@@ -2168,8 +2168,10 @@ ALTER TABLE task_recurring_schedules
         FOREIGN KEY (created_by) REFERENCES users(id)
         ON DELETE SET NULL;
 
+-- end_date is TIMESTAMPTZ, so a bare ::DATE cast is only STABLE and cannot be
+-- indexed. Pinning the zone to UTC makes the expression IMMUTABLE.
 CREATE UNIQUE INDEX IF NOT EXISTS idx_tasks_schedule_end_date_unique
-ON tasks (schedule_id, (end_date::DATE))
+ON tasks (schedule_id, ((end_date AT TIME ZONE 'UTC')::DATE))
 WHERE schedule_id IS NOT NULL AND end_date IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS idx_task_recurring_schedules_timezone_id
