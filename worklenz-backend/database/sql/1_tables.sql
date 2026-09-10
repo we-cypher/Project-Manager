@@ -609,7 +609,13 @@ CREATE TABLE IF NOT EXISTS organizations (
     updated_at               TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     license_type_id          UUID,
     is_lkr_billing           BOOLEAN                  DEFAULT FALSE,
-    working_hours            DOUBLE PRECISION         DEFAULT 8                  NOT NULL
+    working_hours            DOUBLE PRECISION         DEFAULT 8                  NOT NULL,
+    calculation_method       TEXT                     DEFAULT 'hourly',
+    hours_per_day            INTEGER                  DEFAULT 8,
+    logo_url                 TEXT,
+    base_currency            VARCHAR(10)              DEFAULT 'USD'              NOT NULL,
+    restrict_task_creation   BOOLEAN                  DEFAULT FALSE,
+    timelog_backdate_limit_days INTEGER               DEFAULT 0                  NOT NULL
 );
 
 ALTER TABLE organizations
@@ -820,7 +826,11 @@ CREATE TABLE IF NOT EXISTS projects (
     hours_per_day          INTEGER                  DEFAULT 8,
     health_id              UUID,
     estimated_working_days INTEGER                  DEFAULT 0,
-    priority_id            UUID
+    priority_id            UUID,
+    budget                 NUMERIC(14, 2)           DEFAULT 0,
+    currency               VARCHAR(10)              DEFAULT 'USD',
+    calculation_method     TEXT                     DEFAULT 'hourly',
+    restrict_task_creation BOOLEAN                  DEFAULT FALSE
 );
 
 ALTER TABLE projects
@@ -1497,7 +1507,8 @@ CREATE TABLE IF NOT EXISTS tasks (
     phase_sort_order    INTEGER                  DEFAULT 0                  NOT NULL,
     member_sort_order   INTEGER                  DEFAULT 0                  NOT NULL,
     billable            BOOLEAN                  DEFAULT TRUE,
-    schedule_id         UUID
+    schedule_id         UUID,
+    fixed_cost          NUMERIC(14, 2)           DEFAULT 0
 );
 
 ALTER TABLE tasks
