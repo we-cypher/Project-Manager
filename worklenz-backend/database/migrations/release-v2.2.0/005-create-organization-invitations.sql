@@ -50,6 +50,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS organization_invitations_updated_at_trigger ON organization_invitations;
 CREATE TRIGGER organization_invitations_updated_at_trigger
     BEFORE UPDATE ON organization_invitations
     FOR EACH ROW

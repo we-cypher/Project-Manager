@@ -1,6 +1,7 @@
 -- Migration: Add survey tables for account setup questionnaire
 -- Date: 2025-07-24
 -- Description: Creates tables to store survey questions and user responses for account setup flow
+-- Idempotent against base schema that already defines these tables/constraints.
 
 BEGIN;
 
@@ -58,18 +59,26 @@ CREATE INDEX IF NOT EXISTS idx_survey_responses_user_survey ON survey_responses(
 CREATE INDEX IF NOT EXISTS idx_survey_responses_completed ON survey_responses(survey_id, is_completed);
 CREATE INDEX IF NOT EXISTS idx_survey_answers_response ON survey_answers(response_id);
 
--- Add constraints
-ALTER TABLE survey_questions ADD CONSTRAINT survey_questions_sort_order_check CHECK (sort_order >= 0);
-ALTER TABLE survey_questions ADD CONSTRAINT survey_questions_type_check CHECK (question_type IN ('single_choice', 'multiple_choice', 'text'));
-
--- Add unique constraint to prevent duplicate responses per user per survey
-ALTER TABLE survey_responses ADD CONSTRAINT unique_user_survey_response UNIQUE (user_id, survey_id);
-
--- Add unique constraint to prevent duplicate answers per question per response
-ALTER TABLE survey_answers ADD CONSTRAINT unique_response_question_answer UNIQUE (response_id, question_id);
+-- Add constraints only when missing (base 1_tables.sql may already have them)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'survey_questions_sort_order_check') THEN
+    ALTER TABLE survey_questions ADD CONSTRAINT survey_questions_sort_order_check CHECK (sort_order >= 0);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'survey_questions_type_check') THEN
+    ALTER TABLE survey_questions ADD CONSTRAINT survey_questions_type_check CHECK (question_type IN ('single_choice', 'multiple_choice', 'text'));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'unique_user_survey_response') THEN
+    ALTER TABLE survey_responses ADD CONSTRAINT unique_user_survey_response UNIQUE (user_id, survey_id);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'unique_response_question_answer') THEN
+    ALTER TABLE survey_answers ADD CONSTRAINT unique_response_question_answer UNIQUE (response_id, question_id);
+  END IF;
+END
+$$;
 
 -- Insert the default account setup survey
-INSERT INTO surveys (name, description, survey_type, is_active) VALUES 
+INSERT INTO surveys (name, description, survey_type, is_active) VALUES
 ('Account Setup Survey', 'Initial questionnaire during account setup to understand user needs', 'account_setup', true)
 ON CONFLICT DO NOTHING;
 
@@ -79,7 +88,7 @@ DECLARE
     survey_uuid UUID;
 BEGIN
     SELECT id INTO survey_uuid FROM surveys WHERE survey_type = 'account_setup' AND name = 'Account Setup Survey' LIMIT 1;
-    
+
     -- Insert survey questions
     INSERT INTO survey_questions (survey_id, question_key, question_type, is_required, sort_order, options) VALUES
     (survey_uuid, 'organization_type', 'single_choice', true, 1, '["freelancer", "startup", "small_medium_business", "agency", "enterprise", "other"]'),

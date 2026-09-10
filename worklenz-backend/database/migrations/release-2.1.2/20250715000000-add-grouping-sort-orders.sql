@@ -1,5 +1,6 @@
 -- Migration: Add separate sort order columns for different grouping types
 -- This allows users to maintain different task orders when switching between grouping views
+-- Idempotent: safe when base schema already defines these columns/constraints.
 
 -- Add new sort order columns
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS status_sort_order INTEGER DEFAULT 0;
@@ -8,21 +9,33 @@ ALTER TABLE tasks ADD COLUMN IF NOT EXISTS phase_sort_order INTEGER DEFAULT 0;
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS member_sort_order INTEGER DEFAULT 0;
 
 -- Initialize new columns with current sort_order values
-UPDATE tasks SET 
+UPDATE tasks SET
   status_sort_order = sort_order,
   priority_sort_order = sort_order,
   phase_sort_order = sort_order,
   member_sort_order = sort_order
-WHERE status_sort_order = 0 
-   OR priority_sort_order = 0 
-   OR phase_sort_order = 0 
+WHERE status_sort_order = 0
+   OR priority_sort_order = 0
+   OR phase_sort_order = 0
    OR member_sort_order = 0;
 
--- Add constraints to ensure non-negative values
-ALTER TABLE tasks ADD CONSTRAINT tasks_status_sort_order_check CHECK (status_sort_order >= 0);
-ALTER TABLE tasks ADD CONSTRAINT tasks_priority_sort_order_check CHECK (priority_sort_order >= 0);
-ALTER TABLE tasks ADD CONSTRAINT tasks_phase_sort_order_check CHECK (phase_sort_order >= 0);
-ALTER TABLE tasks ADD CONSTRAINT tasks_member_sort_order_check CHECK (member_sort_order >= 0);
+-- Add constraints only when missing (base 1_tables.sql already has status/priority/phase checks)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'tasks_status_sort_order_check') THEN
+    ALTER TABLE tasks ADD CONSTRAINT tasks_status_sort_order_check CHECK (status_sort_order >= 0);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'tasks_priority_sort_order_check') THEN
+    ALTER TABLE tasks ADD CONSTRAINT tasks_priority_sort_order_check CHECK (priority_sort_order >= 0);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'tasks_phase_sort_order_check') THEN
+    ALTER TABLE tasks ADD CONSTRAINT tasks_phase_sort_order_check CHECK (phase_sort_order >= 0);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'tasks_member_sort_order_check') THEN
+    ALTER TABLE tasks ADD CONSTRAINT tasks_member_sort_order_check CHECK (member_sort_order >= 0);
+  END IF;
+END
+$$;
 
 -- Add indexes for performance (since these will be used for ordering)
 CREATE INDEX IF NOT EXISTS idx_tasks_status_sort_order ON tasks(project_id, status_sort_order);

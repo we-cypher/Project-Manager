@@ -143,13 +143,23 @@ LEFT JOIN projects p ON t.project_id = p.id
 LEFT JOIN archived_projects ap ON p.id = ap.project_id
 WHERE ap.project_id IS NULL;  -- Exclude archived projects
 
--- Grant appropriate permissions
-GRANT SELECT ON team_lead_managed_members TO worklenz_user;
-GRANT SELECT ON team_lead_member_stats TO worklenz_user;
-GRANT SELECT ON team_lead_member_performance TO worklenz_user;
-GRANT SELECT ON team_lead_time_logs TO worklenz_user;
+-- Grant appropriate permissions (skip missing roles)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'worklenz_user') THEN
+    EXECUTE 'GRANT SELECT ON team_lead_managed_members TO worklenz_user';
+    EXECUTE 'GRANT SELECT ON team_lead_member_stats TO worklenz_user';
+    EXECUTE 'GRANT SELECT ON team_lead_member_performance TO worklenz_user';
+    EXECUTE 'GRANT SELECT ON team_lead_time_logs TO worklenz_user';
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'worklenz_client') THEN
+    EXECUTE 'GRANT SELECT ON team_lead_managed_members TO worklenz_client';
+    EXECUTE 'GRANT SELECT ON team_lead_member_stats TO worklenz_client';
+    EXECUTE 'GRANT SELECT ON team_lead_member_performance TO worklenz_client';
+    EXECUTE 'GRANT SELECT ON team_lead_time_logs TO worklenz_client';
+  END IF;
+END
+$$;
 
--- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_team_lead_managed_members_manager ON team_lead_managed_members(manager_id);
-CREATE INDEX IF NOT EXISTS idx_team_lead_managed_members_managed ON team_lead_managed_members(managed_member_id);
-CREATE INDEX IF NOT EXISTS idx_team_lead_managed_members_team ON team_lead_managed_members(team_id);
+-- team_lead_managed_members is a VIEW — indexes are not supported here.
+-- Underlying table indexes (if needed) belong on team_members / related base tables.

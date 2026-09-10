@@ -191,13 +191,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS licensing_plan_trials_updated_at ON licensing_plan_trials;
 CREATE TRIGGER licensing_plan_trials_updated_at
 BEFORE UPDATE ON licensing_plan_trials
 FOR EACH ROW
 EXECUTE FUNCTION update_licensing_plan_trials_updated_at();
 
--- 10. Grant permissions
-GRANT SELECT, INSERT, UPDATE ON licensing_plan_trials TO worklenz_db_user;
-GRANT EXECUTE ON FUNCTION can_start_plan_trial TO worklenz_db_user;
-GRANT EXECUTE ON FUNCTION start_plan_trial TO worklenz_db_user;
-GRANT EXECUTE ON FUNCTION get_active_plan_trial TO worklenz_db_user;
+-- 10. Grant permissions (skip if role was never created in this environment)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'worklenz_db_user') THEN
+    EXECUTE 'GRANT SELECT, INSERT, UPDATE ON licensing_plan_trials TO worklenz_db_user';
+    EXECUTE 'GRANT EXECUTE ON FUNCTION can_start_plan_trial TO worklenz_db_user';
+    EXECUTE 'GRANT EXECUTE ON FUNCTION start_plan_trial TO worklenz_db_user';
+    EXECUTE 'GRANT EXECUTE ON FUNCTION get_active_plan_trial TO worklenz_db_user';
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'worklenz_client') THEN
+    EXECUTE 'GRANT SELECT, INSERT, UPDATE ON licensing_plan_trials TO worklenz_client';
+  END IF;
+END
+$$;

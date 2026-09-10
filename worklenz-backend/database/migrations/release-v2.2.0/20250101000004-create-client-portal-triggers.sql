@@ -194,85 +194,101 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create triggers
+-- Create triggers (DROP IF EXISTS for idempotent re-runs)
 
 -- Request number generation trigger
+DROP TRIGGER IF EXISTS trigger_client_portal_requests_number ON client_portal_requests;
 CREATE TRIGGER trigger_client_portal_requests_number
     BEFORE INSERT ON client_portal_requests
     FOR EACH ROW
     EXECUTE FUNCTION trigger_generate_request_number();
 
 -- Invoice number generation trigger
+DROP TRIGGER IF EXISTS trigger_client_portal_invoices_number ON client_portal_invoices;
 CREATE TRIGGER trigger_client_portal_invoices_number
     BEFORE INSERT ON client_portal_invoices
     FOR EACH ROW
     EXECUTE FUNCTION trigger_generate_invoice_number();
 
 -- Updated timestamp triggers
+DROP TRIGGER IF EXISTS trigger_client_portal_services_updated_at ON client_portal_services;
 CREATE TRIGGER trigger_client_portal_services_updated_at
     BEFORE UPDATE ON client_portal_services
     FOR EACH ROW
     EXECUTE FUNCTION trigger_update_updated_at();
 
+DROP TRIGGER IF EXISTS trigger_client_portal_requests_updated_at ON client_portal_requests;
 CREATE TRIGGER trigger_client_portal_requests_updated_at
     BEFORE UPDATE ON client_portal_requests
     FOR EACH ROW
     EXECUTE FUNCTION trigger_update_updated_at();
 
+DROP TRIGGER IF EXISTS trigger_client_portal_invoices_updated_at ON client_portal_invoices;
 CREATE TRIGGER trigger_client_portal_invoices_updated_at
     BEFORE UPDATE ON client_portal_invoices
     FOR EACH ROW
     EXECUTE FUNCTION trigger_update_updated_at();
 
+DROP TRIGGER IF EXISTS trigger_client_portal_settings_updated_at ON client_portal_settings;
 CREATE TRIGGER trigger_client_portal_settings_updated_at
     BEFORE UPDATE ON client_portal_settings
     FOR EACH ROW
     EXECUTE FUNCTION trigger_update_updated_at();
 
+DROP TRIGGER IF EXISTS trigger_client_relationships_updated_at ON client_relationships;
 CREATE TRIGGER trigger_client_relationships_updated_at
     BEFORE UPDATE ON client_relationships
     FOR EACH ROW
     EXECUTE FUNCTION trigger_update_updated_at();
 
 -- Activity logging triggers
+DROP TRIGGER IF EXISTS trigger_log_client_portal_services_activity ON client_portal_services;
 CREATE TRIGGER trigger_log_client_portal_services_activity
     AFTER INSERT OR UPDATE OR DELETE ON client_portal_services
     FOR EACH ROW
     EXECUTE FUNCTION trigger_log_client_portal_activity();
 
+DROP TRIGGER IF EXISTS trigger_log_client_portal_requests_activity ON client_portal_requests;
 CREATE TRIGGER trigger_log_client_portal_requests_activity
     AFTER INSERT OR UPDATE OR DELETE ON client_portal_requests
     FOR EACH ROW
     EXECUTE FUNCTION trigger_log_client_portal_activity();
 
+DROP TRIGGER IF EXISTS trigger_log_client_portal_invoices_activity ON client_portal_invoices;
 CREATE TRIGGER trigger_log_client_portal_invoices_activity
     AFTER INSERT OR UPDATE OR DELETE ON client_portal_invoices
     FOR EACH ROW
     EXECUTE FUNCTION trigger_log_client_portal_activity();
 
+DROP TRIGGER IF EXISTS trigger_log_client_relationships_activity ON client_relationships;
 CREATE TRIGGER trigger_log_client_relationships_activity
     AFTER INSERT OR UPDATE OR DELETE ON client_relationships
     FOR EACH ROW
     EXECUTE FUNCTION trigger_log_client_portal_activity();
 
 -- Data validation triggers
+DROP TRIGGER IF EXISTS trigger_validate_client_portal_requests ON client_portal_requests;
 CREATE TRIGGER trigger_validate_client_portal_requests
     BEFORE INSERT OR UPDATE ON client_portal_requests
     FOR EACH ROW
     EXECUTE FUNCTION trigger_validate_client_portal_data();
 
+DROP TRIGGER IF EXISTS trigger_validate_client_portal_invoices ON client_portal_invoices;
 CREATE TRIGGER trigger_validate_client_portal_invoices
     BEFORE INSERT OR UPDATE ON client_portal_invoices
     FOR EACH ROW
     EXECUTE FUNCTION trigger_validate_client_portal_data();
 
+DROP TRIGGER IF EXISTS trigger_validate_client_portal_services ON client_portal_services;
 CREATE TRIGGER trigger_validate_client_portal_services
     BEFORE INSERT OR UPDATE ON client_portal_services
     FOR EACH ROW
     EXECUTE FUNCTION trigger_validate_client_portal_data();
 
 -- Client relationship management triggers
+DROP TRIGGER IF EXISTS trigger_handle_client_relationships ON client_relationships;
 CREATE TRIGGER trigger_handle_client_relationships
     AFTER INSERT OR UPDATE ON client_relationships
     FOR EACH ROW
-    EXECUTE FUNCTION trigger_handle_client_relationship_changes(); 
+    EXECUTE FUNCTION trigger_handle_client_relationship_changes();
+ 

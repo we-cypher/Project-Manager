@@ -1495,6 +1495,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     status_sort_order   INTEGER                  DEFAULT 0                  NOT NULL,
     priority_sort_order INTEGER                  DEFAULT 0                  NOT NULL,
     phase_sort_order    INTEGER                  DEFAULT 0                  NOT NULL,
+    member_sort_order   INTEGER                  DEFAULT 0                  NOT NULL,
     billable            BOOLEAN                  DEFAULT TRUE,
     schedule_id         UUID
 );
@@ -1588,16 +1589,19 @@ ALTER TABLE tasks
 ALTER TABLE tasks ADD CONSTRAINT tasks_status_sort_order_check CHECK (status_sort_order >= 0);
 ALTER TABLE tasks ADD CONSTRAINT tasks_priority_sort_order_check CHECK (priority_sort_order >= 0);
 ALTER TABLE tasks ADD CONSTRAINT tasks_phase_sort_order_check CHECK (phase_sort_order >= 0);
+ALTER TABLE tasks ADD CONSTRAINT tasks_member_sort_order_check CHECK (member_sort_order >= 0);
 
 -- Add indexes for performance on new sort order columns
 CREATE INDEX IF NOT EXISTS idx_tasks_status_sort_order ON tasks(project_id, status_sort_order);
 CREATE INDEX IF NOT EXISTS idx_tasks_priority_sort_order ON tasks(project_id, priority_sort_order);
 CREATE INDEX IF NOT EXISTS idx_tasks_phase_sort_order ON tasks(project_id, phase_sort_order);
+CREATE INDEX IF NOT EXISTS idx_tasks_member_sort_order ON tasks(project_id, member_sort_order);
 
 -- Add comments for documentation
 COMMENT ON COLUMN tasks.status_sort_order IS 'Sort order when grouped by status';
 COMMENT ON COLUMN tasks.priority_sort_order IS 'Sort order when grouped by priority';
 COMMENT ON COLUMN tasks.phase_sort_order IS 'Sort order when grouped by phase';
+COMMENT ON COLUMN tasks.member_sort_order IS 'Sort order when grouped by members/assignees';
 
 CREATE TABLE IF NOT EXISTS tasks_assignees (
     task_id           UUID                                               NOT NULL,
@@ -2511,3 +2515,133 @@ CREATE TABLE IF NOT EXISTS project_comment_attachments (
 
 CREATE INDEX IF NOT EXISTS idx_project_comment_attachments_comment
     ON project_comment_attachments (comment_id);
+
+-- Plan-specific trials (required by deserialize_user / register_user at runtime).
+-- Kept at end of file so users + organizations FKs resolve.
+CREATE TABLE IF NOT EXISTS licensing_plan_trials (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    plan_tier_id UUID NOT NULL REFERENCES licensing_plan_tiers(id),
+    trial_start_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    trial_end_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    converted_to_paid BOOLEAN DEFAULT FALSE,
+    conversion_date TIMESTAMP WITH TIME ZONE,
+    cancellation_reason TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, plan_tier_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_licensing_plan_trials_user_id ON licensing_plan_trials(user_id);
+CREATE INDEX IF NOT EXISTS idx_licensing_plan_trials_organization_id ON licensing_plan_trials(organization_id);
+CREATE INDEX IF NOT EXISTS idx_licensing_plan_trials_active ON licensing_plan_trials(is_active) WHERE is_active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_licensing_plan_trials_end_date ON licensing_plan_trials(trial_end_date) WHERE is_active = TRUE;
+
+-- Import jobs (backend import worker polls this on every tick)
+CREATE TABLE IF NOT EXISTS import_jobs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  provider TEXT NOT NULL,
+  flow_type TEXT NOT NULL CHECK (flow_type IN ('direct','csv')),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','ready','running','success','failed')),
+  current_step INT NOT NULL DEFAULT 0,
+  target_project_id UUID NULL,
+  target_space_type TEXT NULL,
+  target_template TEXT NULL,
+  source_reference JSONB NULL,
+  created_by UUID NOT NULL,
+  stats JSONB DEFAULT '{}'::jsonb,
+  error_message TEXT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS import_hierarchy_mappings (
+  id BIGSERIAL PRIMARY KEY,
+  job_id UUID NOT NULL REFERENCES import_jobs(id) ON DELETE CASCADE,
+  source_level TEXT NOT NULL,
+  target_level TEXT NOT NULL,
+  position INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS import_field_mappings (
+  id BIGSERIAL PRIMARY KEY,
+  job_id UUID NOT NULL REFERENCES import_jobs(id) ON DELETE CASCADE,
+  source_field TEXT NOT NULL,
+  target_field TEXT NOT NULL,
+  required BOOLEAN NOT NULL DEFAULT FALSE,
+  include BOOLEAN NOT NULL DEFAULT TRUE,
+  meta JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS import_value_mappings (
+  id BIGSERIAL PRIMARY KEY,
+  job_id UUID NOT NULL REFERENCES import_jobs(id) ON DELETE CASCADE,
+  source_value TEXT NOT NULL,
+  target_worktype TEXT NOT NULL,
+  include BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS import_user_mappings (
+  id BIGSERIAL PRIMARY KEY,
+  job_id UUID NOT NULL REFERENCES import_jobs(id) ON DELETE CASCADE,
+  source_user_id TEXT NULL,
+  source_email TEXT NULL,
+  target_user_id UUID NULL,
+  resolution TEXT NOT NULL DEFAULT 'unresolved',
+  include BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS import_attachment_plans (
+  id BIGSERIAL PRIMARY KEY,
+  job_id UUID NOT NULL REFERENCES import_jobs(id) ON DELETE CASCADE,
+  source_url TEXT NOT NULL,
+  filename TEXT NULL,
+  content_type TEXT NULL,
+  size_bytes BIGINT NULL,
+  status TEXT NOT NULL DEFAULT 'planned',
+  storage_key TEXT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS import_stage_tasks (
+  id BIGSERIAL PRIMARY KEY,
+  job_id UUID NOT NULL REFERENCES import_jobs(id) ON DELETE CASCADE,
+  source_task_id TEXT NULL,
+  parent_source_task_id TEXT NULL,
+  title TEXT NOT NULL,
+  description TEXT NULL,
+  status TEXT NULL,
+  due_at TIMESTAMPTZ NULL,
+  start_at TIMESTAMPTZ NULL,
+  worktype TEXT NULL,
+  assignee_source_id TEXT NULL,
+  attachments_planned BOOLEAN NOT NULL DEFAULT FALSE,
+  raw JSONB NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS import_logs (
+  id BIGSERIAL PRIMARY KEY,
+  job_id UUID NOT NULL REFERENCES import_jobs(id) ON DELETE CASCADE,
+  level TEXT NOT NULL DEFAULT 'info',
+  message TEXT NOT NULL,
+  context JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_import_jobs_status ON import_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_import_jobs_provider ON import_jobs(provider);
+CREATE INDEX IF NOT EXISTS idx_import_hierarchy_job ON import_hierarchy_mappings(job_id);
+CREATE INDEX IF NOT EXISTS idx_import_field_job ON import_field_mappings(job_id);
+CREATE INDEX IF NOT EXISTS idx_import_value_job ON import_value_mappings(job_id);
+CREATE INDEX IF NOT EXISTS idx_import_user_job ON import_user_mappings(job_id);
+CREATE INDEX IF NOT EXISTS idx_import_attachment_job ON import_attachment_plans(job_id);
+CREATE INDEX IF NOT EXISTS idx_import_stage_task_job ON import_stage_tasks(job_id);
+CREATE INDEX IF NOT EXISTS idx_import_logs_job ON import_logs(job_id);
+

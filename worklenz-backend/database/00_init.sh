@@ -90,6 +90,16 @@ ORDERED_MIGRATION_DIRS=(
 apply_migration_file() {
   local file="$1"
   local version="${file#"$MIGRATIONS_DIR"/}"
+  local basename
+  basename="$(basename "$file")"
+
+  # Skip diagnostic / orchestrator scripts that are not idempotent migrations
+  case "$basename" in
+    debug-*.sql|verify-*.sql|apply-client-portal-migrations.sql)
+      echo "Skipping non-migration SQL: $version"
+      return
+      ;;
+  esac
 
   if psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "SELECT 1 FROM schema_migrations WHERE version = '$version'" | grep -q 1; then
     echo "Skipping already applied migration: $version"
