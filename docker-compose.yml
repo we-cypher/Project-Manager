@@ -94,7 +94,9 @@ services:
         ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 30
+      # First boot runs apt-get + full schema + ~100 migrations; allow time before failing.
+      start_period: 180s
     restart: unless-stopped
     networks:
       - worklenz
@@ -148,7 +150,7 @@ services:
     command: >
            bash -c 'while true; do
               sleep 86400;
-              PGPASSWORD=$$POSTGRES_PASSWORD pg_dump -h worklenz_db -U $$POSTGRES_USER -d $$POSTGRES_DB \
+              PGPASSWORD=$$POSTGRES_PASSWORD pg_dump -h db -U $$POSTGRES_USER -d $$POSTGRES_DB \
               > /pg_backups/worklenz_db_$$(date +%Y-%m-%d_%H-%M-%S).sql;
               find /pg_backups -type f -name "*.sql" -mtime +30 -delete;
             done'
