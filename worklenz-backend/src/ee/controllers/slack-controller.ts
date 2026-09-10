@@ -79,7 +79,7 @@ export default class SlackController extends WorklenzControllerBase {
         frontendUrl = `https://${frontendUrl}`;
       } else {
         // Fallback to default
-        frontendUrl = "https://app.worklenz.com";
+        frontendUrl = process.env.FRONTEND_URL || "http://localhost:5000";
       }
     }
     
@@ -93,8 +93,7 @@ export default class SlackController extends WorklenzControllerBase {
       if (match) {
         frontendUrl = match[1];
       } else {
-        // Ultimate fallback
-        frontendUrl = "https://app.worklenz.com";
+        frontendUrl = process.env.FRONTEND_URL || "http://localhost:5000";
       }
     }
     

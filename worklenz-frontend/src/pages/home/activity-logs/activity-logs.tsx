@@ -37,7 +37,7 @@ const ActivityLogs = () => {
       <div style={{ maxHeight: 420, overflow: 'auto' }}>
         {activityLogs.length === 0 ? (
           <Empty
-            image="https://s3.us-west-2.amazonaws.com/worklenz.com/assets/empty-box.webp"
+            image={undefined}
             imageStyle={{ height: 60 }}
             style={{
               display: 'flex',

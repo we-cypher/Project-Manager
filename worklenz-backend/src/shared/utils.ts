@@ -12,7 +12,7 @@ import { IRecurringSchedule } from "../interfaces/recurring-tasks";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const error_codes = require("./postgresql-error-codes");
 
-export function log_error(error: any, user: any | null = null, sendToSlack = true) {
+export function log_error(error: any, user: any | null = null, sendToSlack = false) {
   const msg = error_codes[error.code];
   if (msg) {
     console.log("\n==== BEGIN ERROR ====\n");
@@ -39,7 +39,7 @@ export function isProduction() {
 /** Returns true if uat or dev */
 export function isTestServer() {
   const hostname = process.env.HOSTNAME;
-  return hostname === "dev.worklenz.com" || hostname === "uat.app.worklenz.com";
+  return hostname === "dev.worklenz.com" || hostname === "uat.app.worklenz.com" || hostname === (process.env.UAT_HOSTNAME || "");
 }
 
 /** Returns true if localhost:3000 or localhost:4200 */

@@ -7,10 +7,10 @@ import db from "../config/db";
 
 // Ensure FRONTEND_URL is always an absolute URL with a scheme.
 // Without https://, email clients (e.g. Outlook Safe Links) strip the <a> tag.
-const _rawFrontendUrl = process.env.FRONTEND_URL || "worklenz.com";
+const _rawFrontendUrl = process.env.FRONTEND_URL || "localhost:5000";
 const FRONTEND_URL = (_rawFrontendUrl.startsWith("http") ? _rawFrontendUrl : `https://${_rawFrontendUrl}`).replace(/\/+$/, "");
 
-const DEFAULT_LOGO_URL = "https://s3.us-west-2.amazonaws.com/worklenz.com/email-templates-assets/worklenz-light-mode.png";
+const DEFAULT_LOGO_URL = process.env.EMAIL_LOGO_URL || "/assets/images/worklenz-light-mode.png";
 
 /**
  * Validates that a URL is a safe http/https URL for use in email templates.

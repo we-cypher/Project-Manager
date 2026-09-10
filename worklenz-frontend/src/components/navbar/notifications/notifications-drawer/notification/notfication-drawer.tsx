@@ -80,7 +80,7 @@ const NotificationDrawer = () => {
 
   const createPush = (message: string, title: string, teamId: string | null, url?: string) => {
     if (Notification.permission === 'granted' && showBrowserPush) {
-      const img = 'https://worklenz.com/assets/icons/icon-128x128.png';
+      const img = '/favicon.ico';
       const notification = new Notification(title, {
         body: stripHtmlTags(message),
         icon: img,

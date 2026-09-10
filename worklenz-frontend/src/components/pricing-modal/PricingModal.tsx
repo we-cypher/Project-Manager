@@ -468,7 +468,7 @@ const PricingModal: React.FC<PricingModalProps> = ({
     (planId: string) => {
       if (planId === 'enterprise') {
         // Contact sales for enterprise
-        window.open('mailto:sales@worklenz.com?subject=Enterprise Plan Inquiry', '_blank');
+        window.open('mailto:sales@example.com?subject=Enterprise Plan Inquiry', '_blank');
         return;
       }
 

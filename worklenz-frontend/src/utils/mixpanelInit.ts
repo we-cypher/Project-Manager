@@ -1,16 +1,8 @@
-import { MixpanelConfig } from '@/types/mixpanel.types';
-import mixpanel from 'mixpanel-browser';
+/**
+ * Mixpanel initialization - DISABLED
+ * Analytics tracking has been removed for independence.
+ */
 
-export const initMixpanel = (token: string | null, config: MixpanelConfig = {}): void => {
-  if (!token || token === 'mixpanel-token' || token.trim() === '') {
-    console.warn('Mixpanel initialization skipped: Invalid or missing token');
-    return;
-  }
-
-  mixpanel.init(token, {
-    debug: import.meta.env.VITE_APP_ENV !== 'production',
-    track_pageview: true,
-    persistence: 'localStorage',
-    ...config,
-  });
+export const initMixpanel = (_token: string | null, _config: Record<string, unknown> = {}): void => {
+  // No-op: Mixpanel disabled
 };

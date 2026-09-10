@@ -455,7 +455,7 @@ boxShadow: '0 4px 16px rgba(22,119,255,0.35)',
       <div style={{ marginTop: 20, textAlign: 'center' }}>
         <Text style={{ fontSize: 13, color: footerColor }}>
           {t('need-help') || 'Need help?'}{' '}
-          <a href="mailto:support@worklenz.com" style={{ color: footerLinkColor, textDecoration: 'none' }}>
+          <a href="mailto:support@example.com" style={{ color: footerLinkColor, textDecoration: 'none' }}>
             {t('contact-support') || 'Contact support'}
           </a>
           {' '}{t('or') || 'or'}{' '}

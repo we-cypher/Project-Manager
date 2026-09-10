@@ -407,7 +407,7 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
               // Guard with !homeTasksFetching to avoid flashing the empty state
               // while the new tab response is still in-flight
               <EmptyListPlaceholder
-                imageSrc="https://s3.us-west-2.amazonaws.com/worklenz.com/assets/empty-box.webp"
+                
                 text={t('tasks.noTasks', { defaultValue: 'No tasks found' })}
                 action={
                   <Button type="primary" icon={<PlusOutlined />} onClick={() => setAddTaskOpen(true)}>

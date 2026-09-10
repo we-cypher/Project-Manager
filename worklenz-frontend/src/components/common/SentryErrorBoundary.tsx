@@ -1,6 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Result, Button } from 'antd';
-import { captureException, addBreadcrumb } from '@/config/sentry';
 
 interface Props {
   children: ReactNode;
@@ -25,7 +24,6 @@ export class SentryErrorBoundary extends Component<Props, State> {
   }
 
   static getDerivedStateFromError(error: Error): State {
-    // Update state so the next render will show the fallback UI
     return {
       hasError: true,
       error,
@@ -34,30 +32,12 @@ export class SentryErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Add breadcrumb for error boundary trigger
-    addBreadcrumb({
-      category: 'error',
-      message: 'React Error Boundary caught an error',
-      level: 'error',
-      data: {
-        componentStack: errorInfo.componentStack,
-        errorBoundary: 'SentryErrorBoundary',
-      },
-    });
+    console.error('Error caught by boundary:', error, errorInfo);
 
-    // Capture the exception with additional context
-    captureException(error, {
-      componentStack: errorInfo.componentStack,
-      errorBoundary: 'SentryErrorBoundary',
-      reactVersion: React.version,
-    });
-
-    // Call custom error handler if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
 
-    // Update state with error info
     this.setState({
       error,
       errorInfo,
@@ -65,13 +45,6 @@ export class SentryErrorBoundary extends Component<Props, State> {
   }
 
   handleReset = () => {
-    // Add breadcrumb for manual reset
-    addBreadcrumb({
-      category: 'user',
-      message: 'User manually reset error boundary',
-      level: 'info',
-    });
-
     this.setState({
       hasError: false,
       error: null,
@@ -81,19 +54,17 @@ export class SentryErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      // Custom fallback UI
       if (this.props.fallback) {
         return this.props.fallback;
       }
 
-      // Default error UI
       return (
         <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
           <div className="max-w-md w-full p-6">
             <Result
               status="500"
               title="Something went wrong"
-              subTitle="We're sorry, but something unexpected happened. Our team has been notified and is working on a fix."
+              subTitle="We're sorry, but something unexpected happened. Please try again."
               extra={[
                 <Button type="primary" key="home" onClick={() => (window.location.href = '/')}>
                   Go Home
@@ -133,7 +104,6 @@ export class SentryErrorBoundary extends Component<Props, State> {
   }
 }
 
-// Higher-order component for wrapping components with error boundary
 export const withErrorBoundary = <P extends object>(
   Component: React.ComponentType<P>,
   errorBoundaryProps?: Omit<Props, 'children'>

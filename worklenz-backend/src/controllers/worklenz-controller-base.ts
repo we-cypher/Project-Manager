@@ -9,10 +9,11 @@ export default abstract class WorklenzControllerBase {
   }
 
   protected static isValidHost(hostname: string) {
-    return hostname === "worklenz.com"
-      || hostname === "www.worklenz.com"
-      || hostname === "dev.worklenz.com"
-      || hostname === "uat.worklenz.com";
+    const allowedHosts = (process.env.ALLOWED_HOSTS || "").split(",").map(h => h.trim()).filter(Boolean);
+    if (allowedHosts.length > 0) {
+      return allowedHosts.includes(hostname);
+    }
+    return hostname === "localhost" || hostname === "127.0.0.1";
   }
 
   public static createTagList(list: Array<{ name?: string; end?: boolean; names?: string[]; }>, max = 4) {

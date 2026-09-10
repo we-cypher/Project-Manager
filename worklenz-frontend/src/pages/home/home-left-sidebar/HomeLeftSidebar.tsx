@@ -73,12 +73,12 @@ const HELP_QUICK_LINKS: HelpQuickLink[] = [
   {
     label: 'Documentation',
     icon: <ReadOutlined />,
-    onClick: () => window.open('https://docs.worklenz.com/en/start/introduction/', '_blank'),
+    onClick: () => window.open('#', '_blank'),
   },
   {
     label: 'Support Email',
     icon: <MailOutlined />,
-    onClick: () => { window.location.href = 'mailto:support@worklenz.com'; },
+    onClick: () => { window.location.href = 'mailto:support@example.com'; },
   },
   {
     label: 'Live Chat',

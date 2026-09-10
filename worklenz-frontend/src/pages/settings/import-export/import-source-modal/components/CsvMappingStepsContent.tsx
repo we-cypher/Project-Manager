@@ -621,7 +621,7 @@ export const CsvMappingStepsContent: React.FC<CsvMappingStepsContentProps> = ({
             'Build more structure into your space by mapping values in your Status column to Worklenz statuses.'
           )}{' '}
           <a
-            href="https://worklenz.com/blog/"
+            href="#"
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: palette.primary }}

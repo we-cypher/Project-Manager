@@ -97,7 +97,7 @@ export class LkrReceiptTemplate {
 
   <div class="footer">
     <strong>Worklenz</strong> — This is an automatically generated receipt.<br />
-    For support, contact <strong>support@worklenz.com</strong>
+    For support, contact <strong>${process.env.SUPPORT_EMAIL || "support@example.com"}</strong>
   </div>
 </div>
 </body>

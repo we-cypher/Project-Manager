@@ -676,7 +676,7 @@ export default class BillingController extends WorklenzControllerBase {
       first_name: firstName,
       email: email,
       description: "Worklenz - Add Payment Method",
-      logo: "https://s3.us-west-2.amazonaws.com/worklenz.com/assets/icon-96x96.png",
+      logo: process.env.APP_LOGO_URL || "",
       do_initial_payment: doInitialPayment ? "1" : "0",
     };
 

@@ -260,7 +260,6 @@ const TasksList: React.FC = React.memo(() => {
         <Skeleton active />
       ) : data?.body.total === 0 ? (
         <EmptyListPlaceholder
-          imageSrc="https://s3.us-west-2.amazonaws.com/worklenz.com/assets/empty-box.webp"
           text=" No tasks to show."
         />
       ) : (
