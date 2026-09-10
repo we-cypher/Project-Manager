@@ -321,8 +321,8 @@ describe('SignupPage', () => {
     const privacyLink = screen.getByText('Privacy Policy').closest('a');
     const termsLink = screen.getByText('Terms of Use').closest('a');
 
-    expect(privacyLink).toHaveAttribute('href', 'https://worklenz.com/privacy/');
-    expect(termsLink).toHaveAttribute('href', 'https://worklenz.com/terms/');
+    expect(privacyLink).toHaveAttribute('href', '#');
+    expect(termsLink).toHaveAttribute('href', '#');
   });
 
   it('navigates to login page', async () => {

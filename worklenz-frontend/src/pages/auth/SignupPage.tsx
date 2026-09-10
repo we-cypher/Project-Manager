@@ -481,11 +481,11 @@ const SignupPage = () => {
         <Form.Item>
           <Typography.Paragraph style={{ fontSize: 14 }}>
             {t('bySigningUpText')}{' '}
-            <a href="https://worklenz.com/privacy/" target="_blank" rel="noopener noreferrer">
+            <a href="#" target="_blank" rel="noopener noreferrer">
               {t('privacyPolicyLink')}
             </a>{' '}
             {t('andText')}{' '}
-            <a href="https://worklenz.com/terms/" target="_blank" rel="noopener noreferrer">
+            <a href="#" target="_blank" rel="noopener noreferrer">
               {t('termsOfUseLink')}
             </a>
             .

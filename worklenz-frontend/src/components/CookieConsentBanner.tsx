@@ -12,7 +12,7 @@ import { useAppSelector } from '../hooks/useAppSelector';
  * - Cookie icon and visual indicators
  * - Semi-transparent backdrop for emphasis
  * - Responsive design with hover effects
- * - Links to privacy policy at https://worklenz.com/privacy/
+ * - Links to privacy policy
  */
 function CookieConsentBanner() {
   const { t } = useTranslation('common');
@@ -103,7 +103,7 @@ function CookieConsentBanner() {
                 </p>
 
                 <a
-                  href="https://worklenz.com/privacy/"
+                  href="#"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`text-xs font-medium ${linkClass} inline-flex items-center gap-1 transition-all`}

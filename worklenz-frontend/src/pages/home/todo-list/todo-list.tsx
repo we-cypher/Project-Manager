@@ -187,7 +187,7 @@ const TodoList = () => {
       return (
         <div style={{ flex: 1, overflow: 'auto' }}>
           <EmptyListPlaceholder
-            imageSrc="https://s3.us-west-2.amazonaws.com/worklenz.com/assets/empty-box.webp"
+            imageSrc=""
             text={t('home:todoList.noTasks')}
           />
         </div>
@@ -278,7 +278,7 @@ const TodoList = () => {
       <div style={{ flex: 1, overflow: 'auto' }}>
         {sortedDays.length === 0 ? (
           <EmptyListPlaceholder
-            imageSrc="https://s3.us-west-2.amazonaws.com/worklenz.com/assets/empty-box.webp"
+            imageSrc=""
             text={t('home:todoList.noTasks')}
           />
         ) : (
@@ -430,7 +430,7 @@ const TodoList = () => {
     if (data.body.length === 0) {
       return (
         <EmptyListPlaceholder
-          imageSrc="https://s3.us-west-2.amazonaws.com/worklenz.com/assets/empty-box.webp"
+          imageSrc=""
           text={t('home:todoList.noTasks')}
         />
       );
@@ -455,7 +455,7 @@ const TodoList = () => {
       <div style={{ flex: 1, overflow: 'auto' }}>
         {sortedTasks.length === 0 ? (
           <EmptyListPlaceholder
-            imageSrc="https://s3.us-west-2.amazonaws.com/worklenz.com/assets/empty-box.webp"
+            imageSrc=""
             text={t('home:todoList.noTasks')}
           />
         ) : (

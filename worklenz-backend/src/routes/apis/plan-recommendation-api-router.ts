@@ -17,8 +17,8 @@ planRecommendationApiRouter.get("/migration-info", (req, res) => {
       customPlan: 'Flexible'
     },
     contactInfo: {
-      support: 'support@worklenz.com',
-      migration: 'migration@worklenz.com'
+      support: process.env.SUPPORT_EMAIL || 'support@example.com',
+      migration: process.env.MIGRATION_EMAIL || 'migration@example.com'
     }
   });
 });

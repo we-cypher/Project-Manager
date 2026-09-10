@@ -33,10 +33,6 @@ export const authenticateClient = async (
         'http://localhost:5173',
         'http://localhost:5174',
         'http://localhost:3000',
-        'https://clients.worklenz.com',
-        'https://wl-client.ceydigital.dev',
-        'https://dev.worklenz.com', // Add dev environment
-        'http://dev.worklenz.com',  // Add dev environment (http)
       ].filter((url): url is string => Boolean(url));
       
       // Only validate if we have origin/referer AND explicitly configured allowed origins

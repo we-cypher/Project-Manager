@@ -917,7 +917,7 @@ const UpgradePlans = () => {
                       trackAppSumoEvent(AppSumoUpsellEvents.TALK_TO_SALES_CLICKED);
                     }
                     window.open(
-                      'mailto:info@worklenz.com?subject=Enterprise%20Plan%20Inquiry',
+                      'mailto:info@example.com?subject=Enterprise%20Plan%20Inquiry',
                       '_blank'
                     );
                   }}

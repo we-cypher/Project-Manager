@@ -24,9 +24,7 @@ export const getApiUrl = (): string => {
     return import.meta.env.VITE_API_URL;
   }
 
-  // Fallback for deployed environments when VITE_API_URL is not injected.
-  // Example: ncinga.worklenz.com -> api.ncinga.worklenz.com
-  // Example: app.worklenz.com -> api.worklenz.com
+  // Fallback: derive API URL from current hostname
   const { protocol, hostname } = window.location;
   const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
   if (!isLocalhost && hostname.includes('.')) {
@@ -91,11 +89,8 @@ export const getClientPortalBaseUrl = (): string => {
     return 'http://localhost:5174';
   }
 
-  // For production/UST, derive from current hostname
-  // If on app.worklenz.com, client portal might be on client.worklenz.com
-  // Or use the same hostname with different subdomain
-  if (hostname === 'worklenz.com' || hostname.endsWith('.worklenz.com')) {
-    // Swap the leading 'app.' subdomain for 'client.', otherwise keep the host as-is
+  // For production/staging, derive from current hostname
+  if (!isLocalhost && hostname.includes('.')) {
     const clientHostname = hostname.startsWith('app.')
       ? `client.${hostname.slice('app.'.length)}`
       : hostname;

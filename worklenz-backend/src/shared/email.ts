@@ -257,7 +257,7 @@ export async function sendEmailEnhanced(email: IEmail): Promise<IEmailResult> {
           },
         },
       },
-      Source: "Worklenz <noreply@worklenz.com>",
+      Source: `${process.env.APP_NAME || "WeCypher"} <${process.env.SES_FROM_EMAIL || "noreply@example.com"}>`,
     });
 
     const res = await sesClient.send(command);

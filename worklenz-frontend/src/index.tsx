@@ -12,7 +12,6 @@ import { ConfigProvider } from '@/shared/antd-imports';
 import { getInitialTheme } from './utils/get-initial-theme';
 import { initializePerformanceMonitoring } from './utils/enhanced-performance-monitoring';
 import { getThemeConfig } from './config/theme.config';
-import { initSentry } from './config/sentry';
 import SentryErrorBoundary from '@/components/common/SentryErrorBoundary';
 
 // Handle chunk load failures (CSS/JS preload errors after deployment)
@@ -49,9 +48,6 @@ const initialTheme = getInitialTheme();
 
 // Apply CSS variables and initial theme
 applyCssVariables();
-
-// Initialize Sentry for error tracking
-initSentry();
 
 // Initialize enhanced performance monitoring
 initializePerformanceMonitoring();

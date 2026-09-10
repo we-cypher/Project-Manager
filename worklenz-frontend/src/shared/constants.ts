@@ -7,15 +7,14 @@ import {
 } from '@/shared/antd-imports';
 import dayjs from 'dayjs';
 
-// logos
-export const LOGO_LIGHT =
-  'https://s3.us-west-2.amazonaws.com/worklenz.com/assets/worklenz-light-mode.png';
-export const LOGO_DARK =
-  'https://s3.us-west-2.amazonaws.com/worklenz.com/assets/worklenz-dark-mode.png';
-export const XMAS_LOGO_LIGHT =
-  'https://s3.us-west-2.amazonaws.com/worklenz.com/assets/worklenz-xmas-light.webp';
-export const XMAS_LOGO_DARK =
-  'https://s3.us-west-2.amazonaws.com/worklenz.com/assets/worklenz-xmas-dark.webp';
+// logos - use local assets (no external CDN dependency)
+import worklenzLightLogo from '@/assets/images/worklenz-light-mode.png';
+import worklenzDarkLogo from '@/assets/images/worklenz-dark-mode.png';
+
+export const LOGO_LIGHT = worklenzLightLogo;
+export const LOGO_DARK = worklenzDarkLogo;
+export const XMAS_LOGO_LIGHT = worklenzLightLogo;
+export const XMAS_LOGO_DARK = worklenzDarkLogo;
 
 export const avatarNamesMap: { [x: string]: string } = {
   A: '#154c9b',

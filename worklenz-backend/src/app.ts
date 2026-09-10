@@ -113,16 +113,7 @@ const allowedOrigins = [
     ? [
         `http://localhost:5000`,
         `http://127.0.0.1:5000`,
-        `https://app.worklenz.com`,
-        `https://www.app.worklenz.com`,
-        `https://clients.worklenz.com`,
-        `https://uat.app.worklenz.com`,
-        `https://www.uat.app.worklenz.com`,
-        `https://uat.clients.worklenz.com`,
-        `https://appleid.apple.com`, // Allow Apple Sign-In OAuth requests
-        `https://api.ncinga.worklenz.com`,
-        `https://ncinga.worklenz.com`,
-        `https://www.ncinga.worklenz.com`,
+        `https://appleid.apple.com`,
       ]
     : [
       "http://localhost:3000",
@@ -132,7 +123,7 @@ const allowedOrigins = [
       "http://127.0.0.1:3000",
       "http://127.0.0.1:5000",
       `http://localhost:5000`,
-      `https://appleid.apple.com`, // Allow Apple Sign-In OAuth requests
+      `https://appleid.apple.com`,
     ]
 ].flat();
 
