@@ -1707,7 +1707,8 @@ CREATE TABLE IF NOT EXISTS users (
     temp_email      BOOLEAN                  DEFAULT FALSE,
     is_deleted      BOOLEAN                  DEFAULT FALSE,
     deleted_at      TIMESTAMP WITH TIME ZONE,
-    language        LANGUAGE_TYPE            DEFAULT 'en'::LANGUAGE_TYPE
+    language        LANGUAGE_TYPE            DEFAULT 'en'::LANGUAGE_TYPE,
+    mobile_app_banner_dismissed BOOLEAN      DEFAULT FALSE                  NOT NULL
 );
 
 ALTER TABLE users
@@ -2101,11 +2102,16 @@ ALTER TABLE task_comment_mentions
             ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS email_logs (
-    id         UUID                     DEFAULT uuid_generate_v4() NOT NULL,
-    email      TEXT                                                NOT NULL,
-    subject    TEXT                                                NOT NULL,
-    html       TEXT                                                NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    id            UUID                     DEFAULT uuid_generate_v4() NOT NULL,
+    email         TEXT                                                NOT NULL,
+    subject       TEXT                                                NOT NULL,
+    html          TEXT                                                NOT NULL,
+    status        TEXT                     DEFAULT 'pending',
+    message_id    TEXT,
+    error_details TEXT,
+    delivered_at  TIMESTAMP WITH TIME ZONE,
+    created_at    TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at    TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS task_comment_reactions (

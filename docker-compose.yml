@@ -103,7 +103,7 @@ services:
     volumes:
       # Bump this name (v2 -> v3, …) in Coolify when you need a clean DB init.
       # Compose volume UI is read-only; renaming creates a new empty volume.
-      - worklenz_postgres_data_v6:/var/lib/postgresql/data
+      - worklenz_postgres_data_v7:/var/lib/postgresql/data
       # Mount the whole database dir (file bind-mounts break on Coolify and
       # become empty directories — that blocked 00_init.sh last deploy).
       - ./worklenz-backend/database:/db-init:ro
@@ -153,7 +153,7 @@ services:
 
 volumes:
   # Bump this suffix if init must re-run on Coolify (old volume stays orphaned until cleaned up).
-  worklenz_postgres_data_v6:
+  worklenz_postgres_data_v7:
   worklenz_minio_data:
   pgdata:
 
