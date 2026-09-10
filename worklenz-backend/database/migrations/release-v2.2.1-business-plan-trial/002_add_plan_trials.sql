@@ -2,6 +2,29 @@
 -- Description: Enables 7-day trial for Business plan and other plan-specific trials
 -- Date: 2025-01-18
 
+-- 0. Ensure plan tiers exist (historically missing from open-source base schema)
+CREATE TABLE IF NOT EXISTS licensing_plan_tiers (
+    id                  UUID                     DEFAULT uuid_generate_v4() NOT NULL,
+    tier_name           TEXT                                                NOT NULL,
+    display_name        TEXT                                                NOT NULL,
+    trial_duration_days INTEGER,
+    trial_enabled       BOOLEAN                  DEFAULT FALSE              NOT NULL,
+    created_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+    updated_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+    CONSTRAINT licensing_plan_tiers_pk PRIMARY KEY (id),
+    CONSTRAINT licensing_plan_tiers_tier_name_key UNIQUE (tier_name)
+);
+
+INSERT INTO licensing_plan_tiers (tier_name, display_name, trial_duration_days, trial_enabled)
+VALUES
+    ('FREE', 'Free', NULL, FALSE),
+    ('PRO_SMALL', 'Pro Small', NULL, FALSE),
+    ('BUSINESS_SMALL', 'Business Small', NULL, FALSE),
+    ('PRO_LARGE', 'Pro Large', NULL, FALSE),
+    ('BUSINESS_LARGE', 'Business Large', 7, TRUE),
+    ('ENTERPRISE', 'Enterprise', NULL, FALSE)
+ON CONFLICT (tier_name) DO NOTHING;
+
 -- 1. Add trial configuration columns to licensing_plan_tiers
 ALTER TABLE licensing_plan_tiers
 ADD COLUMN IF NOT EXISTS trial_duration_days INTEGER DEFAULT NULL,

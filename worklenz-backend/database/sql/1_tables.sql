@@ -463,6 +463,31 @@ ALTER TABLE licensing_credit_subs
 ALTER TABLE licensing_pricing_plans
     ADD UNIQUE (paddle_id);
 
+-- Plan tiers used by signup trial auto-start (register_user) and plan-trial features.
+-- Upstream open-source dumps historically omitted this table while migrations still
+-- ALTER/SELECT it, which breaks fresh installs with 42P01 on signup.
+CREATE TABLE IF NOT EXISTS licensing_plan_tiers (
+    id                  UUID                     DEFAULT uuid_generate_v4() NOT NULL,
+    tier_name           TEXT                                                NOT NULL,
+    display_name        TEXT                                                NOT NULL,
+    trial_duration_days INTEGER,
+    trial_enabled       BOOLEAN                  DEFAULT FALSE              NOT NULL,
+    created_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+    updated_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+    CONSTRAINT licensing_plan_tiers_pk PRIMARY KEY (id),
+    CONSTRAINT licensing_plan_tiers_tier_name_key UNIQUE (tier_name)
+);
+
+INSERT INTO licensing_plan_tiers (tier_name, display_name, trial_duration_days, trial_enabled)
+VALUES
+    ('FREE', 'Free', NULL, FALSE),
+    ('PRO_SMALL', 'Pro Small', NULL, FALSE),
+    ('BUSINESS_SMALL', 'Business Small', NULL, FALSE),
+    ('PRO_LARGE', 'Pro Large', NULL, FALSE),
+    ('BUSINESS_LARGE', 'Business Large', 7, TRUE),
+    ('ENTERPRISE', 'Enterprise', NULL, FALSE)
+ON CONFLICT (tier_name) DO NOTHING;
+
 ALTER TABLE licensing_payment_details
     ADD CONSTRAINT licensing_payment_details_licensing_pricing_plans_paddle_id_fk
         FOREIGN KEY (subscription_plan_id) REFERENCES licensing_pricing_plans (paddle_id);

@@ -97,8 +97,11 @@ apply_migration_file() {
   fi
 
   echo "Applying migration: $version"
-  psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f "$file"
-  psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO schema_migrations (version) VALUES ('$version');"
+  if ! psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f "$file"; then
+    echo "ERROR: Migration failed: $version"
+    exit 1
+  fi
+  psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO schema_migrations (version) VALUES ('$version');"
 }
 
 apply_migration_dir() {
