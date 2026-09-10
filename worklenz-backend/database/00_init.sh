@@ -69,20 +69,72 @@ echo "✅ Base schema SQL execution complete."
 # 🚀 STEP 3: Apply SQL migrations
 # --------------------------------------------
 
-if [ -d "$MIGRATIONS_DIR" ] && compgen -G "$MIGRATIONS_DIR/*.sql" > /dev/null; then
+# Release subdirectories must run before the top-level migrations, which assume
+# tables such as client_users and import_jobs already exist. Version order is
+# explicit because filenames alone do not sort into a dependency-safe sequence.
+ORDERED_MIGRATION_DIRS=(
+  "release-2.1.2"
+  "release-v2.1.4"
+  "release-v2.2.0"
+  "release-v2.2.1-business-plan-trial"
+  "release-v2.2.2-team-lead-role"
+  "release-v2.2.3"
+  "release-v2.3.0"
+  "release-v2.3.1"
+  "release-v2.4"
+  "release-v2.5"
+  "release-v2.6"
+  "import-tasks"
+)
+
+apply_migration_file() {
+  local file="$1"
+  local version="${file#"$MIGRATIONS_DIR"/}"
+
+  if psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "SELECT 1 FROM schema_migrations WHERE version = '$version'" | grep -q 1; then
+    echo "Skipping already applied migration: $version"
+    return
+  fi
+
+  echo "Applying migration: $version"
+  psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f "$file"
+  psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO schema_migrations (version) VALUES ('$version');"
+}
+
+apply_migration_dir() {
+  local dir="$1"
+  if [ ! -d "$dir" ] || ! compgen -G "$dir/*.sql" > /dev/null; then
+    return
+  fi
+  while IFS= read -r file; do
+    apply_migration_file "$file"
+  done < <(find "$dir" -maxdepth 1 -type f -name "*.sql" | sort)
+}
+
+if [ -d "$MIGRATIONS_DIR" ]; then
   echo "Applying migrations..."
-  for f in "$MIGRATIONS_DIR"/*.sql; do
-    version=$(basename "$f")
-    if ! psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "SELECT 1 FROM schema_migrations WHERE version = '$version'" | grep -q 1; then
-      echo "Applying migration: $version"
-      psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f "$f"
-      psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO schema_migrations (version) VALUES ('$version');"
-    else
-      echo "Skipping already applied migration: $version"
-    fi
+
+  applied_dirs=()
+  for dir in "${ORDERED_MIGRATION_DIRS[@]}"; do
+    apply_migration_dir "$MIGRATIONS_DIR/$dir"
+    applied_dirs+=("$MIGRATIONS_DIR/$dir")
   done
+
+  # Any subdirectory added later still runs, after the known release order.
+  while IFS= read -r dir; do
+    for known in "${applied_dirs[@]}"; do
+      if [ "$dir" = "$known" ]; then
+        continue 2
+      fi
+    done
+    apply_migration_dir "$dir"
+  done < <(find "$MIGRATIONS_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
+
+  apply_migration_dir "$MIGRATIONS_DIR"
+
+  echo "✅ Migration execution complete."
 else
-  echo "No migration files found or directory is empty, skipping migrations."
+  echo "No migrations directory found, skipping migrations."
 fi
 
 echo "🎉 Database initialization completed successfully."
