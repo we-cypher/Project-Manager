@@ -347,9 +347,10 @@ BEGIN
     UPDATE teams SET name = TRIM((_body ->> 'team_name')::TEXT) WHERE id = _team_id AND user_id = _user_id;
 
     -- Create the project
-    INSERT INTO projects (name, team_id, owner_id, color_code, status_id, key)
+    INSERT INTO projects (name, team_id, owner_id, color_code, status_id, key, priority_id)
     VALUES ((_body ->> 'project_name')::TEXT, _team_id, _user_id, '#3b7ad4',
-            (SELECT id FROM sys_project_statuses WHERE is_default IS TRUE), (_body ->> 'key')::TEXT)
+            (SELECT id FROM sys_project_statuses WHERE is_default IS TRUE), (_body ->> 'key')::TEXT,
+            (SELECT id FROM sys_project_priorities WHERE name = 'Medium' LIMIT 1))
     RETURNING id INTO _project_id;
 
     -- Insert task's statuses

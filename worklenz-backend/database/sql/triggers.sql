@@ -135,7 +135,7 @@ CREATE TRIGGER projects_tasks_counter_trigger
 EXECUTE FUNCTION update_project_tasks_counter_trigger_fn();
 -- Update project tasks counter
 
--- Set default project priority
+-- Set default project priority (sys_project_priorities, not task_priorities)
 CREATE OR REPLACE FUNCTION set_project_default_priority_trigger_fn() RETURNS TRIGGER AS
 $$
 DECLARE
@@ -143,7 +143,7 @@ BEGIN
     IF NEW.priority_id IS NULL
     THEN
         SELECT id
-        FROM task_priorities
+        FROM sys_project_priorities
         WHERE name = 'Medium'
         LIMIT 1
         INTO NEW.priority_id;

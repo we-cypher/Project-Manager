@@ -1,3 +1,38 @@
+-- Fix: project default priority trigger used task_priorities IDs while
+-- projects.priority_id FK points at sys_project_priorities (FK 23503 on setup).
+
+INSERT INTO sys_project_priorities (name, value, color_code, color_code_dark)
+SELECT v.name, v.value, v.color_code, v.color_code_dark
+FROM (VALUES
+    ('Low', 0, '#75c997', '#46D980'),
+    ('Medium', 1, '#fbc84c', '#FFC227'),
+    ('High', 2, '#f37070', '#FF4141'),
+    ('Critical', 3, '#8B1A1A', '#B22222')
+) AS v(name, value, color_code, color_code_dark)
+WHERE NOT EXISTS (SELECT 1 FROM sys_project_priorities spp WHERE spp.name = v.name);
+
+CREATE OR REPLACE FUNCTION set_project_default_priority_trigger_fn() RETURNS TRIGGER AS
+$$
+BEGIN
+    IF NEW.priority_id IS NULL THEN
+        SELECT id
+        FROM sys_project_priorities
+        WHERE name = 'Medium'
+        LIMIT 1
+        INTO NEW.priority_id;
+    END IF;
+    RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS projects_default_priority_trigger ON projects;
+CREATE TRIGGER projects_default_priority_trigger
+    BEFORE INSERT OR UPDATE OF priority_id
+    ON projects
+    FOR EACH ROW
+EXECUTE FUNCTION set_project_default_priority_trigger_fn();
+
+-- Keep complete_account_setup aligned: set priority_id from sys_project_priorities
 -- Migration: Add invited team members as project members during account setup
 -- Date: 2026-02-24
 -- Description: Modifies complete_account_setup function to automatically add invited team members
