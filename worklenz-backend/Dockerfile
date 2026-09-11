@@ -16,7 +16,10 @@ COPY package*.json ./
 RUN npm ci --include=dev
 
 COPY . .
-RUN npm run build
+RUN npm run clean
+RUN npm run compile
+RUN npm run copy
+RUN npm run compress
 
 RUN echo "$RELEASE_VERSION" > release
 
