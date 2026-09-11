@@ -16,10 +16,7 @@ COPY package*.json ./
 RUN npm ci --include=dev
 
 COPY . .
-RUN npm run clean
-RUN npx tsc --build tsconfig.prod.json --pretty false 2>&1; TSC_EXIT=$?; if [ $TSC_EXIT -ne 0 ]; then echo "TSC FAILED WITH EXIT CODE $TSC_EXIT"; exit $TSC_EXIT; fi
-RUN npm run copy
-RUN npm run compress
+RUN npm run build
 
 RUN echo "$RELEASE_VERSION" > release
 

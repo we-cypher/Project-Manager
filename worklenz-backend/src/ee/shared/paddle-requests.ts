@@ -9,9 +9,9 @@ import {log_error} from "../../shared/utils";
 
 const DISABLED_MSG = "Paddle billing proxy is disabled for self-hosted deployment. Set PRODUCTION_SERVER_URL to your own billing server to re-enable.";
 
-async function post(_endpoint: string, _body: Record<string, unknown>) {
+async function post(_endpoint: string, _body: Record<string, unknown>): Promise<{ success: boolean; message: string; body: Record<string, unknown> }> {
   log_error(new Error(DISABLED_MSG), null, false);
-  throw new Error(DISABLED_MSG);
+  return { success: false, message: DISABLED_MSG, body: {} };
 }
 
 export async function generatePayLinkRequest(_teamMemberData: any, _plan: string, _owner_id = "", _user_id = "") {
