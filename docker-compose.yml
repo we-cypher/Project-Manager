@@ -4,7 +4,6 @@ services:
       context: ./worklenz-frontend
       dockerfile: Dockerfile
     image: wecypher-frontend:latest
-    container_name: worklenz_frontend
     ports:
       - "5000:5000"
     depends_on:
@@ -20,7 +19,6 @@ services:
       context: ./worklenz-backend
       dockerfile: Dockerfile
     image: wecypher-backend:latest
-    container_name: worklenz_backend
     ports:
       - "3000:3000"
     depends_on:
@@ -41,10 +39,15 @@ services:
       GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-https://localhost/api/auth/google/verify}
     networks:
       - worklenz
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"const http=require('http');const r=http.get('http://localhost:3000/public/health',res=>{process.exit(res.statusCode===200?0:1)});r.on('error',()=>process.exit(1));r.setTimeout(5000,()=>{r.destroy();process.exit(1)})\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   minio:
     image: minio/minio:latest
-    container_name: worklenz_minio
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -61,7 +64,6 @@ services:
   # MinIO setup helper - creates default bucket on startup
   createbuckets:
     image: minio/mc
-    container_name: worklenz_createbuckets
     depends_on:
       - minio
     restart: on-failure
@@ -87,7 +89,6 @@ services:
       - worklenz
   db:
     image: postgres:15
-    container_name: worklenz_db
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_DB: ${DB_NAME:-worklenz_db}
@@ -135,7 +136,6 @@ services:
         '
   db-backup:
     image: postgres:15
-    container_name: worklenz_db_backup
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_DB: ${DB_NAME:-worklenz_db}
