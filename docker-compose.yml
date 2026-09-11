@@ -66,7 +66,7 @@ services:
     image: minio/mc
     depends_on:
       - minio
-    restart: on-failure
+    restart: unless-stopped
     entrypoint: >
       /bin/sh -c '
         echo "Waiting for MinIO to start...";
@@ -77,7 +77,8 @@ services:
             echo "Successfully connected to MinIO!";
             /usr/bin/mc mb --ignore-existing myminio/worklenz-bucket;
             /usr/bin/mc policy set public myminio/worklenz-bucket;
-            exit 0;
+            echo "Bucket setup complete. Sleeping...";
+            tail -f /dev/null;
           fi
           echo "Connection failed, retrying in 5 seconds...";
           sleep 5;
