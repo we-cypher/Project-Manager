@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --include=dev
 
 COPY . .
 RUN npm run build
