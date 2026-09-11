@@ -33,13 +33,45 @@ async function releaseAdvisoryLock(client: PoolClient): Promise<void> {
   await client.query("SELECT pg_advisory_unlock($1);", [ADVISORY_LOCK_ID]);
 }
 
+let tableVerified = false;
+
+async function ensureTableExists(client: PoolClient): Promise<boolean> {
+  if (tableVerified) return true;
+  const result = await client.query(
+    `SELECT EXISTS (
+       SELECT 1 FROM information_schema.tables
+       WHERE table_schema = 'public' AND table_name = 'project_files'
+     ) AS exists;`
+  );
+  if (!result.rows[0]?.exists) {
+    log("project_files table does not exist yet, skipping cleanup tick.");
+    return false;
+  }
+
+  const colCheck = await client.query(
+    `SELECT EXISTS (
+       SELECT 1 FROM information_schema.columns
+       WHERE table_schema = 'public' AND table_name = 'project_files' AND column_name = 'status'
+     ) AS exists;`
+  );
+  if (!colCheck.rows[0]?.exists) {
+    log("project_files.status column does not exist yet, skipping cleanup tick.");
+    return false;
+  }
+
+  tableVerified = true;
+  return true;
+}
+
 async function onCleanupTick(): Promise<void> {
   let locked = false;
   let lockClient: PoolClient | null = null;
   try {
     lockClient = await db.pool.connect();
     locked = await acquireAdvisoryLock(lockClient);
-    if (!locked) return; // Another instance is already running the cleanup.
+    if (!locked) return;
+
+    if (!await ensureTableExists(lockClient)) return;
 
     const staleResult = await lockClient.query(
       `SELECT id, team_id, project_id, type
