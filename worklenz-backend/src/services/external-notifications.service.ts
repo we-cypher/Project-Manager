@@ -414,8 +414,8 @@ export class ExternalNotificationsService {
         taskData.new_status_name = await this.getStatusName(additionalData.newStatusId) || undefined;
       }
 
-      // Get Slack channel configs for this project
-      const slackConfigs = await SlackService.getChannelConfigsByProject(projectId);
+      // Slack integration disabled for self-hosted
+      const slackConfigs: any[] = [];
 
       // Send to Slack channels
       for (const config of slackConfigs) {

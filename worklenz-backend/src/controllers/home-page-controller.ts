@@ -12,6 +12,23 @@ import SqlHelper from "../shared/sql-helpers";
 import { DEFAULT_PAGE_SIZE } from "../shared/constants";
 import { buildTaskFilterClauses, buildTaskOrderClause, buildTabClause } from "../shared/home-task-query-builder";
 
+const DEPRECATED_TIMEZONES: Record<string, string> = {
+  "Asia/Calcutta": "Asia/Kolkata",
+  "US/Pacific-New": "America/Los_Angeles",
+  "Pacific/Ponape": "Pacific/Pohnpei",
+  "Pacific/Truk": "Pacific/Chuuk",
+  "Pacific/Yap": "Pacific/Chuuk",
+  "Atlantic/Faeroe": "Atlantic/Faroe",
+  "Europe/Kiev": "Europe/Kyiv",
+  "Asia/Katmandu": "Asia/Kathmandu",
+  "Asia/Rangoon": "Asia/Yangon",
+  "Asia/Saigon": "Asia/Ho_Chi_Minh",
+};
+
+function normalizeTimezone(tz: string): string {
+  return DEPRECATED_TIMEZONES[tz] || tz;
+}
+
 export default class HomePageController extends WorklenzControllerBase {
 
   private static readonly GROUP_BY_ASSIGNED_TO_ME = "0";
@@ -283,7 +300,7 @@ export default class HomePageController extends WorklenzControllerBase {
   public static async getUnassignedTasks(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
     const teamId = req.user?.team_id as string;
     const userId = req.user?.id as string;
-    const timeZone = (req.query.time_zone as string) || "UTC";
+    const timeZone = normalizeTimezone((req.query.time_zone as string) || "UTC");
 
     const values: unknown[] = [];
     const filterClause = buildTaskFilterClauses(req.query, values, this.BASE_PARAM_OFFSET, this.TZ_PARAM_INDEX);
@@ -396,7 +413,7 @@ export default class HomePageController extends WorklenzControllerBase {
   public static async getMyProgress(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
     const teamId = req.user?.team_id;
     const userId = req.user?.id;
-    const timeZone = (req.query.time_zone as string) || "UTC";
+    const timeZone = normalizeTimezone((req.query.time_zone as string) || "UTC");
 
     const currentGroup = this.isValidGroup(req.query.group_by as string) ? req.query.group_by : this.GROUP_BY_ASSIGNED_TO_ME;
     const groupByClosure = this.getTasksByGroupClosure(currentGroup as string);
@@ -509,7 +526,7 @@ export default class HomePageController extends WorklenzControllerBase {
   public static async getTaskStats(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
     const teamId = req.user?.team_id;
     const userId = req.user?.id;
-    const timeZone = (req.query.time_zone as string) || "UTC";
+    const timeZone = normalizeTimezone((req.query.time_zone as string) || "UTC");
     const today = new Date();
 
     const currentGroup = this.isValidGroup(req.query.group_by as string) ? req.query.group_by : this.GROUP_BY_ASSIGNED_TO_ME;
@@ -601,7 +618,7 @@ export default class HomePageController extends WorklenzControllerBase {
   public static async getTasks(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
     const teamId = req.user?.team_id as string;
     const userId = req.user?.id as string;
-    const timeZone = (req.query.time_zone as string) || "UTC";
+    const timeZone = normalizeTimezone((req.query.time_zone as string) || "UTC");
     const today = new Date();
 
     const currentGroup = this.isValidGroup(req.query.group_by as string) ? req.query.group_by : this.GROUP_BY_ASSIGNED_TO_ME;
