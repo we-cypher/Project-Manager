@@ -14,7 +14,7 @@ const ClientPortalInvoices = () => {
 
   // function to handle add invoices - navigate to invoice builder
   const handleAddInvoice = () => {
-    navigate('/client-portal/invoices/create');
+    navigate('/finance/invoices/create');
   };
 
   return (

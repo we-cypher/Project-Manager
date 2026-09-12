@@ -185,7 +185,7 @@ const InvoiceBuilder = () => {
           t('cannotEditPaidInvoice', { defaultValue: 'Paid invoices cannot be edited' }) ||
             'Paid invoices cannot be edited'
         );
-        navigate(`/client-portal/invoices/${invoiceId}`);
+        navigate(`/finance/invoices/${invoiceId}`);
         return;
       }
 
@@ -358,7 +358,7 @@ const InvoiceBuilder = () => {
           t('updateInvoiceSuccessMessage', { defaultValue: 'Invoice updated successfully' }) ||
             'Invoice updated successfully'
         );
-        navigate(`/client-portal/invoices/${invoiceId}`);
+        navigate(`/finance/invoices/${invoiceId}`);
       } catch (error) {
         message.error(
           t('updateInvoiceErrorMessage', { defaultValue: 'Failed to update invoice' }) ||
@@ -411,7 +411,7 @@ const InvoiceBuilder = () => {
           t('createInvoiceSuccessMessage', { defaultValue: 'Invoice created successfully' }) ||
             'Invoice created successfully'
         );
-        navigate('/client-portal/invoices');
+        navigate('/finance/invoices');
       } catch (error) {
         message.error(
           t('createInvoiceErrorMessage', { defaultValue: 'Failed to create invoice' }) ||

@@ -136,6 +136,24 @@ const FinanceExpensesPage = lazy(
 const TaskDrawer = lazy(
   ChunkErrorHandler.wrapLazyImport(() => import('@/components/task-drawer/task-drawer'), 'TaskDrawer')
 );
+const ClientPortalInvoices = lazy(
+  ChunkErrorHandler.wrapLazyImport(
+    () => import('@/ee/pages/client-portal/invoices/client-portal-invoices'),
+    'ClientPortalInvoices'
+  )
+);
+const InvoiceBuilder = lazy(
+  ChunkErrorHandler.wrapLazyImport(
+    () => import('@/ee/pages/client-portal/invoices/invoice-builder/invoice-builder'),
+    'InvoiceBuilder'
+  )
+);
+const ClientPortalInvoiceDetails = lazy(
+  ChunkErrorHandler.wrapLazyImport(
+    () => import('@/ee/pages/client-portal/invoices/invoice-details/client-portal-invoice-details'),
+    'ClientPortalInvoiceDetails'
+  )
+);
 
 // Define AdminGuard component with defensive programming
 const AdminGuard = ({ children }: { children: React.ReactNode }) => {
@@ -558,7 +576,31 @@ const mainRoutes: RouteObject[] = [
             path: 'invoices',
             element: (
               <Suspense fallback={<SuspenseFallback />}>
-                <FinanceInvoicesComingSoon />
+                <ClientPortalInvoices />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'invoices/create',
+            element: (
+              <Suspense fallback={<SuspenseFallback />}>
+                <InvoiceBuilder />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'invoices/:invoiceId/edit',
+            element: (
+              <Suspense fallback={<SuspenseFallback />}>
+                <InvoiceBuilder />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'invoices/:invoiceId',
+            element: (
+              <Suspense fallback={<SuspenseFallback />}>
+                <ClientPortalInvoiceDetails />
               </Suspense>
             ),
           },
