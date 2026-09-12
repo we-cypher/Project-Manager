@@ -281,7 +281,7 @@ export const RecurringTasksTable: React.FC<RecurringTasksTableProps> = ({
             style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
             onClick={() =>
               record.project_id &&
-              navigate(`/worklenz/projects/${record.project_id}?tab=tasks-list&pinned_tab=tasks-list`)
+              navigate(`/projects/${record.project_id}?tab=tasks-list&pinned_tab=tasks-list`)
             }
           >
             <Badge color={record.project_color || token.colorPrimary} />

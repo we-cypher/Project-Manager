@@ -693,7 +693,7 @@ const ClientPortalSettings = () => {
                                 type="link"
                                 size="small"
                                 onClick={() =>
-                                  window.open('/worklenz/admin-center/overview', '_blank')
+                                  window.open('/admin-center/overview', '_blank')
                                 }
                                 style={{ padding: 0, height: 'auto', fontSize: '12px' }}
                               >

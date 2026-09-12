@@ -34,7 +34,7 @@ const StatusDrawer = lazy(
   () => import('@/components/project-task-filters/create-status-drawer/create-status-drawer')
 );
 
-const PLANNER_BASE_PATH = '/worklenz/planner';
+const PLANNER_BASE_PATH = '/planner';
 
 // Shell for the Planner section: left rail plus drawers rendered outside the
 // routed sub-views. Each sub-view (Schedule, Timeline, Workload) is a routed

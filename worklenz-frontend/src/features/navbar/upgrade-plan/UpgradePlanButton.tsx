@@ -254,7 +254,7 @@ const UpgradePlanButton: React.FC<UpgradePlanButtonProps> = ({
           };
           trackMixpanelEvent(MixpanelBillingEvents.PRICING_MODAL_OPENED, modalProps);
         } else if (redirectToBilling) {
-          navigate('/worklenz/admin-center/billing');
+          navigate('/admin-center/billing');
         }
       }}
       onMouseEnter={e => {

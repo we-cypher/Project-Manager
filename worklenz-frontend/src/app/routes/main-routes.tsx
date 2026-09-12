@@ -158,7 +158,7 @@ const AdminGuard = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (!authService.isOwnerOrAdmin()) {
-      return <Navigate to="/worklenz/unauthorized" replace />;
+      return <Navigate to="/unauthorized" replace />;
     }
 
     return <>{children}</>;
@@ -191,7 +191,7 @@ const TeamLeadGuard = ({ children }: { children: React.ReactNode }) => {
       : false;
 
     if (!hasTeamLeadRole) {
-      return <Navigate to="/worklenz/unauthorized" replace />;
+      return <Navigate to="/unauthorized" replace />;
     }
 
     return <>{children}</>;
@@ -201,7 +201,7 @@ const TeamLeadGuard = ({ children }: { children: React.ReactNode }) => {
   }
 };
 
-const FINANCE_BASE_PATH = '/worklenz/finance';
+const FINANCE_BASE_PATH = '/finance';
 
 // Finance is a business-plan feature. Rather than redirecting users without
 // access away entirely, the rail navigation stays visible and the content
@@ -274,7 +274,7 @@ const FinanceForecastsComingSoon = () => {
 
 const mainRoutes: RouteObject[] = [
   {
-    path: '/worklenz',
+    path: '/',
     element: <MainLayout />,
     children: [
       { index: true, element: <Navigate to="home" replace /> },
@@ -444,7 +444,7 @@ const mainRoutes: RouteObject[] = [
       {
         // Time Entries moved under Projects — redirect old bookmarks/links.
         path: 'time-entries',
-        element: <Navigate to="/worklenz/projects/time-entries" replace />,
+        element: <Navigate to="/projects/time-entries" replace />,
       },
       {
         path: 'team-lead-reports',
@@ -480,7 +480,7 @@ const mainRoutes: RouteObject[] = [
       },
       {
         path: 'schedule',
-        element: <Navigate to="/worklenz/planner" replace />,
+        element: <Navigate to="/planner" replace />,
       },
       {
         path: 't/:taskId',

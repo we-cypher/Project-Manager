@@ -117,8 +117,8 @@ export default class TaskCommentsController extends WorklenzControllerBase {
 
   private static async sendMail(config: IMailConfig) {
     const subject = config.message.replace(HTML_TAG_REGEXP, "");
-    const taskUrl = `${getBaseUrl()}/worklenz/projects/${config.projectId}?tab=tasks-list&task=${config.taskId}&focus=comments`;
-    const settingsUrl = `${getBaseUrl()}/worklenz/settings/notifications`;
+    const taskUrl = `${getBaseUrl()}/projects/${config.projectId}?tab=tasks-list&task=${config.taskId}&focus=comments`;
+    const settingsUrl = `${getBaseUrl()}/settings/notifications`;
 
     const data: ICommentEmailNotification = {
       greeting: `Hi ${config.receiverName}`,

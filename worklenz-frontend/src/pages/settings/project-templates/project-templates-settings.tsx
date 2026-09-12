@@ -81,7 +81,7 @@ const ProjectTemplatesSettings = () => {
           style: { borderRadius: '4px' },
         });
         setPreviewModalVisible(false);
-        navigate(`/worklenz/projects/${(res.body as any)?.project_id ?? ''}`);
+        navigate(`/projects/${(res.body as any)?.project_id ?? ''}`);
         return null;
       } else {
         // Return the error message so the modal can display it inline on the name field

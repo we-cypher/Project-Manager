@@ -90,7 +90,7 @@ const TimelineProjectInfoRow: React.FC<TimelineRowProps> = ({ project, borderCol
 
   const goToProject = () =>
     navigate({
-      pathname: `/worklenz/projects/${project.id}`,
+      pathname: `/projects/${project.id}`,
       search: new URLSearchParams({ tab: 'roadmap', pinned_tab: 'roadmap' }).toString(),
     });
 

@@ -185,7 +185,7 @@ const InvoiceBuilder = () => {
           t('cannotEditPaidInvoice', { defaultValue: 'Paid invoices cannot be edited' }) ||
             'Paid invoices cannot be edited'
         );
-        navigate(`/worklenz/client-portal/invoices/${invoiceId}`);
+        navigate(`/client-portal/invoices/${invoiceId}`);
         return;
       }
 
@@ -358,7 +358,7 @@ const InvoiceBuilder = () => {
           t('updateInvoiceSuccessMessage', { defaultValue: 'Invoice updated successfully' }) ||
             'Invoice updated successfully'
         );
-        navigate(`/worklenz/client-portal/invoices/${invoiceId}`);
+        navigate(`/client-portal/invoices/${invoiceId}`);
       } catch (error) {
         message.error(
           t('updateInvoiceErrorMessage', { defaultValue: 'Failed to update invoice' }) ||
@@ -411,7 +411,7 @@ const InvoiceBuilder = () => {
           t('createInvoiceSuccessMessage', { defaultValue: 'Invoice created successfully' }) ||
             'Invoice created successfully'
         );
-        navigate('/worklenz/client-portal/invoices');
+        navigate('/client-portal/invoices');
       } catch (error) {
         message.error(
           t('createInvoiceErrorMessage', { defaultValue: 'Failed to create invoice' }) ||

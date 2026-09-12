@@ -29,12 +29,12 @@ const AppShellLayout = memo(() => {
     [billingInfo, currentSession, isOwnerOrAdmin]
   );
 
-  // Any route nested under /worklenz/projects/ that the rail itself owns —
+  // Any route nested under /projects/ that the rail itself owns —
   // checked against the registry rather than hardcoded paths, so this can't
   // silently stop matching a route that moved under Projects. Excludes
-  // /worklenz/projects/:projectId, whose segment won't be a known item key.
+  // /projects/:projectId, whose segment won't be a known item key.
   const isProjectsSubRoute = useMemo(() => {
-    const prefix = '/worklenz/projects/';
+    const prefix = '/projects/';
     if (!location.pathname.startsWith(prefix)) return false;
     const segment = location.pathname.slice(prefix.length).split('/')[0];
     return PROJECTS_RAIL_SUB_ROUTES.has(segment);
@@ -43,7 +43,7 @@ const AppShellLayout = memo(() => {
   // Same idea as isProjectsSubRoute above, for Finance's own SimpleRailLayout
   // sub-routes (Profitability, Budgets, Invoices, ...).
   const isFinanceSubRoute = useMemo(() => {
-    const prefix = '/worklenz/finance/';
+    const prefix = '/finance/';
     if (!location.pathname.startsWith(prefix)) return false;
     const segment = location.pathname.slice(prefix.length).split('/')[0];
     return FINANCE_RAIL_SUB_ROUTES.has(segment);
@@ -55,18 +55,18 @@ const AppShellLayout = memo(() => {
   // surfaces with a visible seam between them.
   const hasLeftRail = useMemo(
     () =>
-      location.pathname === '/worklenz/home' ||
+      location.pathname === '/home' ||
       location.pathname.endsWith('/home') ||
-      location.pathname.startsWith('/worklenz/home/') ||
-      location.pathname.includes('/worklenz/planner') ||
-      location.pathname.includes('/worklenz/schedule') ||
-      location.pathname.includes('/worklenz/reporting') ||
-      location.pathname.includes('/worklenz/client-portal') ||
-      location.pathname === '/worklenz/projects' ||
+      location.pathname.startsWith('/home/') ||
+      location.pathname.includes('/planner') ||
+      location.pathname.includes('/schedule') ||
+      location.pathname.includes('/reporting') ||
+      location.pathname.includes('/client-portal') ||
+      location.pathname === '/projects' ||
       (location.pathname.endsWith('/projects') && !location.pathname.includes('/admin-center/')) ||
       isProjectsSubRoute ||
-      location.pathname.includes('/worklenz/team-lead-reports') ||
-      location.pathname === '/worklenz/finance' ||
+      location.pathname.includes('/team-lead-reports') ||
+      location.pathname === '/finance' ||
       location.pathname.endsWith('/finance') ||
       isFinanceSubRoute,
     [location.pathname, isProjectsSubRoute, isFinanceSubRoute]

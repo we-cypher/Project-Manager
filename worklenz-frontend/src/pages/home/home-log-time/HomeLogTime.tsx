@@ -462,7 +462,7 @@ const HomeLogTime: React.FC = () => {
         render: (_, record) => (
           <span
             style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
-            onClick={() => record.project_id && navigate(`/worklenz/projects/${record.project_id}?tab=tasks-list&pinned_tab=tasks-list`)}
+            onClick={() => record.project_id && navigate(`/projects/${record.project_id}?tab=tasks-list&pinned_tab=tasks-list`)}
           >
             <Badge color={record.project_color || token.colorPrimary} />
             <span style={{ fontWeight: 500 }}>{record.project_name}</span>
@@ -833,7 +833,7 @@ const HomeLogTime: React.FC = () => {
                <span style={{ fontSize: 13, fontWeight: 600 }}>{t('logTime.recentlyLogged', { defaultValue: 'Recently Logged' })}</span>
                <span
                  style={{ fontSize: 12, color: token.colorPrimary, cursor: 'pointer' }}
-                 onClick={() => navigate('/worklenz/time-entries')}
+                 onClick={() => navigate('/time-entries')}
                >
                   {t('logTime.viewAll', { defaultValue: 'View All' })}
                </span>

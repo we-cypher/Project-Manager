@@ -505,7 +505,7 @@ export const ProjectSettingsModal = ({ onClose }: { onClose: () => void }) => {
         if (!editMode) {
           trackMixpanelEvent(evt_projects_create);
           navigate(
-            `/worklenz/projects/${response.data.body.id}?tab=tasks-list&pinned_tab=tasks-list`
+            `/projects/${response.data.body.id}?tab=tasks-list&pinned_tab=tasks-list`
           );
           setTimeout(() => {
             window.location.reload();
@@ -566,7 +566,7 @@ export const ProjectSettingsModal = ({ onClose }: { onClose: () => void }) => {
         dispatch(setProjectData({} as IProjectViewModel));
         dispatch(setProjectId(null));
         dispatch(closeProjectSettingsModal());
-        navigate('/worklenz/projects');
+        navigate('/projects');
         refetchProjects();
 
         notification.success({

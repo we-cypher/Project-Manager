@@ -42,7 +42,7 @@ const GranttMembersTable = React.memo(
 
     const navigateToProject = useCallback(
       (projectId: string) => {
-        navigate(`/worklenz/projects/${projectId}?tab=tasks-list&pinned_tab=tasks-list`);
+        navigate(`/projects/${projectId}?tab=tasks-list&pinned_tab=tasks-list`);
       },
       [navigate]
     );

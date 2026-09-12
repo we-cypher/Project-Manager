@@ -49,7 +49,7 @@ const ClientPortalServices = () => {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => navigate('/worklenz/client-portal/add-service')}
+            onClick={() => navigate('/client-portal/add-service')}
           >
             {t('addServiceButton') || 'Add Service'}
           </Button>

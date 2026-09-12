@@ -130,7 +130,7 @@ export const InvoicesTable = () => {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => navigate('/worklenz/client-portal/invoices/create')}
+            onClick={() => navigate('/client-portal/invoices/create')}
           >
             {t('addInvoiceButton')}
           </Button>
@@ -232,7 +232,7 @@ export const InvoicesTable = () => {
         }}
         rowKey={record => record.id}
         onRow={record => ({
-          onClick: () => navigate(`/worklenz/client-portal/invoices/${record.id}`),
+          onClick: () => navigate(`/client-portal/invoices/${record.id}`),
           style: { cursor: 'pointer' },
         })}
       />

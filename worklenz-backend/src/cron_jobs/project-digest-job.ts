@@ -18,15 +18,15 @@ let isRunning = false;
 function updateTaskUrls(projectId: string, tasks: IProjectDigestTask[]) {
   const baseUrl = getBaseUrl();
   for (const task of tasks) {
-    task.url = `${baseUrl}/worklenz/projects/${projectId}?tab=tasks-list&task=${task.id}`;
+    task.url = `${baseUrl}/projects/${projectId}?tab=tasks-list&task=${task.id}`;
   }
 }
 
 function updateMetadata(project: IProjectDigest, subscriberName: string) {
   project.greeting = `Hi ${subscriberName},`;
   project.summary = `Here's the "${project.name}" summary | ${project.team_name}`;
-  project.settings_url = `${getBaseUrl()}/worklenz/settings/notifications`;
-  project.project_url = `${getBaseUrl()}/worklenz/projects/${project.id}?tab=tasks-list`;
+  project.settings_url = `${getBaseUrl()}/settings/notifications`;
+  project.project_url = `${getBaseUrl()}/projects/${project.id}?tab=tasks-list`;
 }
 
 async function onProjectDigestJobTick() {

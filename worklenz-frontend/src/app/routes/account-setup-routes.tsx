@@ -10,7 +10,7 @@ const AccountSetup = lazy(
 );
 
 const accountSetupRoute: RouteObject = {
-  path: '/worklenz/setup',
+  path: '/setup',
   element: (
     <Suspense fallback={<SuspenseFallback />}>
       <AccountSetup />

@@ -44,7 +44,7 @@ const ServicesTable = () => {
 
   // Handle edit service
   const handleEdit = (serviceId: string) => {
-    navigate(`/worklenz/client-portal/edit-service/${serviceId}`);
+    navigate(`/client-portal/edit-service/${serviceId}`);
   };
 
   // Handle delete service
@@ -219,7 +219,7 @@ const ServicesTable = () => {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => navigate('/worklenz/client-portal/add-service')}
+            onClick={() => navigate('/client-portal/add-service')}
           >
             {t('addServiceButton')}
           </Button>

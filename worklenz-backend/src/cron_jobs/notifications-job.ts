@@ -18,8 +18,8 @@ function getModel(model: ITaskAssignmentsModel): ITaskAssignmentsModel {
   const mappedModel: ITaskAssignmentsModel = {...model};
 
   mappedModel.name = mappedModel.name?.split(" ")[0] || "";
-  mappedModel.url = `${getBaseUrl()}/worklenz/team/member/${mappedModel.team_member_id}`;
-  mappedModel.settings_url = `${getBaseUrl()}/worklenz/settings/notifications`;
+  mappedModel.url = `${getBaseUrl()}/team/member/${mappedModel.team_member_id}`;
+  mappedModel.settings_url = `${getBaseUrl()}/settings/notifications`;
 
   const teams = [];
   for (const team of model.teams || []) {

@@ -19,7 +19,7 @@ const flattenedItems = flattenItems(reportingsItems);
 
 const reportingRoutes: RouteObject[] = [
   {
-    path: 'worklenz/reporting',
+    path: 'reporting',
     element: <ReportingLayout />,
     children: [
       { index: true, element: <NavSurfaceIndexRedirect surfaceKey="reporting" /> },

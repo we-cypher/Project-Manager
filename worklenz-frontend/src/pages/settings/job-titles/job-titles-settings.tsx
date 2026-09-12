@@ -185,7 +185,7 @@ const JobTitlesSettings = () => {
             <Tooltip title={t('pinTooltip', { defaultValue: 'Pin to navbar' })} trigger={'hover'}>
               <PinRouteToNavbarButton
                 name="jobTitles"
-                path="/worklenz/settings/job-titles"
+                path="/settings/job-titles"
                 adminOnly
               />
             </Tooltip>

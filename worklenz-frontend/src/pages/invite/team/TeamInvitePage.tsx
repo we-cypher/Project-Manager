@@ -110,10 +110,10 @@ const TeamInvitePage: React.FC = () => {
             // Force full page reload to refresh session with new active team
             // Backend has already set the active team, so reload will pick it up
             console.log('[TeamInvite] Reloading to refresh session with new active team:', teamId);
-            window.location.href = '/worklenz/projects';
+            window.location.href = '/projects';
           } else if (currentUser) {
             // Fallback: reload to pick up the active team set by backend
-            window.location.href = '/worklenz/projects';
+            window.location.href = '/projects';
           } else {
             navigate('/auth/login', {
               state: {
@@ -127,14 +127,14 @@ const TeamInvitePage: React.FC = () => {
         message.error(response.message || t('joinFailed'));
         // Navigate to home page if join failed (using window.location to bypass auth guards)
         setTimeout(() => {
-          window.location.href = '/worklenz/home';
+          window.location.href = '/home';
         }, 1500);
       }
     } catch (error: any) {
       message.error(error?.response?.data?.message || t('joinFailed'));
       // Navigate to home page if join failed (using window.location to bypass auth guards)
       setTimeout(() => {
-        window.location.href = '/worklenz/home';
+        window.location.href = '/home';
       }, 1500);
     } finally {
       setSubmitting(false);

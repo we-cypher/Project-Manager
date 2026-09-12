@@ -30,7 +30,7 @@ const TaskShortLinkRedirect = () => {
 
         const projectId = task.project_id;
         navigate(
-          `/worklenz/projects/${projectId}?tab=tasks-list&pinned_tab=tasks-list&task=${taskId}`,
+          `/projects/${projectId}?tab=tasks-list&pinned_tab=tasks-list&task=${taskId}`,
           { replace: true }
         );
       } catch (error) {
@@ -61,7 +61,7 @@ const TaskShortLinkRedirect = () => {
         </Text>
       }
       extra={
-        <Button type="primary" onClick={() => navigate('/worklenz/projects')}>
+        <Button type="primary" onClick={() => navigate('/projects')}>
           Back to projects
         </Button>
       }

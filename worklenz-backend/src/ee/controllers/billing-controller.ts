@@ -672,7 +672,7 @@ export default class BillingController extends WorklenzControllerBase {
       order_id: orderId,
       currency: "LKR",
       response_url: `${webhookBaseUrl}/directpay-webhook/card-response`,
-      return_url: `${frontendBaseUrl}/worklenz/admin-center/billing?dp_card_added=1`,
+      return_url: `${frontendBaseUrl}/admin-center/billing?dp_card_added=1`,
       first_name: firstName,
       email: email,
       description: "Worklenz - Add Payment Method",

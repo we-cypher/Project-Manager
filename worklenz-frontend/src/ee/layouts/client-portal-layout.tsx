@@ -22,7 +22,7 @@ import FeatureUpgradePreview from '@/components/upgrade/FeatureUpgradePreview';
 import { useClientPortalFeaturePreviews } from '@/components/upgrade/clientPortalFeaturePreviews';
 import GlobalUpgradeModal from '@/components/upgrade/GlobalUpgradeModal';
 
-const CLIENT_PORTAL_BASE_PATH = '/worklenz/client-portal';
+const CLIENT_PORTAL_BASE_PATH = '/client-portal';
 
 const ClientPortalLayout = () => {
   const { resolved } = useNavPreferences('client-portal');

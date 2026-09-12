@@ -94,8 +94,8 @@ export default class ProjectCommentsController extends WorklenzControllerBase {
       team: config.teamName,
       project_name: config.projectName,
       comment: config.content,
-      settings_url: `${getBaseUrl()}/worklenz/settings/notifications`,
-      project_url: `${getBaseUrl()}/worklenz/projects/${config.projectId}`
+      settings_url: `${getBaseUrl()}/settings/notifications`,
+      project_url: `${getBaseUrl()}/projects/${config.projectId}`
     };
 
     await sendProjectComment(config.receiverEmail, data);

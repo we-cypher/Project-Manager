@@ -315,7 +315,7 @@ const InviteTeamMembers = () => {
       localStorage.setItem('pendingTeamInvite', JSON.stringify(pendingInvite));
     }
     // Navigate to Settings > Members
-    navigate('/worklenz/settings/team-members');
+    navigate('/settings/team-members');
   };
 
   const handleSeatLimitModalClose = () => {

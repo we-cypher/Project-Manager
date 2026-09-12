@@ -70,7 +70,7 @@ const SimpleRailLayout: React.FC<SimpleRailLayoutProps> = memo(({ surfaceKey, co
   const railDividerColor = isDark ? NAV_RAIL_DIVIDER_DARK : NAV_RAIL_DIVIDER_LIGHT;
   const sidebarWidth = resolved.collapsed ? NAV_RAIL_COLLAPSED_WIDTH : NAV_RAIL_EXPANDED_WIDTH;
 
-  const basePath = `/worklenz/${surfaceKey}`;
+  const basePath = `/${surfaceKey}`;
 
   const activeKey = useMemo(() => {
     const rest = location.pathname.startsWith(basePath)

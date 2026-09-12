@@ -18,8 +18,8 @@ const MainLayout = memo(() => {
   const isProjectView = useMemo(
     () =>
       (location.pathname.includes('/projects/') && !location.pathname.endsWith('/projects')) ||
-      location.pathname.includes('/worklenz/planner') ||
-      location.pathname.includes('/worklenz/schedule'),
+      location.pathname.includes('/planner') ||
+      location.pathname.includes('/schedule'),
     [location.pathname]
   );
 
@@ -30,25 +30,25 @@ const MainLayout = memo(() => {
 
   const isHomePage = useMemo(
     () =>
-      location.pathname === '/worklenz/home' ||
+      location.pathname === '/home' ||
       location.pathname.endsWith('/home') ||
-      location.pathname.startsWith('/worklenz/home/'),
+      location.pathname.startsWith('/home/'),
     [location.pathname]
   );
 
   const isPlannerPage = useMemo(
-    () => location.pathname.includes('/worklenz/planner'),
+    () => location.pathname.includes('/planner'),
     [location.pathname]
   );
 
-  // Any route nested under /worklenz/projects/ that the rail itself owns
+  // Any route nested under /projects/ that the rail itself owns
   // (Time Entries, Recurring Tasks, etc.) — checked against the registry
   // rather than hardcoded paths, so this can't silently stop matching the
   // way a manual path list already did once a route moved under Projects.
-  // Excludes /worklenz/projects/:projectId, whose segment won't be a known
+  // Excludes /projects/:projectId, whose segment won't be a known
   // rail item key.
   const isProjectsSubRoute = useMemo(() => {
-    const prefix = '/worklenz/projects/';
+    const prefix = '/projects/';
     if (!location.pathname.startsWith(prefix)) return false;
     const segment = location.pathname.slice(prefix.length).split('/')[0];
     return PROJECTS_RAIL_SUB_ROUTES.has(segment);
@@ -57,7 +57,7 @@ const MainLayout = memo(() => {
   // Same idea as isProjectsSubRoute above, for Finance's own SimpleRailLayout
   // sub-routes (Profitability, Budgets, Invoices, ...).
   const isFinanceSubRoute = useMemo(() => {
-    const prefix = '/worklenz/finance/';
+    const prefix = '/finance/';
     if (!location.pathname.startsWith(prefix)) return false;
     const segment = location.pathname.slice(prefix.length).split('/')[0];
     return FINANCE_RAIL_SUB_ROUTES.has(segment);
@@ -70,11 +70,11 @@ const MainLayout = memo(() => {
     () =>
       isHomePage ||
       isPlannerPage ||
-      location.pathname === '/worklenz/projects' ||
+      location.pathname === '/projects' ||
       (location.pathname.endsWith('/projects') && !location.pathname.includes('/admin-center/')) ||
       isProjectsSubRoute ||
-      location.pathname.includes('/worklenz/team-lead-reports') ||
-      location.pathname === '/worklenz/finance' ||
+      location.pathname.includes('/team-lead-reports') ||
+      location.pathname === '/finance' ||
       location.pathname.endsWith('/finance') ||
       isFinanceSubRoute,
     [location.pathname, isHomePage, isPlannerPage, isProjectsSubRoute, isFinanceSubRoute]

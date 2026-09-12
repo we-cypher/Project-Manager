@@ -82,7 +82,7 @@ const TaskDrawerHeader = ({ t, canCreateTask, isGuest = false }: TaskDrawerHeade
     if (!selectedTaskId) return;
 
     try {
-      const taskLink = `${window.location.origin}/worklenz/t/${selectedTaskId}`;
+      const taskLink = `${window.location.origin}/t/${selectedTaskId}`;
 
       await navigator.clipboard.writeText(taskLink);
 

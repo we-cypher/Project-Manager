@@ -17,20 +17,20 @@ export const isRouteGatedForFreePlan = (route: NavRoutesType, isFreePlan: boolea
 export const navRoutes: NavRoutesType[] = [
   {
     name: 'home',
-    path: '/worklenz/home',
+    path: '/home',
     adminOnly: false,
     freePlanFeature: true,
     guestExcluded: true, // Hide Home for guest-only users
   },
   {
     name: 'projects',
-    path: '/worklenz/projects',
+    path: '/projects',
     adminOnly: false,
     freePlanFeature: true,
   },
   {
     name: 'planner',
-    path: '/worklenz/planner',
+    path: '/planner',
     adminOnly: true,
     freePlanFeature: false,
   },
@@ -38,14 +38,14 @@ export const navRoutes: NavRoutesType[] = [
     name: 'client-portal',
     // Bare surface root — resolves to whichever item is pinned as default
     // (or 'clients' if nothing is pinned) via the client-portal index route.
-    path: '/worklenz/client-portal',
+    path: '/client-portal',
     adminOnly: true,
     freePlanFeature: false,
     selfHostedExcluded: true,
   },
   {
     name: 'finance',
-    path: '/worklenz/finance',
+    path: '/finance',
     adminOnly: true,
     freePlanFeature: false,
   },
@@ -53,13 +53,13 @@ export const navRoutes: NavRoutesType[] = [
     name: 'reporting',
     // Bare surface root — resolves to whichever item is pinned as default
     // (or 'overview' if nothing is pinned) via the reporting index route.
-    path: '/worklenz/reporting',
+    path: '/reporting',
     adminOnly: true,
     freePlanFeature: false,
   },
   {
     name: 'Team Reports',
-    path: '/worklenz/team-lead-reports',
+    path: '/team-lead-reports',
     adminOnly: false,
     freePlanFeature: true,
     teamLeadOnly: true,

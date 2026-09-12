@@ -125,7 +125,7 @@ const ClientPortalRequestDetails = () => {
 
   // Navigate to invoice builder with request ID
   const handleCreateInvoice = () => {
-    navigate(`/worklenz/client-portal/invoices/create?requestId=${id}`);
+    navigate(`/client-portal/invoices/create?requestId=${id}`);
   };
 
   // Handle status change
@@ -748,7 +748,7 @@ const ClientPortalRequestDetails = () => {
                     key={invoice.id}
                     size="small"
                     hoverable
-                    onClick={() => navigate(`/worklenz/client-portal/invoices/${invoice.id}`)}
+                    onClick={() => navigate(`/client-portal/invoices/${invoice.id}`)}
                     style={{
                       cursor: 'pointer',
                       borderRadius: 8,
@@ -813,7 +813,7 @@ const ClientPortalRequestDetails = () => {
             icon={<ArrowLeftOutlined style={{ fontSize: 22 }} />}
             className="borderless-icon-btn"
             style={{ boxShadow: 'none' }}
-            onClick={() => navigate('/worklenz/client-portal/requests')}
+            onClick={() => navigate('/client-portal/requests')}
           />
 
           <Typography.Title level={5} style={{ marginBlock: 0 }}>

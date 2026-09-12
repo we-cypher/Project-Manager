@@ -236,7 +236,7 @@ const LabelsSettings = () => {
               trigger={'hover'}
             >
               {/* this button pin this route to navbar  */}
-              <PinRouteToNavbarButton name="labels" path="/worklenz/settings/labels" />
+              <PinRouteToNavbarButton name="labels" path="/settings/labels" />
             </Tooltip>
           </Flex>
         </Flex>

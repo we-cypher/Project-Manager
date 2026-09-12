@@ -223,7 +223,7 @@ const Navbar = () => {
   }, [filteredRoutes, t, tCommon, isFreePlan]);
 
   const currentRoute = useMemo(() => {
-    const afterWorklenzString = location.pathname.split('/worklenz/')[1];
+    const afterWorklenzString = location.pathname.split('/')[1];
     const pathKey = afterWorklenzString?.split('/')[0];
     return pathKey ?? 'home';
   }, [location.pathname]);

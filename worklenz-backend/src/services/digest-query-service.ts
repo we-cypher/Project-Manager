@@ -112,7 +112,7 @@ function taskJoins(): string {
 }
 
 function buildTaskUrl(taskId: string): string {
-  return `${getBaseUrl()}/worklenz/tasks/${taskId}`;
+  return `${getBaseUrl()}/tasks/${taskId}`;
 }
 
 function mapRows(rows: any[], workspaceCount: number): DigestTask[] {

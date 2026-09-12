@@ -20,7 +20,7 @@ const SettingsGuard = ({
   const hasAccess = accessibleSettings.some(item => item.key === itemKey);
 
   if (!hasAccess) {
-    return <Navigate to="/worklenz/unauthorized" replace />;
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return <>{children}</>;

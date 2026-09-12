@@ -109,7 +109,7 @@ const LoginPage: React.FC = () => {
 
     trackMixpanelEvent(evt_login_page_visit);
     if (currentSession && !currentSession?.setup_completed) {
-      navigate('/worklenz/setup');
+      navigate('/setup');
       return;
     }
 
@@ -136,15 +136,15 @@ const LoginPage: React.FC = () => {
                 // Step 3: Redirect based on whether there's a project ID
                 if (projectId) {
                   // Redirect to the specific project
-                  window.location.href = `/worklenz/projects/${projectId}`;
+                  window.location.href = `/projects/${projectId}`;
                 } else {
                   // Team-only invitation, redirect to home with the new active team
-                  window.location.href = '/worklenz/home';
+                  window.location.href = '/home';
                 }
               } else {
                 // Session verification failed after team switch
                 message.error('Failed to update session. Please try again.');
-                window.location.href = '/worklenz/home';
+                window.location.href = '/home';
               }
             } catch (error) {
               // Could not switch team - user is not a team member yet
@@ -152,12 +152,12 @@ const LoginPage: React.FC = () => {
               message.info('Please check your notifications to accept the team invitation.');
 
               setTimeout(() => {
-                window.location.href = '/worklenz/home';
+                window.location.href = '/home';
               }, 2000);
             }
           } else {
             // No invitation params, redirect to home
-            window.location.href = '/worklenz/home';
+            window.location.href = '/home';
           }
         }
       } catch (error) {

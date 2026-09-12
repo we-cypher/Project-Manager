@@ -65,8 +65,8 @@ const LicenseExpired = () => {
     try {
       await dispatch(setActiveTeam(id));
       await handleVerifyAuth();
-      navigate('/worklenz/home');
-      window.location.href = '/worklenz/home';
+      navigate('/home');
+      window.location.href = '/home';
     } catch (error) {
       console.error('Failed to switch team:', error);
     }
@@ -88,7 +88,7 @@ const LicenseExpired = () => {
         setIsContactingSupport(false);
       }
     } else {
-      navigate('/worklenz/admin-center/billing');
+      navigate('/admin-center/billing');
     }
   };
 
@@ -315,7 +315,7 @@ boxShadow: '0 4px 16px rgba(22,119,255,0.35)',
 
           {/* Continue with Free Plan */}
           <button
-            onClick={() => navigate('/worklenz/admin-center/billing')}
+            onClick={() => navigate('/admin-center/billing')}
             style={{
               width: '100%',
               height: 44,
@@ -461,7 +461,7 @@ boxShadow: '0 4px 16px rgba(22,119,255,0.35)',
           {' '}{t('or') || 'or'}{' '}
           <span
             style={{ color: footerLinkColor, cursor: 'pointer', textDecoration: 'none' }}
-            onClick={() => navigate('/worklenz/admin-center/billing')}
+            onClick={() => navigate('/admin-center/billing')}
           >
             {t('view-pricing') || 'view pricing'}
           </span>

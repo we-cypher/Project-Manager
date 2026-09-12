@@ -61,7 +61,7 @@ export const TimeEntriesTaskRow: React.FC<TimeEntriesTaskRowProps> = ({ task, on
 
   const goToProject = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/worklenz/projects/${task.project_id}`);
+    navigate(`/projects/${task.project_id}`);
   };
 
   const refreshEntries = async () => {

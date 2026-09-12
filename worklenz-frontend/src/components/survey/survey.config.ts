@@ -8,7 +8,7 @@
 // Routes where the survey popup should NEVER appear (conversion-critical pages)
 export const SURVEY_EXCLUDED_ROUTES: string[] = [
   // Pricing and billing related routes
-  '/worklenz/admin-center/billing',
+  '/admin-center/billing',
   '/pricing',
   '/checkout',
   '/payment',
@@ -20,13 +20,13 @@ export const SURVEY_EXCLUDED_ROUTES: string[] = [
   '/signup',
   '/register',
   // License related
-  '/worklenz/license-expired',
+  '/license-expired',
   // Unauthorized
-  '/worklenz/unauthorized',
+  '/unauthorized',
 ];
 
 // Routes where the survey popup IS allowed to appear
-export const SURVEY_ALLOWED_ROUTES: string[] = ['/worklenz/home', '/worklenz/projects'];
+export const SURVEY_ALLOWED_ROUTES: string[] = ['/home', '/projects'];
 
 // LocalStorage keys for survey state management
 export const SURVEY_STORAGE_KEYS = {

@@ -162,6 +162,6 @@ export default class DigestPreferencesController extends WorklenzControllerBase 
   }
 
   public static buildManagePreferencesUrl(): string {
-    return `${getBaseUrl()}/worklenz/settings/notifications`;
+    return `${getBaseUrl()}/settings/notifications`;
   }
 }

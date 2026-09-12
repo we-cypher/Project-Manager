@@ -160,7 +160,7 @@ export const TimeEntriesLogTable: React.FC<TimeEntriesLogTableProps> = ({
         render: (_, record) => (
           <span
             style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
-            onClick={() => record.project_id && navigate(`/worklenz/projects/${record.project_id}?tab=tasks-list&pinned_tab=tasks-list`)}
+            onClick={() => record.project_id && navigate(`/projects/${record.project_id}?tab=tasks-list&pinned_tab=tasks-list`)}
           >
             <Badge color={record.project_color || token.colorPrimary} />
             <span style={{ fontWeight: 500 }}>{record.project_name}</span>

@@ -88,8 +88,8 @@ export default class DbTaskStatusChangeListener {
     const result = await db.query(q, [taskId]);
 
     for (const data of result.rows) {
-      const taskUrl = `${getBaseUrl()}/worklenz/projects/${data.project_id}?tab=tasks-list&task=${data.task_id}`;
-      const settingsUrl = `${getBaseUrl()}/worklenz/settings/notifications`;
+      const taskUrl = `${getBaseUrl()}/projects/${data.project_id}?tab=tasks-list&task=${data.task_id}`;
+      const settingsUrl = `${getBaseUrl()}/settings/notifications`;
 
       const task = {
         name: data.task_name,

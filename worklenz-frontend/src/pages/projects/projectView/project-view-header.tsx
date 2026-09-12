@@ -254,7 +254,7 @@ const ProjectViewHeader = memo(() => {
   }, [dispatch, currentSession]);
 
   const handleNavigateToProjects = useCallback(() => {
-    navigate('/worklenz/projects');
+    navigate('/projects');
   }, [navigate]);
 
   const handleSaveAsTemplate = useCallback(() => {

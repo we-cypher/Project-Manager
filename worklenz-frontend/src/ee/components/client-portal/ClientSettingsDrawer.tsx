@@ -219,7 +219,7 @@ const ClientSettingsDrawer = () => {
               size="small"
               onClick={() => {
                 if (record.id) {
-                  navigate(`/worklenz/projects/${record.id}?tab=tasks-list&pinned_tab=tasks-list`);
+                  navigate(`/projects/${record.id}?tab=tasks-list&pinned_tab=tasks-list`);
                 }
               }}
             >

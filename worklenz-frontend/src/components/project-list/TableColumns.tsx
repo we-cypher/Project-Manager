@@ -82,7 +82,7 @@ const TableColumns = (): ColumnsType<DataType> => {
             <Flex
               gap={2}
               align="center"
-              onClick={() => navigate(`/worklenz/projects/${record.key}`)}
+              onClick={() => navigate(`/projects/${record.key}`)}
             >
               <Badge color="geekblue" style={{ marginRight: '0.5rem' }} />
               <>

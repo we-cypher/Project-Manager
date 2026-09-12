@@ -56,7 +56,7 @@ export const AdminGuard = memo(({ children }: GuardProps) => {
   }
 
   if (!isAdmin) {
-    return <Navigate to="/worklenz/unauthorized" />;
+    return <Navigate to="/unauthorized" />;
   }
 
   return <>{children}</>;
@@ -67,17 +67,17 @@ AdminGuard.displayName = 'AdminGuard';
 export const LicenseExpiryGuard = memo(({ children }: GuardProps) => {
   const { isLicenseExpired, location } = useAuthStatus();
 
-  const isAdminCenterRoute = location.pathname.includes('/worklenz/admin-center');
-  const isAccountDeletionRoute = location.pathname.includes('/worklenz/settings/account-deletion');
-  const isLicenseExpiredPage = location.pathname.includes('/worklenz/license-expired');
+  const isAdminCenterRoute = location.pathname.includes('/admin-center');
+  const isAccountDeletionRoute = location.pathname.includes('/settings/account-deletion');
+  const isLicenseExpiredPage = location.pathname.includes('/license-expired');
 
   // NEW: Check if current route is a project view (with or without query params)
-  const isProjectViewRoute = /^\/worklenz\/projects\/[a-f0-9-]{36}/i.test(location.pathname);
+  const isProjectViewRoute = /^\/projects\/[a-f0-9-]{36}/i.test(location.pathname);
 
   // Redirect to license expired page if license is expired
   // Except when on admin center, account deletion, or already on license expired page
   if (isLicenseExpired && !isAdminCenterRoute && !isAccountDeletionRoute && !isLicenseExpiredPage && !isProjectViewRoute) {
-    return <Navigate to="/worklenz/license-expired" replace />;
+    return <Navigate to="/license-expired" replace />;
   }
   return <>{children}</>;
 });
@@ -92,7 +92,7 @@ export const SetupGuard = memo(({ children }: GuardProps) => {
   }
 
   if (!isSetupComplete) {
-    return <Navigate to="/worklenz/setup" />;
+    return <Navigate to="/setup" />;
   }
 
   return <>{children}</>;
@@ -109,7 +109,7 @@ export const AuthAndSetupGuard = memo(({ children }: GuardProps) => {
   }
 
   if (!isSetupComplete) {
-    return <Navigate to="/worklenz/setup" />;
+    return <Navigate to="/setup" />;
   }
 
   return <>{children}</>;
@@ -184,7 +184,7 @@ const StaticLicenseExpired = memo(() => {
             fontSize: '16px',
             cursor: 'pointer',
           }}
-          onClick={() => (window.location.href = '/worklenz/admin-center/billing')}
+          onClick={() => (window.location.href = '/admin-center/billing')}
         >
           Upgrade now
         </button>

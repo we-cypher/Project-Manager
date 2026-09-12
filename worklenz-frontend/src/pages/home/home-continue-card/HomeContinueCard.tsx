@@ -78,7 +78,7 @@ const HomeContinueCard: React.FC = () => {
   const handleOpenProject = useCallback(
     (e: React.MouseEvent, projectId: string) => {
       e.stopPropagation();
-      navigate(`/worklenz/projects/${projectId}?tab=tasks-list&pinned_tab=tasks-list`);
+      navigate(`/projects/${projectId}?tab=tasks-list&pinned_tab=tasks-list`);
     },
     [navigate]
   );
@@ -234,7 +234,7 @@ const HomeContinueCard: React.FC = () => {
                   title={t('continueCard.noRecentProjects', { defaultValue: 'No recent projects' })}
                   subtitle={t('continueCard.noRecentProjectsSubtitle', { defaultValue: 'Start or continue working on a project to see it here.' })}
                   action={
-                    <Button size="small" onClick={() => navigate('/worklenz/projects')}>
+                    <Button size="small" onClick={() => navigate('/projects')}>
                       {t('continueCard.browseProjects', { defaultValue: 'Browse Projects' })}
                     </Button>
                   }
@@ -244,7 +244,7 @@ const HomeContinueCard: React.FC = () => {
                   <div
                     key={p.id}
                     style={{ ...ROW_STYLE, cursor: 'pointer' }}
-                    onClick={() => navigate(`/worklenz/projects/${p.id}?tab=tasks-list&pinned_tab=tasks-list`)}
+                    onClick={() => navigate(`/projects/${p.id}?tab=tasks-list&pinned_tab=tasks-list`)}
                   >
                     <span
                       style={{
@@ -431,7 +431,7 @@ const HomeContinueCard: React.FC = () => {
                   title={t('continueCard.noTimeLogged', { defaultValue: 'No time logged' })}
                   subtitle={t('continueCard.noTimeLoggedSubtitle', { defaultValue: 'Track time on tasks to see it here.' })}
                   action={
-                    <Button size="small" onClick={() => navigate('/worklenz/time-entries')}>
+                    <Button size="small" onClick={() => navigate('/time-entries')}>
                       {t('continueCard.viewTimeEntries', { defaultValue: 'View Time Entries' })}
                     </Button>
                   }

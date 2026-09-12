@@ -164,7 +164,7 @@ const ClientPortalInvoiceDetails: React.FC = () => {
   // Handle edit invoice
   const handleEditInvoice = () => {
     if (!invoiceId) return;
-    navigate(`/worklenz/client-portal/invoices/${invoiceId}/edit`);
+    navigate(`/client-portal/invoices/${invoiceId}/edit`);
   };
 
   // Handle delete invoice
@@ -183,7 +183,7 @@ const ClientPortalInvoiceDetails: React.FC = () => {
           message.success(
             t('deleteInvoice.success', { defaultValue: 'Invoice deleted successfully' })
           );
-          navigate('/worklenz/client-portal/invoices');
+          navigate('/client-portal/invoices');
         } catch (error) {
           message.error(t('deleteInvoice.failure', { defaultValue: 'Failed to delete invoice' }));
         }
@@ -236,7 +236,7 @@ const ClientPortalInvoiceDetails: React.FC = () => {
         <Flex align="center" gap={16}>
           <Button
             icon={<ArrowLeftOutlined />}
-            onClick={() => navigate('/worklenz/client-portal/invoices')}
+            onClick={() => navigate('/client-portal/invoices')}
             type="text"
           />
           <div>

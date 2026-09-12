@@ -14,7 +14,7 @@ const ClientPortalInvoices = () => {
 
   // function to handle add invoices - navigate to invoice builder
   const handleAddInvoice = () => {
-    navigate('/worklenz/client-portal/invoices/create');
+    navigate('/client-portal/invoices/create');
   };
 
   return (

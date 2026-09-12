@@ -161,7 +161,7 @@ const PlannerScheduleView: React.FC = () => {
   // occupies part of the cell, and resizing moves the pointer off it) — the browser then
   // dispatches a normal click at that point, which bubbles straight to the cell's onClick
   // since there's no chip in between to stopPropagation() it. This is what caused
-  // https://github.com/Worklenz/worklenz-business/issues/1861 (Add Task popup opening on
+  // https://github.com/worklenz-business/issues/1861 (Add Task popup opening on
   // drag). Self-consumed by the cell's onClick so it only ever blocks the one click caused
   // by this gesture; each resize's onMouseUp also clears it on a zero-delay timeout as a
   // fallback for when no click fires at all (e.g. the gesture ends back over the chip,

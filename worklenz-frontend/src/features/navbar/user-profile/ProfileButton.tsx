@@ -156,7 +156,7 @@ const ProfileButton = ({ isOwnerOrAdmin }: ProfileButtonProps) => {
         >
           {isOwnerOrAdmin && (
             <Link
-              to="/worklenz/admin-center/overview"
+              to="/admin-center/overview"
               style={itemStyle}
               onMouseEnter={handleItemMouseEnter}
               onMouseLeave={handleItemMouseLeave}
@@ -169,7 +169,7 @@ const ProfileButton = ({ isOwnerOrAdmin }: ProfileButtonProps) => {
           )}
           {isOwnerOrAdmin && (
             <Link
-              to="/worklenz/admin-center/billing"
+              to="/admin-center/billing"
               style={itemStyle}
               onMouseEnter={handleItemMouseEnter}
               onMouseLeave={handleItemMouseLeave}
@@ -188,7 +188,7 @@ const ProfileButton = ({ isOwnerOrAdmin }: ProfileButtonProps) => {
           )}
           {!isLicenseExpired && (
             <Link
-              to="/worklenz/settings/profile"
+              to="/settings/profile"
               style={itemStyle}
               onMouseEnter={handleItemMouseEnter}
               onMouseLeave={handleItemMouseLeave}
@@ -214,7 +214,7 @@ const ProfileButton = ({ isOwnerOrAdmin }: ProfileButtonProps) => {
           )}
           {isLicenseExpired && (
             <Link
-              to="/worklenz/settings/account-deletion"
+              to="/settings/account-deletion"
               style={dangerItemStyle}
               onMouseEnter={handleItemMouseEnter}
               onMouseLeave={handleItemMouseLeave}

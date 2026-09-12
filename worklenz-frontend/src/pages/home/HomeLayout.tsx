@@ -23,7 +23,7 @@ import { fetchProjectCategories } from '@/features/projects/lookups/projectCateg
 import { fetchProjectHealth } from '@/features/projects/lookups/projectHealth/projectHealthSlice';
 import { fetchProjects } from '@/features/home-page/home-page.slice';
 
-const HOME_BASE_PATH = '/worklenz/home';
+const HOME_BASE_PATH = '/home';
 
 const TaskDrawer = React.lazy(() => import('@/components/task-drawer/task-drawer'));
 const SurveyPromptModal = React.lazy(() =>

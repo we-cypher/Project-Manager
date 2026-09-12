@@ -80,7 +80,7 @@ const ClientViewInvoiceDetails = () => {
   };
 
   const handleEditInvoice = () => {
-    navigate(`/worklenz/client-portal/invoices/${id}/edit`);
+    navigate(`/client-portal/invoices/${id}/edit`);
   };
 
   const handleDeleteInvoice = () => {

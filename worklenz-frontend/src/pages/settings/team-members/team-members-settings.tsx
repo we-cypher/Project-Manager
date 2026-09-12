@@ -863,7 +863,7 @@ const TeamMembersSettings = () => {
               <Tooltip title={t('pinTooltip')} trigger={'hover'}>
                 <PinRouteToNavbarButton
                   name={t('title')}
-                  path="/worklenz/settings/team-members"
+                  path="/settings/team-members"
                   adminOnly={false}
                 />
               </Tooltip>

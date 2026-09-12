@@ -148,7 +148,7 @@ export const ProjectLinksTab: React.FC<ProjectLinksTabProps> = ({
     if (record.source_type === 'manual') {
       window.open(record.url, '_blank', 'noopener,noreferrer');
     } else if (record.source_task_id && projectId) {
-      navigate(`/worklenz/projects/${projectId}?tab=tasks-list&pinned_tab=tasks-list&task=${record.source_task_id}`);
+      navigate(`/projects/${projectId}?tab=tasks-list&pinned_tab=tasks-list&task=${record.source_task_id}`);
     }
   };
 

@@ -150,7 +150,7 @@ const RequestsTable = () => {
           return {
             onClick: () => {
               dispatch(setSelectedRequestNo(record.req_no));
-              navigate(`/worklenz/client-portal/requests/${record.id}`);
+              navigate(`/client-portal/requests/${record.id}`);
             },
             style: { cursor: 'pointer' },
           };

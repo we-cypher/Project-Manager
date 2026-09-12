@@ -444,7 +444,7 @@ export const CreateProjectModal = ({
         return;
       }
       navigate(
-        `/worklenz/projects/${newProjectId}?tab=tasks-list&pinned_tab=tasks-list&new_project=1`
+        `/projects/${newProjectId}?tab=tasks-list&pinned_tab=tasks-list&new_project=1`
       );
       if (reloadOnNavigate) {
         setTimeout(() => {
@@ -580,7 +580,7 @@ export const CreateProjectModal = ({
         return;
       }
       navigate(
-        `/worklenz/projects/${projectId}?tab=tasks-list&pinned_tab=tasks-list&new_project=1`
+        `/projects/${projectId}?tab=tasks-list&pinned_tab=tasks-list&new_project=1`
       );
       if (!selectedTemplateId) {
         setTimeout(() => {

@@ -258,7 +258,7 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
         render: (_, record) => (
           <Typography.Paragraph
             ellipsis={{ rows: 1, tooltip: false }}
-            onClick={() => record.project_id && navigate(`/worklenz/projects/${record.project_id}?tab=tasks-list&pinned_tab=tasks-list`)}
+            onClick={() => record.project_id && navigate(`/projects/${record.project_id}?tab=tasks-list&pinned_tab=tasks-list`)}
             style={{ margin: 0, paddingInlineEnd: 6, cursor: 'pointer' }}
           >
             <Badge color={record.project_color || 'blue'} style={{ marginInlineEnd: 4 }} />

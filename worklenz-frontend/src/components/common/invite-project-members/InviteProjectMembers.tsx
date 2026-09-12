@@ -302,7 +302,7 @@ const InviteProjectMembers = ({ projectId, projectName, prefillEmail }: InvitePr
       localStorage.setItem('pendingProjectInvite', JSON.stringify(pendingInvite));
     }
     // Navigate to Settings > Members
-    navigate('/worklenz/settings/team-members');
+    navigate('/settings/team-members');
   };
 
   const handleSeatLimitModalClose = () => {

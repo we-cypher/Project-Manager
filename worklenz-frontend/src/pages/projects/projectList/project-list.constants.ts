@@ -121,5 +121,5 @@ export const parsePositiveIntegerParam = (value: string | null): number | null =
 
 export const buildProjectRoute = (projectId: string, defaultView: string | undefined): string => {
   const tab = defaultView === 'BOARD' ? 'board' : 'tasks-list';
-  return `/worklenz/projects/${projectId}?tab=${tab}&pinned_tab=${tab}`;
+  return `/projects/${projectId}?tab=${tab}&pinned_tab=${tab}`;
 };

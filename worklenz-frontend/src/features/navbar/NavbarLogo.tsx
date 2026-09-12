@@ -61,7 +61,7 @@ const NavbarLogo = () => {
   }, [organization?.logo_url, isChristmasSeason]);
 
   return (
-    <Link to={'/worklenz/home'}>
+    <Link to={'/home'}>
       <div style={{ position: 'relative', display: 'flex', alignItems: 'center', height: 44 }}>
         <img
           src={logoSrc}

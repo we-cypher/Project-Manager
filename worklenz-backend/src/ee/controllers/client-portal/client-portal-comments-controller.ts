@@ -164,7 +164,7 @@ export default class ClientPortalCommentsController extends ClientPortalControll
             const teamName = teamQuery.rows[0].team_name;
             const adminEmails = teamQuery.rows.map((row: any) => row.email).filter(Boolean);
             const baseUrl = getBaseUrl();
-            const requestUrl = `${baseUrl}/worklenz/client-portal/requests/${id}`;
+            const requestUrl = `${baseUrl}/client-portal/requests/${id}`;
 
             // Send to each admin
             for (const adminEmail of adminEmails) {

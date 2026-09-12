@@ -192,7 +192,7 @@ export const LicenseExpiredModal = ({
         setIsContactingSupport(false);
       }
     } else {
-      navigate('/worklenz/admin-center/billing');
+      navigate('/admin-center/billing');
     }
   };
 

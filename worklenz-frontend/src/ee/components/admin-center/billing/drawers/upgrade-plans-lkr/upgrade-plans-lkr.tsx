@@ -140,7 +140,7 @@ const UpgradePlansLKR: React.FC = () => {
         if (authorizeResponse.authenticated) {
           setSession(authorizeResponse.user);
           dispatch(setUser(authorizeResponse.user));
-          window.location.href = '/worklenz/admin-center/billing';
+          window.location.href = '/admin-center/billing';
         }
       }
     } catch (error) {

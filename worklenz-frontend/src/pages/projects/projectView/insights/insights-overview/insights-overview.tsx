@@ -19,7 +19,7 @@ const InsightsOverview = ({ t }: { t: TFunction }) => {
   const handleSeeAllLastUpdated = () => {
     dispatch(setSort({ field: 'updated_at', order: 'DESC' }));
     navigate(
-      `/worklenz/projects/${projectId}?pinned_tab=tasks-list&sort_field=updated_at&sort_order=DESC`
+      `/projects/${projectId}?pinned_tab=tasks-list&sort_field=updated_at&sort_order=DESC`
     );
   };
 

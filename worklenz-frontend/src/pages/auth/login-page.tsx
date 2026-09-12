@@ -70,7 +70,7 @@ const LoginPage: React.FC = () => {
       if (session?.authenticated) {
         setSession(session.user);
         dispatch(setUser(session.user));
-        navigate('/worklenz/home');
+        navigate('/home');
       }
     } catch (error) {
       logger.error('Failed to verify authentication status', error);
@@ -92,7 +92,7 @@ const LoginPage: React.FC = () => {
 
     trackMixpanelEvent(evt_login_page_visit);
     if (currentSession && !currentSession?.setup_completed) {
-      navigate('/worklenz/setup');
+      navigate('/setup');
       return;
     }
     void verifyAuthStatus();

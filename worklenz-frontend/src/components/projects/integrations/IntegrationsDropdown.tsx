@@ -34,7 +34,7 @@ export const IntegrationsDropdown: React.FC<IntegrationsDropdownProps> = ({
     document.body.classList.contains('dark');
 
   const handleManageAll = () => {
-    navigate('/worklenz/settings/integrations');
+    navigate('/settings/integrations');
     onClose();
   };
 

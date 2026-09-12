@@ -273,7 +273,7 @@ const ProjectView = React.memo(() => {
     const currentPath = location.pathname;
 
     // If we're not on a project view path, clean up
-    if (!currentPath.includes('/worklenz/projects/') || currentPath === '/worklenz/projects') {
+    if (!currentPath.includes('/projects/') || currentPath === '/projects') {
       resetAllProjectData();
     }
   }, [location.pathname, resetAllProjectData]);
@@ -377,7 +377,7 @@ const ProjectView = React.memo(() => {
           // Check if project fetch was rejected (access denied or not found)
           if (projectResult.status === 'rejected') {
             // Redirect to projects list
-            navigate('/worklenz/projects');
+            navigate('/projects');
             return;
           }
 
@@ -403,7 +403,7 @@ const ProjectView = React.memo(() => {
                       })
                   );
                 }
-                navigate('/worklenz/projects');
+                navigate('/projects');
                 return;
               }
 
@@ -416,13 +416,13 @@ const ProjectView = React.memo(() => {
                   })
                 );
               }
-              navigate('/worklenz/projects');
+              navigate('/projects');
               return;
             }
 
             // Check if project data is missing
             if (!result.payload) {
-              navigate('/worklenz/projects');
+              navigate('/projects');
               return;
             }
 
@@ -481,7 +481,7 @@ const ProjectView = React.memo(() => {
           setIsInitialized(true);
         } catch (error) {
           console.error('Error loading project data:', error);
-          navigate('/worklenz/projects');
+          navigate('/projects');
         } finally {
           isLoadingRef.current = false;
         }

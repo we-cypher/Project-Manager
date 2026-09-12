@@ -350,7 +350,7 @@ const FinanceOverviewPage = () => {
                 <Tooltip title={t('viewFinanceButton')}>
                     <Button
                         size="small"
-                        onClick={e => { e.stopPropagation(); navigate(`/worklenz/projects/${record.id}?tab=finance`); }}
+                        onClick={e => { e.stopPropagation(); navigate(`/projects/${record.id}?tab=finance`); }}
                         style={{ whiteSpace: 'nowrap' }}
                     >
                         {t('viewButton')}
@@ -456,7 +456,7 @@ const FinanceOverviewPage = () => {
                     <InfoCircleOutlined style={{ marginRight: 4 }} />
                     {t('currencyNote.unavailable')}{' '}
                     {ratesError}{' '}
-                    <a href="/worklenz/settings/organization-currency" style={{ fontSize: 11 }}>
+                    <a href="/settings/organization-currency" style={{ fontSize: 11 }}>
                         {t('currencyNote.checkSettings')}
                     </a>
                 </Text>
@@ -469,7 +469,7 @@ const FinanceOverviewPage = () => {
                         time: ratesFetchedAt ? new Date(ratesFetchedAt).toLocaleTimeString() : '',
                     })}
                     {' '}
-                    <a href="/worklenz/settings/organization-currency" style={{ fontSize: 11 }}>
+                    <a href="/settings/organization-currency" style={{ fontSize: 11 }}>
                         {t('currencyNote.changeCurrency')}
                     </a>
                 </Text>
@@ -506,7 +506,7 @@ const FinanceOverviewPage = () => {
                             loading={loading}
                             size="small"
                             onRow={record => ({
-                                onClick: () => navigate(`/worklenz/projects/${record.id}?tab=finance`),
+                                onClick: () => navigate(`/projects/${record.id}?tab=finance`),
                                 style: { cursor: 'pointer' },
                             })}
                             pagination={{

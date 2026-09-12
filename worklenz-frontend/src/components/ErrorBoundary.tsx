@@ -142,7 +142,7 @@ const ErrorFallback: React.FC<{ error?: Error; onReset?: () => void }> = ({ erro
   };
 
   const handleGoHome = () => {
-    navigate('/worklenz/home');
+    navigate('/home');
     window.location.reload();
   };
 

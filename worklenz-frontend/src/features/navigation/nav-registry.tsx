@@ -309,7 +309,7 @@ export const PROJECTS_NAV_SURFACE: NavSurface = {
   ],
 };
 
-// Route segments nested under /worklenz/projects/ that the rail itself
+// Route segments nested under /projects/ that the rail itself
 // covers (every item except the index 'all-projects') — derived from the
 // surface definition above so MainLayout/AppShellLayout's width/background
 // matching for these pages can't silently drift out of sync with the rail's

@@ -26,8 +26,8 @@ const GuestRedirect = ({ children }: { children: React.ReactNode }) => {
 
     const isGuest = Boolean(currentProject?.project?.is_guest);
 
-    if (isGuest && location.pathname.startsWith('/worklenz/home')) {
-      return <Navigate to="/worklenz/projects" replace />;
+    if (isGuest && location.pathname.startsWith('/home')) {
+      return <Navigate to="/projects" replace />;
     }
 
     return <>{children}</>;

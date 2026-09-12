@@ -1,6 +1,6 @@
 {
-  "name": "Worklenz - Project Management",
-  "short_name": "Worklenz",
+  "name": "WeProject - Project Management",
+  "short_name": "WeProject",
   "description": "A comprehensive project management application for teams",
   "start_url": "/",
   "display": "standalone",
@@ -35,7 +35,7 @@
       "name": "Dashboard",
       "short_name": "Dashboard",
       "description": "View your project dashboard",
-      "url": "/worklenz",
+      "url": "/",
       "icons": [
         {
           "src": "/favicon.ico",
@@ -47,7 +47,7 @@
       "name": "Tasks",
       "short_name": "Tasks",
       "description": "Manage your tasks",
-      "url": "/worklenz/tasks",
+      "url": "/tasks",
       "icons": [
         {
           "src": "/favicon.ico",

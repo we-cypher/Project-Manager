@@ -288,7 +288,7 @@ export default class ClientPortalRequestsController extends ClientPortalControll
 
           if (adminRecipients.length > 0) {
             const baseUrl = getBaseUrl();
-            const requestUrl = `${baseUrl}/worklenz/client-portal/requests/${newRequest.id}`;
+            const requestUrl = `${baseUrl}/client-portal/requests/${newRequest.id}`;
 
             // Get request title from requestData if available
             let requestTitle = "";

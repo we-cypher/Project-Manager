@@ -289,7 +289,7 @@ describe('LoginPage', () => {
     renderWithProviders(<LoginPage />);
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/worklenz/home');
+      expect(mockNavigate).toHaveBeenCalledWith('/home');
     });
   });
 
@@ -309,7 +309,7 @@ describe('LoginPage', () => {
     renderWithProviders(<LoginPage />);
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/worklenz/setup');
+      expect(mockNavigate).toHaveBeenCalledWith('/setup');
     });
   });
 });

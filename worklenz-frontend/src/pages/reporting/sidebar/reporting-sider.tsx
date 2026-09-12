@@ -16,7 +16,7 @@ const ReportingSider = () => {
   const { resolved, pin, unpin, isPinned, reorder, toggleCollapsed } = useNavPreferences('reporting');
 
   const activeKey = useMemo(() => {
-    const afterWorklenzString = location.pathname?.split('/worklenz/reporting/')[1];
+    const afterWorklenzString = location.pathname?.split('/reporting/')[1];
     return afterWorklenzString?.split('/')[0];
   }, [location.pathname]);
 
@@ -37,7 +37,7 @@ const ReportingSider = () => {
   );
 
   const handleSelect = useCallback(
-    (itemKey: string) => navigate(`/worklenz/reporting/${itemKey}`),
+    (itemKey: string) => navigate(`/reporting/${itemKey}`),
     [navigate]
   );
 

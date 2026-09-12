@@ -13,7 +13,7 @@ const NavbarLogo = () => {
   const themeMode = useSelector((state: RootState) => state.themeReducer.mode);
 
   return (
-    <Link to={'/worklenz/home'}>
+    <Link to={'/home'}>
       <div style={{ position: 'relative', display: 'inline-block' }}>
         <img
           src={themeMode === 'dark' ? logoDark : logo}

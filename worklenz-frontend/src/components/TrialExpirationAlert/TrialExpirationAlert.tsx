@@ -74,7 +74,7 @@ export const TrialExpirationAlert = () => {
   };
 
   const handleUpgrade = () => {
-    navigate('/worklenz/admin-center/billing');
+    navigate('/admin-center/billing');
   };
 
   if (!visible || daysRemaining === null) {
