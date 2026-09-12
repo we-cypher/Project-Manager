@@ -65,4 +65,29 @@ export const financeOverviewApiService = {
     return response.data;
   },
 
+  getBudgets: async (): Promise<IServerResponse<any>> => {
+    const response = await apiClient.get(`${API_BASE_URL}/finance-overview/budgets`);
+    return response.data;
+  },
+
+  getBillableTime: async (): Promise<IServerResponse<any>> => {
+    const response = await apiClient.get(`${API_BASE_URL}/finance-overview/billable-time`);
+    return response.data;
+  },
+
+  getProfitability: async (): Promise<IServerResponse<any>> => {
+    const response = await apiClient.get(`${API_BASE_URL}/finance-overview/profitability`);
+    return response.data;
+  },
+
+  getUtilization: async (): Promise<IServerResponse<any>> => {
+    const response = await apiClient.get(`${API_BASE_URL}/finance-overview/utilization`);
+    return response.data;
+  },
+
+  getForecasts: async (): Promise<IServerResponse<any>> => {
+    const response = await apiClient.get(`${API_BASE_URL}/finance-overview/forecasts`);
+    return response.data;
+  },
+
 };

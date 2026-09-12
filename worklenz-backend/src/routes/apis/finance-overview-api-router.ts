@@ -39,4 +39,34 @@ financeOverviewApiRouter.get(
     safeControllerFunction(FinanceOverviewController.getTeamFixedCosts)
 );
 
+financeOverviewApiRouter.get(
+    "/budgets",
+    teamLeadFinanceValidator,
+    safeControllerFunction(FinanceOverviewController.getBudgets)
+);
+
+financeOverviewApiRouter.get(
+    "/billable-time",
+    teamLeadFinanceValidator,
+    safeControllerFunction(FinanceOverviewController.getBillableTime)
+);
+
+financeOverviewApiRouter.get(
+    "/profitability",
+    teamLeadFinanceValidator,
+    safeControllerFunction(FinanceOverviewController.getProfitability)
+);
+
+financeOverviewApiRouter.get(
+    "/utilization",
+    teamLeadFinanceValidator,
+    safeControllerFunction(FinanceOverviewController.getUtilization)
+);
+
+financeOverviewApiRouter.get(
+    "/forecasts",
+    teamLeadFinanceValidator,
+    safeControllerFunction(FinanceOverviewController.getForecasts)
+);
+
 export default financeOverviewApiRouter;

@@ -1,5 +1,5 @@
 import { RouteObject } from 'react-router-dom';
-import { lazy, Suspense, useMemo } from 'react';
+import { lazy, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import Skeleton from 'antd/es/skeleton';
 import MainLayout from '@/layouts/MainLayout';
@@ -7,9 +7,6 @@ import SimpleRailLayout from '@/layouts/SimpleRailLayout';
 import settingsRoutes from './settings-routes';
 import adminCenterRoutes from './admin-center-routes';
 import { useAuthService } from '@/hooks/useAuth';
-import { hasBusinessFeatureAccess } from '@/ee/utils/subscription-utils';
-import FeatureUpgradePreview from '@/components/upgrade/FeatureUpgradePreview';
-import { useFinanceFeaturePreviews } from '@/components/upgrade/financeFeaturePreviews';
 import { Navigate, useLocation } from 'react-router-dom';
 import { SuspenseFallback } from '@/components/suspense-fallback/suspense-fallback';
 import NavSurfaceIndexRedirect from '@/features/navigation/NavSurfaceIndexRedirect';
@@ -154,6 +151,36 @@ const ClientPortalInvoiceDetails = lazy(
     'ClientPortalInvoiceDetails'
   )
 );
+const FinanceBudgetsPage = lazy(
+  ChunkErrorHandler.wrapLazyImport(
+    () => import('@/pages/finance-overview/FinanceBudgetsPage'),
+    'FinanceBudgetsPage'
+  )
+);
+const FinanceProfitabilityPage = lazy(
+  ChunkErrorHandler.wrapLazyImport(
+    () => import('@/pages/finance-overview/FinanceProfitabilityPage'),
+    'FinanceProfitabilityPage'
+  )
+);
+const FinanceBillableTimePage = lazy(
+  ChunkErrorHandler.wrapLazyImport(
+    () => import('@/pages/finance-overview/FinanceBillableTimePage'),
+    'FinanceBillableTimePage'
+  )
+);
+const FinanceUtilizationPage = lazy(
+  ChunkErrorHandler.wrapLazyImport(
+    () => import('@/pages/finance-overview/FinanceUtilizationPage'),
+    'FinanceUtilizationPage'
+  )
+);
+const FinanceForecastsPage = lazy(
+  ChunkErrorHandler.wrapLazyImport(
+    () => import('@/pages/finance-overview/FinanceForecastsPage'),
+    'FinanceForecastsPage'
+  )
+);
 
 // Define AdminGuard component with defensive programming
 const AdminGuard = ({ children }: { children: React.ReactNode }) => {
@@ -219,38 +246,10 @@ const TeamLeadGuard = ({ children }: { children: React.ReactNode }) => {
   }
 };
 
-const FINANCE_BASE_PATH = '/finance';
-
-// Finance is a business-plan feature. Rather than redirecting users without
-// access away entirely, the rail navigation stays visible and the content
-// pane shows a blurred preview of whichever page is active — reusing the
-// same per-page previews as the "not built yet" placeholders below — with an
-// upgrade prompt, matching how Planner gates Schedule/Timeline/Workload.
 const FinanceRailLayout = () => {
-  const authService = useAuthService();
-  const location = useLocation();
-  const hasBusinessAccess = hasBusinessFeatureAccess(authService.getCurrentSession());
-  const financePreviews = useFinanceFeaturePreviews();
-
-  const activeKey = useMemo(() => {
-    const rest = location.pathname.startsWith(FINANCE_BASE_PATH)
-      ? location.pathname.slice(FINANCE_BASE_PATH.length).replace(/^\//, '')
-      : '';
-    return rest || 'overview';
-  }, [location.pathname]);
-
-  const lockedPreview = financePreviews[activeKey];
-
   return (
     <>
-      <SimpleRailLayout
-        surfaceKey="finance"
-        contentOverride={
-          hasBusinessAccess ? undefined : (
-            <FeatureUpgradePreview key={activeKey} {...(lockedPreview ?? financePreviews.generic)} />
-          )
-        }
-      />
+      <SimpleRailLayout surfaceKey="finance" />
       {createPortal(
         <Suspense fallback={null}>
           <TaskDrawer />
@@ -262,35 +261,7 @@ const FinanceRailLayout = () => {
   );
 };
 
-// Each wrapped in its own component (rather than inline JSX in the route
-// config) so it can call the translation hook — route `element`s can't call
-// hooks directly.
-const FinanceProfitabilityComingSoon = () => {
-  const previews = useFinanceFeaturePreviews();
-  return <FeatureUpgradePreview {...previews.profitability} showCta={false} />;
-};
-const FinanceBudgetsComingSoon = () => {
-  const previews = useFinanceFeaturePreviews();
-  return <FeatureUpgradePreview {...previews.budgets} showCta={false} />;
-};
-const FinanceInvoicesComingSoon = () => {
-  const previews = useFinanceFeaturePreviews();
-  return <FeatureUpgradePreview {...previews.invoices} showCta={false} />;
-};
-const FinanceBillableTimeComingSoon = () => {
-  const previews = useFinanceFeaturePreviews();
-  return <FeatureUpgradePreview {...previews['billable-time']} showCta={false} />;
-};
-const FinanceUtilizationComingSoon = () => {
-  const previews = useFinanceFeaturePreviews();
-  return <FeatureUpgradePreview {...previews.utilization} showCta={false} />;
-};
-const FinanceForecastsComingSoon = () => {
-  const previews = useFinanceFeaturePreviews();
-  return <FeatureUpgradePreview {...previews.forecasts} showCta={false} />;
-};
-
-const mainRoutes: RouteObject[] = [
+const FINANCE_BASE_PATH = '/finance';const mainRoutes: RouteObject[] = [
   {
     path: '/',
     element: <MainLayout />,
@@ -560,7 +531,7 @@ const mainRoutes: RouteObject[] = [
             path: 'profitability',
             element: (
               <Suspense fallback={<SuspenseFallback />}>
-                <FinanceProfitabilityComingSoon />
+                <FinanceProfitabilityPage />
               </Suspense>
             ),
           },
@@ -568,7 +539,7 @@ const mainRoutes: RouteObject[] = [
             path: 'budgets',
             element: (
               <Suspense fallback={<SuspenseFallback />}>
-                <FinanceBudgetsComingSoon />
+                <FinanceBudgetsPage />
               </Suspense>
             ),
           },
@@ -616,7 +587,7 @@ const mainRoutes: RouteObject[] = [
             path: 'billable-time',
             element: (
               <Suspense fallback={<SuspenseFallback />}>
-                <FinanceBillableTimeComingSoon />
+                <FinanceBillableTimePage />
               </Suspense>
             ),
           },
@@ -624,7 +595,7 @@ const mainRoutes: RouteObject[] = [
             path: 'utilization',
             element: (
               <Suspense fallback={<SuspenseFallback />}>
-                <FinanceUtilizationComingSoon />
+                <FinanceUtilizationPage />
               </Suspense>
             ),
           },
@@ -632,7 +603,7 @@ const mainRoutes: RouteObject[] = [
             path: 'forecasts',
             element: (
               <Suspense fallback={<SuspenseFallback />}>
-                <FinanceForecastsComingSoon />
+                <FinanceForecastsPage />
               </Suspense>
             ),
           },
