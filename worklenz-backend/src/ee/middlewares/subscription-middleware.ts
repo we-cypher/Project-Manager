@@ -57,59 +57,27 @@ export function hasBusinessPlanAccess(user: any): boolean {
 }
 
 /**
- * Middleware to require business plan for accessing certain features
+ * Middleware to require business plan for accessing certain features.
+ * Self-hosted: all features unlocked — pass through unconditionally.
  */
 export const requireBusinessPlan = (
   req: IWorkLenzRequest,
-  res: IWorkLenzResponse,
+  _res: IWorkLenzResponse,
   next: () => void
 ) => {
-  if (!req.user) {
-    res.status(401).send(
-      new ServerResponse(false, null, "Unauthorized")
-    );
-    return;
-  }
-  
-  const hasAccess = hasBusinessPlanAccess(req.user);
-  
-  if (!hasAccess) {
-    res.status(403).send(
-      new ServerResponse(false, null, "This feature requires a Business plan")
-    );
-    return;
-  }
-  
   next();
 };
 
 /**
  * Middleware to require business plan for team-scoped requests that authenticate via
- * x-client-token rather than a passport session (e.g. the client portal), where
- * req.user is never populated. Resolves the organization's plan from req.organizationId,
- * which client-auth-middleware sets to the client's team_id.
+ * x-client-token rather than a passport session (e.g. the client portal).
+ * Self-hosted: all features unlocked — pass through unconditionally.
  */
 export const requireBusinessPlanForOrganization = async (
   req: Request & { organizationId?: string },
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): Promise<Response | void> => {
-  const teamId = req.organizationId;
-
-  if (!teamId) {
-    return res.status(401).send(
-      new ServerResponse(false, null, "Unauthorized")
-    );
-  }
-
-  const subscriptionData = await checkTeamSubscriptionStatus(teamId);
-
-  if (!subscriptionData || !hasBusinessPlanAccess(subscriptionData)) {
-    return res.status(403).send(
-      new ServerResponse(false, null, "This feature requires a Business plan")
-    );
-  }
-
   return next();
 };
 
@@ -140,30 +108,12 @@ export async function isRestrictedFromProPlanFeatures(teamId: string | null | un
 
 /**
  * Middleware to restrict Pro Plan features (project health, billable, etc.)
- * Pro Plan and AppSumo users are restricted from these features
+ * Self-hosted: all features unlocked — pass through unconditionally.
  */
 export const restrictProPlanFeatures = async (
-  req: IWorkLenzRequest,
-  res: IWorkLenzResponse,
+  _req: IWorkLenzRequest,
+  _res: IWorkLenzResponse,
   next: NextFunction
 ): Promise<IWorkLenzResponse | void> => {
-  if (!req.user?.team_id) {
-    return res.status(200).send(
-      new ServerResponse(false, null, "Required fields are missing.")
-    );
-  }
-
-  const isRestricted = await isRestrictedFromProPlanFeatures(req.user.team_id);
-  
-  if (isRestricted) {
-    return res.status(200).send(
-      new ServerResponse(
-        false, 
-        null, 
-        "This feature is not available for Pro Plan and AppSumo users. Please upgrade to Business plan to access this feature."
-      )
-    );
-  }
-  
   return next();
 };
