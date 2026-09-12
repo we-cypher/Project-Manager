@@ -8,7 +8,7 @@ class ClientPortalAPI {
 
   constructor() {
     this.api = axios.create({
-      baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/client-portal',
+      baseURL: (window as any).CLIENT_PORTAL_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/client-portal',
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',

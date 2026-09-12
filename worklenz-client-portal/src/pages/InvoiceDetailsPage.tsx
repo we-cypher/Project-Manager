@@ -70,7 +70,7 @@ const InvoiceDetailsPage: React.FC = () => {
 
       // Create a direct fetch request to handle PDF download
       const token = clientPortalAPI.getToken();
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/client-portal';
+      const baseUrl = (window as any).CLIENT_PORTAL_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/client-portal';
 
       const response = await fetch(`${baseUrl}/invoices/${id}/download?format=pdf`, {
         method: 'GET',

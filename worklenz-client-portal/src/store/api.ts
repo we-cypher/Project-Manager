@@ -15,7 +15,7 @@ import {
 } from '@/types';
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/client-portal',
+  baseUrl: (window as any).CLIENT_PORTAL_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/client-portal',
   prepareHeaders: (headers) => {
     const token = localStorage.getItem('clientToken');
     if (token) {

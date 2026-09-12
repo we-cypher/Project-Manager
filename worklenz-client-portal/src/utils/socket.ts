@@ -30,7 +30,7 @@ class SocketManager {
       return;
     }
 
-    this.socket = io(import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000', {
+    this.socket = io((window as any).CLIENT_PORTAL_SOCKET_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000', {
       auth: {
         token,
         type: 'client'

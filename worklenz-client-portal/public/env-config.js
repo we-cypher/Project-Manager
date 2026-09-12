@@ -1,0 +1,2 @@
+window.CLIENT_PORTAL_API_URL = "";
+window.CLIENT_PORTAL_SOCKET_URL = "";
