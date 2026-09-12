@@ -35,15 +35,6 @@ export const navRoutes: NavRoutesType[] = [
     freePlanFeature: false,
   },
   {
-    name: 'client-portal',
-    // Bare surface root — resolves to whichever item is pinned as default
-    // (or 'clients' if nothing is pinned) via the client-portal index route.
-    path: '/client-portal',
-    adminOnly: true,
-    freePlanFeature: false,
-    selfHostedExcluded: true,
-  },
-  {
     name: 'finance',
     path: '/finance',
     adminOnly: true,

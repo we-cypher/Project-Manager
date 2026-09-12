@@ -12,19 +12,6 @@ services:
     env_file:
       - ./.env
 
-  client-portal:
-    build:
-      context: ./worklenz-client-portal
-      dockerfile: Dockerfile
-    image: wecypher-client-portal:latest
-    ports:
-      - "5174:5174"
-    depends_on:
-      - backend
-    restart: unless-stopped
-    env_file:
-      - ./.env
-
   backend:
     build:
       context: ./worklenz-backend
