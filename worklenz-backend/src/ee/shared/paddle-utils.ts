@@ -86,17 +86,11 @@ export async function checkTeamSubscriptionStatus(team_id: string) {
                          WHERE pt.user_id = ud.user_id AND pt.is_active = true AND pt.trial_end_date > NOW()
                          LIMIT 1)
                       ) AS plan_name,
-                      COALESCE(
-                        (SELECT user_limit FROM licensing_pricing_plans lpp 
+                      (SELECT user_limit FROM licensing_pricing_plans lpp 
                          JOIN licensing_user_subscriptions lus2 ON lpp.id = lus2.plan_id 
                          WHERE lus2.user_id = ud.user_id AND lus2.status IN ('active', 'trialing')
                          ORDER BY CASE WHEN lus2.status = 'trialing' THEN 1 ELSE 2 END
-                         LIMIT 1),
-                        (SELECT max_users FROM licensing_plan_trials pt
-                         JOIN licensing_plan_tiers lpt ON pt.plan_tier_id = lpt.id
-                         WHERE pt.user_id = ud.user_id AND pt.is_active = true AND pt.trial_end_date > NOW()
-                         LIMIT 1)
-                      ) AS base_user_limit,
+                         LIMIT 1) AS base_user_limit,
                       (SELECT EXISTS(SELECT id FROM licensing_custom_subs lcs WHERE lcs.user_id = ud.user_id)) AS is_custom,
                       (SELECT EXISTS(SELECT id FROM licensing_credit_subs lcs WHERE lcs.user_id = ud.user_id)) AS is_credit,
                       (SELECT EXISTS(SELECT id FROM licensing_coupon_codes WHERE redeemed_by = ud.user_id)) AS is_ltd,
@@ -155,14 +149,13 @@ export async function checkTeamSubscriptionStatus(team_id: string) {
       const appSumoLimit = appSumoService.getBusinessPlanUserLimit(
         data.subscription_type,
         data.plan_name,
-        data.base_user_limit || 25
+        data.base_user_limit || 99999
       );
       data.effective_user_limit = appSumoLimit;
     } else if (data && data.subscription_type === "ANNUAL_BUSINESS") {
-      // ANNUAL_BUSINESS license type has business plan features with default business limit
-      data.effective_user_limit = data.base_user_limit || 100; // Default business plan limit
+      data.effective_user_limit = data.base_user_limit || 99999;
     } else {
-      data.effective_user_limit = data.base_user_limit || 25;
+      data.effective_user_limit = data.base_user_limit || 99999;
     }
     
     return data;
