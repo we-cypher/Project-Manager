@@ -1,4 +1,5 @@
 import { SendEmailCommand, SESClient } from "@aws-sdk/client-ses";
+import nodemailer from "nodemailer";
 import { Validator } from "jsonschema";
 import { QueryResult } from "pg";
 import lodash from "lodash";
@@ -7,7 +8,40 @@ import { log_error, isValidateEmail } from "./utils";
 import emailRequestSchema from "../json_schemas/email-request-schema";
 import db from "../config/db";
 
-const sesClient = new SESClient({ region: process.env.AWS_REGION });
+const MAIL_FROM_NAME = process.env.APP_NAME || "WeProject";
+const MAIL_FROM_EMAIL =
+  process.env.SMTP_FROM_EMAIL || process.env.SES_FROM_EMAIL || "noreply@example.com";
+
+function isSmtpConfigured(): boolean {
+  return Boolean(process.env.SMTP_HOST);
+}
+
+let smtpTransporter: nodemailer.Transporter | null = null;
+function getSmtpTransporter(): nodemailer.Transporter {
+  if (!smtpTransporter) {
+    const port = parseInt(process.env.SMTP_PORT || "587", 10);
+    smtpTransporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port,
+      secure: process.env.SMTP_SECURE === "true" || port === 465,
+      auth: process.env.SMTP_USER
+        ? {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASSWORD,
+          }
+        : undefined,
+    });
+  }
+  return smtpTransporter;
+}
+
+let sesClient: SESClient | null = null;
+function getSesClient(): SESClient {
+  if (!sesClient) {
+    sesClient = new SESClient({ region: process.env.AWS_REGION });
+  }
+  return sesClient;
+}
 
 export interface IEmail {
   to?: string[];
@@ -221,47 +255,56 @@ export async function sendEmailEnhanced(email: IEmail): Promise<IEmailResult> {
 
     let messageId: string | undefined;
 
-    // Send via AWS SES
-    console.log("\n📧 Sending email via AWS SES...");
-    console.log("To:", options.to.join(", "));
-    console.log("Subject:", options.subject);
-
     const charset = "UTF-8";
-    
-    // Generate plain text version by stripping HTML tags. Use sanitize-html
-    // (drops <script>/<style> and their contents reliably) then decode entities
-    // so the plaintext body reads naturally.
     const plainText = lodash.unescape(
       sanitizeHtmlLib(options.html, { allowedTags: [], allowedAttributes: {} })
     )
-      .replace(/\s+/g, ' ')
+      .replace(/\s+/g, " ")
       .trim();
-    
-    const command = new SendEmailCommand({
-      Destination: {
-        ToAddresses: options.to,
-      },
-      Message: {
-        Subject: {
-          Charset: charset,
-          Data: options.subject,
-        },
-        Body: {
-          Html: {
-            Charset: charset,
-            Data: options.html,
-          },
-          Text: {
-            Charset: charset,
-            Data: plainText,
-          },
-        },
-      },
-      Source: `${process.env.APP_NAME || "WeCypher"} <${process.env.SES_FROM_EMAIL || "noreply@example.com"}>`,
-    });
+    const from = `${MAIL_FROM_NAME} <${MAIL_FROM_EMAIL}>`;
 
-    const res = await sesClient.send(command);
-    messageId = res.MessageId;
+    console.log("\n📧 Sending email...");
+    console.log("Provider:", isSmtpConfigured() ? "SMTP" : "AWS SES");
+    console.log("To:", options.to.join(", "));
+    console.log("Subject:", options.subject);
+
+    if (isSmtpConfigured()) {
+      const info = await getSmtpTransporter().sendMail({
+        from,
+        to: options.to.join(", "),
+        subject: options.subject,
+        html: options.html,
+        text: plainText,
+      });
+      messageId = info.messageId;
+    } else {
+      const command = new SendEmailCommand({
+        Destination: {
+          ToAddresses: options.to,
+        },
+        Message: {
+          Subject: {
+            Charset: charset,
+            Data: options.subject,
+          },
+          Body: {
+            Html: {
+              Charset: charset,
+              Data: options.html,
+            },
+            Text: {
+              Charset: charset,
+              Data: plainText,
+            },
+          },
+        },
+        Source: from,
+      });
+
+      const res = await getSesClient().send(command);
+      messageId = res.MessageId;
+    }
+
     console.log("✅ Email sent successfully!");
     console.log("Message ID:", messageId);
 
