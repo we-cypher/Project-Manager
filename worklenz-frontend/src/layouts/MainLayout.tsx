@@ -3,7 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { memo, useMemo } from 'react';
 
 import GlobalUpgradeModal from '@/components/upgrade/GlobalUpgradeModal';
-import { PROJECTS_RAIL_SUB_ROUTES, FINANCE_RAIL_SUB_ROUTES } from '@/features/navigation/nav-registry';
+import { PROJECTS_RAIL_SUB_ROUTES, FINANCE_RAIL_SUB_ROUTES, SALES_RAIL_SUB_ROUTES } from '@/features/navigation/nav-registry';
 import { useHomeDashboardSocketSync } from '@/hooks/useHomeDashboardSocketSync';
 
 const MainLayout = memo(() => {
@@ -63,6 +63,13 @@ const MainLayout = memo(() => {
     return FINANCE_RAIL_SUB_ROUTES.has(segment);
   }, [location.pathname]);
 
+  const isSalesSubRoute = useMemo(() => {
+    const prefix = '/sales/';
+    if (!location.pathname.startsWith(prefix)) return false;
+    const segment = location.pathname.slice(prefix.length).split('/')[0];
+    return SALES_RAIL_SUB_ROUTES.has(segment);
+  }, [location.pathname]);
+
   // Pages that mount their own SimpleRailLayout left rail (see main-routes.tsx)
   // need the full width for themselves — they handle their own content
   // padding internally, so MainLayout must not double up on it here.
@@ -76,8 +83,11 @@ const MainLayout = memo(() => {
       location.pathname.includes('/team-lead-reports') ||
       location.pathname === '/finance' ||
       location.pathname.endsWith('/finance') ||
-      isFinanceSubRoute,
-    [location.pathname, isHomePage, isPlannerPage, isProjectsSubRoute, isFinanceSubRoute]
+      isFinanceSubRoute ||
+      location.pathname === '/sales' ||
+      location.pathname.endsWith('/sales') ||
+      isSalesSubRoute,
+    [location.pathname, isHomePage, isPlannerPage, isProjectsSubRoute, isFinanceSubRoute, isSalesSubRoute]
   );
 
   const contentClassName = [

@@ -279,6 +279,42 @@ async function processWeeklyEnd(user: DigestUser, now: moment.Moment): Promise<v
   await logSend(user.id, "weekly_end", workspaceCount, sectionCount, false, undefined, user.timezone_missing);
 }
 
+async function notifyDueSalesActivities(): Promise<void> {
+  try {
+    const due = await db.query(
+      `SELECT a.id,
+              a.title,
+              a.assigned_to,
+              a.team_id,
+              a.deal_id,
+              d.name AS deal_name
+       FROM sales_deal_activities a
+       JOIN sales_deals d ON d.id = a.deal_id
+       WHERE a.completed_at IS NULL
+         AND a.due_at IS NOT NULL
+         AND a.due_at <= CURRENT_TIMESTAMP
+         AND a.notified_at IS NULL
+         AND a.assigned_to IS NOT NULL
+       LIMIT 100`
+    );
+
+    for (const row of due.rows) {
+      const message = `Sales follow-up due: ${row.title} (${row.deal_name})`;
+      await db.query(
+        `INSERT INTO user_notifications (message, user_id, team_id, deal_id)
+         VALUES ($1, $2, $3, $4)`,
+        [message, row.assigned_to, row.team_id, row.deal_id]
+      );
+      await db.query(
+        `UPDATE sales_deal_activities SET notified_at = CURRENT_TIMESTAMP WHERE id = $1`,
+        [row.id]
+      );
+    }
+  } catch (error) {
+    log_error(error);
+  }
+}
+
 export async function onDigestSchedulerTick(): Promise<void> {
   if (isRunning) {
     log("Previous tick still running, skipping.");
@@ -298,6 +334,8 @@ export async function onDigestSchedulerTick(): Promise<void> {
       log("Another instance holds the lock, skipping tick.");
       return;
     }
+
+    await notifyDueSalesActivities();
 
     const usersResult = await db.query(
       `SELECT

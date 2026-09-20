@@ -22,7 +22,8 @@ export default class NotificationController extends WorklenzControllerBase {
              un.project_id,
              t.id AS task_id,
              un.team_id,
-             un.comment_id
+             un.comment_id,
+             un.deal_id
       FROM user_notifications un
              LEFT JOIN tasks t ON un.task_id = t.id
       WHERE user_id = $1
@@ -32,12 +33,24 @@ export default class NotificationController extends WorklenzControllerBase {
 
     `;
 
-    const result = await db.query(q, [req.user?.id, req.query.filter === "Read"]);
+    let result;
+    try {
+      result = await db.query(q, [req.user?.id, req.query.filter === "Read"]);
+    } catch {
+      const fallback = q.replace("un.deal_id", "NULL::UUID AS deal_id");
+      result = await db.query(fallback, [req.user?.id, req.query.filter === "Read"]);
+    }
 
     for (const item of result.rows) {
       item.team_color = getColor(item.team_name);
-      item.url = item.project_id ? `/projects/${item.project_id}` : null;
-      item.params = { task: item.task_id, tab: "tasks-list" };
+      item.url = item.deal_id
+        ? `/sales/${item.deal_id}`
+        : item.project_id
+          ? `/projects/${item.project_id}`
+          : null;
+      item.params = item.deal_id
+        ? {}
+        : { task: item.task_id, tab: "board" };
       if (item.comment_id) {
         item.params.comment = item.comment_id;
       }

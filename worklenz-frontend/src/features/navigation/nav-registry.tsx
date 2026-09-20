@@ -28,6 +28,8 @@ import {
   FileTextOutlined,
   CompassOutlined,
   TagOutlined,
+  ShopOutlined,
+  FundOutlined,
 } from '@ant-design/icons';
 import type { NavSurface, SurfaceKey } from './nav-registry.types';
 import type { TempChatsType } from '@/ee/pages/client-portal/chats/chat-container/chat-box/chat-box-wrapper';
@@ -320,6 +322,34 @@ export const PROJECTS_RAIL_SUB_ROUTES: ReadonlySet<string> = new Set(
     .filter(key => key !== PROJECTS_NAV_SURFACE.defaultItemKey)
 );
 
+export const SALES_NAV_SURFACE: NavSurface = {
+  key: 'sales',
+  defaultItemKey: 'pipeline',
+  groups: [
+    {
+      key: '',
+      items: [
+        {
+          key: 'pipeline',
+          label: { i18nNs: 'sales-sidebar', i18nKey: 'pipeline', defaultValue: 'Pipeline' },
+          icon: <FundOutlined />,
+        },
+        {
+          key: 'products',
+          label: { i18nNs: 'sales-sidebar', i18nKey: 'products', defaultValue: 'Products' },
+          icon: <ShopOutlined />,
+        },
+      ],
+    },
+  ],
+};
+
+export const SALES_RAIL_SUB_ROUTES: ReadonlySet<string> = new Set(
+  SALES_NAV_SURFACE.groups
+    .flatMap(group => group.items.map(item => item.key))
+    .filter(key => key !== SALES_NAV_SURFACE.defaultItemKey)
+);
+
 // ─── Finance ────────────────────────────────────────────────────────────────
 // All items route to the shared "Coming soon" placeholder for now (see
 // FinancePage/ComingSoonPage) — same non-`soon` treatment as Projects: real,
@@ -420,6 +450,7 @@ export const NAV_REGISTRY: Record<SurfaceKey, NavSurface> = {
   reporting: REPORTING_NAV_SURFACE,
   'client-portal': CLIENT_PORTAL_NAV_SURFACE,
   projects: PROJECTS_NAV_SURFACE,
+  sales: SALES_NAV_SURFACE,
   'team-lead-reports': TEAM_LEAD_REPORTS_NAV_SURFACE,
   finance: FINANCE_NAV_SURFACE,
 };

@@ -85,4 +85,6 @@ export interface IHomeCalendarTask {
   is_doing: boolean;
   is_completed: boolean;
   assignees: IHomeCalendarTaskAssignee[];
+  is_sales_activity?: boolean;
+  deal_id?: string | null;
 }

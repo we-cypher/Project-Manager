@@ -10,7 +10,7 @@ import { ImportProgressNotifier } from '@/components/imports/ImportProgressNotif
 import { MobileAppBanner } from '@/components/mobile-app/MobileAppBanner';
 import { AppSumoPopup } from '@/components/appsumo-popup/AppSumoPopup';
 import { NAV_RAIL_BG_DARK, NAV_RAIL_BG_LIGHT } from '@/components/nav-rail/nav-rail-constants';
-import { PROJECTS_RAIL_SUB_ROUTES, FINANCE_RAIL_SUB_ROUTES } from '@/features/navigation/nav-registry';
+import { PROJECTS_RAIL_SUB_ROUTES, FINANCE_RAIL_SUB_ROUTES, SALES_RAIL_SUB_ROUTES } from '@/features/navigation/nav-registry';
 import { shouldShowAppSumoPromo } from '@/ee/utils/subscription-utils';
 
 // Single shared header for every authenticated section (main app, reporting,
@@ -49,6 +49,13 @@ const AppShellLayout = memo(() => {
     return FINANCE_RAIL_SUB_ROUTES.has(segment);
   }, [location.pathname]);
 
+  const isSalesSubRoute = useMemo(() => {
+    const prefix = '/sales/';
+    if (!location.pathname.startsWith(prefix)) return false;
+    const segment = location.pathname.slice(prefix.length).split('/')[0];
+    return SALES_RAIL_SUB_ROUTES.has(segment);
+  }, [location.pathname]);
+
   // Every section below mounts its own left rail directly below the header,
   // styled to share its background — the header must match that color
   // exactly so the two read as one unified panel rather than two adjacent
@@ -68,8 +75,11 @@ const AppShellLayout = memo(() => {
       location.pathname.includes('/team-lead-reports') ||
       location.pathname === '/finance' ||
       location.pathname.endsWith('/finance') ||
-      isFinanceSubRoute,
-    [location.pathname, isProjectsSubRoute, isFinanceSubRoute]
+      isFinanceSubRoute ||
+      location.pathname === '/sales' ||
+      location.pathname.endsWith('/sales') ||
+      isSalesSubRoute,
+    [location.pathname, isProjectsSubRoute, isFinanceSubRoute, isSalesSubRoute]
   );
   const railPanelBg = themeMode === 'dark' ? NAV_RAIL_BG_DARK : NAV_RAIL_BG_LIGHT;
 

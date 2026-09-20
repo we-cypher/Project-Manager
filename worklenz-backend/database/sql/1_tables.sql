@@ -2662,3 +2662,108 @@ CREATE INDEX IF NOT EXISTS idx_import_attachment_job ON import_attachment_plans(
 CREATE INDEX IF NOT EXISTS idx_import_stage_task_job ON import_stage_tasks(job_id);
 CREATE INDEX IF NOT EXISTS idx_import_logs_job ON import_logs(job_id);
 
+CREATE TABLE IF NOT EXISTS sales_deal_products (
+    id         UUID                     DEFAULT uuid_generate_v4() NOT NULL,
+    team_id    UUID                                                NOT NULL,
+    name       TEXT                                                NOT NULL,
+    kind       TEXT                     DEFAULT 'saas'::TEXT       NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+    CONSTRAINT sales_deal_products_pk PRIMARY KEY (id),
+    CONSTRAINT sales_deal_products_kind_check CHECK (kind = ANY (ARRAY ['service'::TEXT, 'saas'::TEXT])),
+    CONSTRAINT sales_deal_products_team_id_fk FOREIGN KEY (team_id) REFERENCES teams ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS sales_onboarding_steps (
+    id            UUID                     DEFAULT uuid_generate_v4() NOT NULL,
+    product_id    UUID                                                NOT NULL,
+    title         TEXT                                                NOT NULL,
+    activity_type TEXT                     DEFAULT 'task'::TEXT       NOT NULL,
+    sort_order    INTEGER                  DEFAULT 0                  NOT NULL,
+    created_at    TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+    CONSTRAINT sales_onboarding_steps_pk PRIMARY KEY (id),
+    CONSTRAINT sales_onboarding_steps_type_check CHECK (activity_type = ANY (ARRAY ['meeting'::TEXT, 'task'::TEXT])),
+    CONSTRAINT sales_onboarding_steps_product_id_fk FOREIGN KEY (product_id) REFERENCES sales_deal_products ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS sales_deals (
+    id                  UUID                     DEFAULT uuid_generate_v4() NOT NULL,
+    team_id             UUID                                                NOT NULL,
+    name                TEXT                                                NOT NULL,
+    deal_type           TEXT                     DEFAULT 'service'::TEXT    NOT NULL,
+    stage               TEXT                     DEFAULT 'new'::TEXT        NOT NULL,
+    source              TEXT                     DEFAULT 'other'::TEXT      NOT NULL,
+    client_id           UUID,
+    product_id          UUID,
+    contact_name        TEXT,
+    contact_email       TEXT,
+    contact_phone       TEXT,
+    budget              NUMERIC(14, 2)           DEFAULT 0,
+    amount              NUMERIC(14, 2)           DEFAULT 0,
+    currency            VARCHAR(10)              DEFAULT 'USD',
+    owner_id            UUID,
+    expected_close_date DATE,
+    lost_reason         TEXT,
+    notes               TEXT,
+    project_id          UUID,
+    onboarding_applied  BOOLEAN                  DEFAULT FALSE              NOT NULL,
+    created_by          UUID,
+    created_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+    updated_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+    CONSTRAINT sales_deals_pk PRIMARY KEY (id),
+    CONSTRAINT sales_deals_type_check CHECK (deal_type = ANY (ARRAY ['service'::TEXT, 'saas'::TEXT])),
+    CONSTRAINT sales_deals_stage_check CHECK (stage = ANY (ARRAY ['new'::TEXT, 'contacted'::TEXT, 'qualified'::TEXT, 'proposal'::TEXT, 'won'::TEXT, 'lost'::TEXT])),
+    CONSTRAINT sales_deals_team_id_fk FOREIGN KEY (team_id) REFERENCES teams ON DELETE CASCADE,
+    CONSTRAINT sales_deals_client_id_fk FOREIGN KEY (client_id) REFERENCES clients ON DELETE SET NULL,
+    CONSTRAINT sales_deals_product_id_fk FOREIGN KEY (product_id) REFERENCES sales_deal_products ON DELETE SET NULL,
+    CONSTRAINT sales_deals_project_id_fk FOREIGN KEY (project_id) REFERENCES projects ON DELETE SET NULL,
+    CONSTRAINT sales_deals_owner_id_fk FOREIGN KEY (owner_id) REFERENCES users ON DELETE SET NULL,
+    CONSTRAINT sales_deals_created_by_fk FOREIGN KEY (created_by) REFERENCES users ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS sales_deal_activities (
+    id           UUID                     DEFAULT uuid_generate_v4() NOT NULL,
+    deal_id      UUID                                                NOT NULL,
+    team_id      UUID                                                NOT NULL,
+    type         TEXT                     DEFAULT 'task'::TEXT       NOT NULL,
+    title        TEXT                                                NOT NULL,
+    description  TEXT,
+    due_at       TIMESTAMP WITH TIME ZONE,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    assigned_to  UUID,
+    notified_at  TIMESTAMP WITH TIME ZONE,
+    created_by   UUID,
+    created_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+    updated_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+    CONSTRAINT sales_deal_activities_pk PRIMARY KEY (id),
+    CONSTRAINT sales_deal_activities_type_check CHECK (type = ANY (ARRAY ['call'::TEXT, 'meeting'::TEXT, 'task'::TEXT, 'note'::TEXT, 'reminder'::TEXT])),
+    CONSTRAINT sales_deal_activities_deal_id_fk FOREIGN KEY (deal_id) REFERENCES sales_deals ON DELETE CASCADE,
+    CONSTRAINT sales_deal_activities_team_id_fk FOREIGN KEY (team_id) REFERENCES teams ON DELETE CASCADE,
+    CONSTRAINT sales_deal_activities_assigned_to_fk FOREIGN KEY (assigned_to) REFERENCES users ON DELETE SET NULL,
+    CONSTRAINT sales_deal_activities_created_by_fk FOREIGN KEY (created_by) REFERENCES users ON DELETE SET NULL
+);
+
+ALTER TABLE user_notifications
+    ADD COLUMN IF NOT EXISTS deal_id UUID;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'user_notifications_deal_id_fk'
+    ) THEN
+        ALTER TABLE user_notifications
+            ADD CONSTRAINT user_notifications_deal_id_fk
+                FOREIGN KEY (deal_id) REFERENCES sales_deals ON DELETE CASCADE;
+    END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_sales_deals_team_id ON sales_deals (team_id);
+CREATE INDEX IF NOT EXISTS idx_sales_deals_stage ON sales_deals (team_id, stage);
+CREATE INDEX IF NOT EXISTS idx_sales_deals_owner_id ON sales_deals (owner_id);
+CREATE INDEX IF NOT EXISTS idx_sales_deals_product_id ON sales_deals (product_id);
+CREATE INDEX IF NOT EXISTS idx_sales_deal_activities_deal_id ON sales_deal_activities (deal_id);
+CREATE INDEX IF NOT EXISTS idx_sales_deal_activities_due_at ON sales_deal_activities (due_at)
+    WHERE completed_at IS NULL AND due_at IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_sales_onboarding_steps_product_id ON sales_onboarding_steps (product_id);
+CREATE INDEX IF NOT EXISTS idx_user_notifications_deal_id ON user_notifications (deal_id);
+

@@ -49,6 +49,15 @@ const HomeAddClient = lazy(
 const ProjectList = lazy(
   ChunkErrorHandler.wrapLazyImport(() => import('@/pages/projects/project-list'), 'ProjectList')
 );
+const SalesPipelinePage = lazy(
+  ChunkErrorHandler.wrapLazyImport(() => import('@/pages/sales/SalesPipelinePage'), 'SalesPipelinePage')
+);
+const SalesProductsPage = lazy(
+  ChunkErrorHandler.wrapLazyImport(() => import('@/pages/sales/SalesProductsPage'), 'SalesProductsPage')
+);
+const SalesDealPage = lazy(
+  ChunkErrorHandler.wrapLazyImport(() => import('@/pages/sales/SalesDealPage'), 'SalesDealPage')
+);
 const PlannerLayout = lazy(
   ChunkErrorHandler.wrapLazyImport(() => import('@/pages/schedule/PlannerLayout'), 'PlannerLayout')
 );
@@ -359,6 +368,36 @@ const FINANCE_BASE_PATH = '/finance';const mainRoutes: RouteObject[] = [
             ),
           },
         ],
+      },
+      {
+        path: 'sales',
+        element: <SimpleRailLayout surfaceKey="sales" />,
+        children: [
+          {
+            index: true,
+            element: (
+              <Suspense fallback={<SuspenseFallback />}>
+                <SalesPipelinePage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'products',
+            element: (
+              <Suspense fallback={<SuspenseFallback />}>
+                <SalesProductsPage />
+              </Suspense>
+            ),
+          },
+        ],
+      },
+      {
+        path: 'sales/:dealId',
+        element: (
+          <Suspense fallback={<SuspenseFallback />}>
+            <SalesDealPage />
+          </Suspense>
+        ),
       },
       {
         path: 'projects',

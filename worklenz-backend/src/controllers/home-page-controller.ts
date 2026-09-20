@@ -892,8 +892,63 @@ export default class HomePageController extends WorklenzControllerBase {
 
     const result = await db.query(q, [teamId, userId, startDate, endDate]);
     this.stampAssigneeColors(result.rows);
+
+    let salesRows: Array<Record<string, unknown>> = [];
+    try {
+      const salesResult = await db.query(
+        `SELECT a.id,
+                a.title AS name,
+                NULL::UUID AS project_id,
+                NULL::UUID AS status_id,
+                a.due_at AS end_date,
+                d.name AS project_name,
+                '#722ed1'::TEXT AS project_color,
+                d.client_id,
+                (SELECT name FROM clients WHERE id = d.client_id) AS client_name,
+                NULL::UUID AS priority_id,
+                NULL::TEXT AS priority_name,
+                NULL::TEXT AS priority_color,
+                INITCAP(a.type) AS status_name,
+                '#722ed1'::TEXT AS status_color,
+                TRUE AS is_todo,
+                FALSE AS is_doing,
+                FALSE AS is_completed,
+                COALESCE(
+                  (
+                    SELECT JSON_AGG(JSON_BUILD_OBJECT(
+                      'team_member_id', tm.id,
+                      'name', u.name,
+                      'avatar_url', u.avatar_url
+                    ))
+                    FROM users u
+                    LEFT JOIN team_members tm ON tm.user_id = u.id AND tm.team_id = a.team_id
+                    WHERE u.id = a.assigned_to
+                  ),
+                  '[]'::JSON
+                ) AS assignees,
+                a.deal_id,
+                TRUE AS is_sales_activity
+         FROM sales_deal_activities a
+         JOIN sales_deals d ON d.id = a.deal_id
+         WHERE a.team_id = $1
+           AND a.completed_at IS NULL
+           AND a.due_at IS NOT NULL
+           AND a.due_at::DATE >= $2::DATE
+           AND a.due_at::DATE <= $3::DATE
+           AND (
+             a.assigned_to = $4
+             OR d.owner_id = $4
+           )
+         ORDER BY a.due_at ASC`,
+        [teamId, startDate, endDate, userId]
+      );
+      salesRows = salesResult.rows;
+    } catch {
+      salesRows = [];
+    }
+
     res.set("Cache-Control", "no-store");
-    return res.status(200).send(new ServerResponse(true, result.rows));
+    return res.status(200).send(new ServerResponse(true, [...result.rows, ...salesRows]));
   }
 
   @HandleExceptions()

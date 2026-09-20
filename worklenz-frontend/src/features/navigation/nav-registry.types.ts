@@ -9,6 +9,7 @@ export type SurfaceKey =
   | 'reporting'
   | 'client-portal'
   | 'projects'
+  | 'sales'
   | 'team-lead-reports'
   | 'finance';
 

@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import dayjs, { Dayjs } from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +41,7 @@ const STATUS_CATEGORY_COLORS = { todo: '#faad14', doing: '#1677ff', done: '#52c4
 const HomeCalendar = () => {
   const { t } = useTranslation('home');
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { homeTasksConfig } = useAppSelector(state => state.homePageReducer);
   const themeMode = useAppSelector(state => state.themeReducer.mode);
   const isDarkMode = themeMode === 'dark';
@@ -181,12 +183,16 @@ const HomeCalendar = () => {
 
   const openTaskDrawer = useCallback(
     (task: IHomeCalendarTask) => {
+      if (task.is_sales_activity && task.deal_id) {
+        navigate(`/sales/${task.deal_id}`);
+        return;
+      }
       dispatch(setSelectedTaskId(task.id));
       dispatch(fetchTask({ taskId: task.id, projectId: task.project_id }));
       dispatch(setProjectId(task.project_id));
       dispatch(setShowTaskDrawer(true));
     },
-    [dispatch]
+    [dispatch, navigate]
   );
 
   const handleSelectDate = (date: Dayjs) => {

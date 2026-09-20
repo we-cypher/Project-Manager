@@ -10,6 +10,7 @@ import {
   ProjectOutlined,
   ReadOutlined,
 } from '@/shared/antd-imports';
+import { ShopOutlined } from '@ant-design/icons';
 import { Card, Dropdown, Flex, MenuProps, Space, theme, Typography } from '@/shared/antd-imports';
 import React, { memo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +29,7 @@ import { Button } from 'antd';
 const ROUTE_ICONS: Record<string, ReactNode> = {
   home: React.createElement(HomeOutlined),
   projects: React.createElement(ProjectOutlined),
+  sales: React.createElement(ShopOutlined),
   planner: React.createElement(ClockCircleOutlined),
   'client-portal': React.createElement(GroupOutlined),
   finance: React.createElement(DollarOutlined),

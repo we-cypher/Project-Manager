@@ -11,6 +11,7 @@ export interface IWorklenzNotification {
   url?: string;
   task_id?: string;
   comment_id?: string;
+  deal_id?: string;
   params?: Params;
   created_at?: string;
 }

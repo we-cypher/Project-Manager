@@ -29,6 +29,13 @@ export const navRoutes: NavRoutesType[] = [
     freePlanFeature: true,
   },
   {
+    name: 'sales',
+    path: '/sales',
+    adminOnly: false,
+    freePlanFeature: true,
+    guestExcluded: true,
+  },
+  {
     name: 'planner',
     path: '/planner',
     adminOnly: true,
