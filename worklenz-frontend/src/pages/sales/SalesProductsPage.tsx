@@ -5,6 +5,7 @@ import {
   Card,
   Flex,
   Input,
+  Modal,
   Select,
   Space,
   Typography,
@@ -13,7 +14,7 @@ import {
 import { PlusOutlined } from '@/shared/antd-imports';
 import { useDocumentTitle } from '@/hooks/useDoumentTItle';
 import { salesApiService } from '@/api/sales/sales.api.service';
-import type { ISalesOnboardingStep, ISalesProduct } from '@/types/sales/sales.types';
+import type { ISalesOnboardingStep, ISalesProduct, SalesProductKind } from '@/types/sales/sales.types';
 
 const { Text, Title, Paragraph } = Typography;
 
@@ -79,6 +80,51 @@ export const SalesProductsPage = () => {
     });
   };
 
+  const changeKind = async (productId: string, kind: SalesProductKind) => {
+    const current = drafts[productId];
+    updateDraft(productId, { kind });
+    const name = current?.name.trim();
+    if (!name) return;
+    const res = await salesApiService.updateProduct(productId, { name, kind });
+    if (res.done) {
+      setProducts(prev => prev.map(product => (product.id === productId ? { ...product, kind } : product)));
+    } else {
+      message.error(res.message || t('loadError', { defaultValue: 'Could not save' }));
+    }
+  };
+
+  const addProduct = async (kind: SalesProductKind) => {
+    const res = await salesApiService.createProduct({
+      name: kind === 'saas' ? t('saas', { defaultValue: 'SaaS' }) : t('service', { defaultValue: 'Service' }),
+      kind,
+    });
+    if (res.done) {
+      void load();
+    } else {
+      message.error(res.message || t('loadError', { defaultValue: 'Could not add product' }));
+    }
+  };
+
+  const removeProduct = (productId: string) => {
+    Modal.confirm({
+      title: t('removeProductConfirm', {
+        defaultValue: 'Remove this product? Deals that used it keep the deal, but lose this product.',
+      }),
+      okText: t('removeProduct', { defaultValue: 'Remove' }),
+      okButtonProps: { danger: true },
+      cancelText: t('cancel', { defaultValue: 'Cancel' }),
+      onOk: async () => {
+        const res = await salesApiService.deleteProduct(productId);
+        if (res.done) {
+          message.success(t('productRemoved', { defaultValue: 'Product removed' }));
+          void load();
+        } else {
+          message.error(res.message || t('loadError', { defaultValue: 'Could not remove product' }));
+        }
+      },
+    });
+  };
+
   const saveProduct = async (productId: string) => {
     const draft = drafts[productId];
     if (!draft?.name.trim()) {
@@ -109,20 +155,45 @@ export const SalesProductsPage = () => {
             defaultValue: 'Each SaaS product has its own onboarding checklist. Won deals copy these steps.',
           })}
         </Paragraph>
+        <Space wrap>
+          <Button icon={<PlusOutlined />} onClick={() => void addProduct('service')}>
+            {t('addProduct', { defaultValue: 'Add product' })} — {t('service', { defaultValue: 'Service' })}
+          </Button>
+          <Button icon={<PlusOutlined />} onClick={() => void addProduct('saas')}>
+            {t('addProduct', { defaultValue: 'Add product' })} — {t('saas', { defaultValue: 'SaaS' })}
+          </Button>
+        </Space>
       </div>
+
+      {products.length === 0 && (
+        <Paragraph type="secondary">
+          {t('noProducts', { defaultValue: 'No products yet. Add a Service or SaaS product to get started.' })}
+        </Paragraph>
+      )}
 
       {products.map(product => {
         const draft = drafts[product.id] || product;
         return (
           <Card key={product.id} style={{ borderRadius: 8 }}>
             <Flex vertical gap={12}>
-              <Flex gap={12} wrap="wrap">
+              <Flex gap={12} wrap="wrap" align="center">
                 <Input
                   value={draft.name}
                   onChange={event => updateDraft(product.id, { name: event.target.value })}
                   style={{ maxWidth: 280 }}
                 />
-                <TagLikeKind kind={draft.kind} t={t} />
+                <Select
+                  value={draft.kind}
+                  style={{ width: 140 }}
+                  onChange={value => void changeKind(product.id, value as SalesProductKind)}
+                  options={[
+                    { value: 'service', label: t('service', { defaultValue: 'Service' }) },
+                    { value: 'saas', label: t('saas', { defaultValue: 'SaaS' }) },
+                  ]}
+                />
+                <Button danger onClick={() => removeProduct(product.id)}>
+                  {t('removeProduct', { defaultValue: 'Remove' })}
+                </Button>
               </Flex>
               <Text strong>{t('onboardingSteps', { defaultValue: 'Onboarding steps' })}</Text>
               {(draft.onboarding_steps || []).map((step, index) => (
@@ -162,15 +233,5 @@ export const SalesProductsPage = () => {
     </Flex>
   );
 };
-
-const TagLikeKind = ({
-  kind,
-  t,
-}: {
-  kind: string;
-  t: (key: string, options: { defaultValue: string }) => string;
-}) => (
-  <Text type="secondary">{kind === 'saas' ? t('saas', { defaultValue: 'SaaS' }) : t('service', { defaultValue: 'Service' })}</Text>
-);
 
 export default SalesProductsPage;

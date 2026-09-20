@@ -11,7 +11,9 @@ salesApiRouter.post("/deals", safeControllerFunction(SalesController.createDeal)
 salesApiRouter.get("/owners", safeControllerFunction(SalesController.getOwners));
 salesApiRouter.get("/projects-lookup", safeControllerFunction(SalesController.getProjectsLookup));
 salesApiRouter.get("/products", safeControllerFunction(SalesController.getProducts));
+salesApiRouter.post("/products", safeControllerFunction(SalesController.createProduct));
 salesApiRouter.put("/products/:id", idParamValidator, safeControllerFunction(SalesController.updateProduct));
+salesApiRouter.delete("/products/:id", idParamValidator, safeControllerFunction(SalesController.deleteProduct));
 salesApiRouter.put(
   "/products/:id/onboarding-steps",
   idParamValidator,

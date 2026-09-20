@@ -134,6 +134,11 @@ export const salesApiService = {
     return response.data;
   },
 
+  async createProduct(body: { name?: string; kind?: string }): Promise<IServerResponse<ISalesProduct>> {
+    const response = await apiClient.post<IServerResponse<ISalesProduct>>(`${rootUrl}/products`, body);
+    return response.data;
+  },
+
   async updateProduct(
     id: string,
     body: { name: string; kind?: string }
@@ -142,6 +147,11 @@ export const salesApiService = {
       `${rootUrl}/products/${id}`,
       body
     );
+    return response.data;
+  },
+
+  async deleteProduct(id: string): Promise<IServerResponse<{ id: string }>> {
+    const response = await apiClient.delete<IServerResponse<{ id: string }>>(`${rootUrl}/products/${id}`);
     return response.data;
   },
 

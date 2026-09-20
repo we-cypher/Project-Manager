@@ -192,8 +192,6 @@ export default class SalesController extends WorklenzControllerBase {
     const teamId = req.user?.team_id;
     if (!teamId) return res.status(400).send(new ServerResponse(false, null, "Team not found"));
 
-    await SalesController.ensureDefaultProducts(teamId);
-
     const search = ((req.query.search as string) || "").trim();
     const stage = req.query.stage as string | undefined;
     const dealType = req.query.deal_type as string | undefined;
@@ -733,8 +731,6 @@ export default class SalesController extends WorklenzControllerBase {
     const teamId = req.user?.team_id;
     if (!teamId) return res.status(400).send(new ServerResponse(false, null, "Team not found"));
 
-    await SalesController.ensureDefaultProducts(teamId);
-
     const result = await db.query(
       `SELECT p.id,
               p.team_id,
@@ -785,6 +781,37 @@ export default class SalesController extends WorklenzControllerBase {
     );
     if (!result.rows[0]) return res.status(404).send(new ServerResponse(false, null, "Product not found"));
     return res.status(200).send(new ServerResponse(true, result.rows[0]));
+  }
+
+  @HandleExceptions()
+  public static async createProduct(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
+    const teamId = req.user?.team_id;
+    if (!teamId) return res.status(400).send(new ServerResponse(false, null, "Team not found"));
+
+    const kind = isOneOf(req.body.kind, PRODUCT_KINDS) ? req.body.kind : "saas";
+    const name = emptyToNull(req.body.name) || (kind === "saas" ? "New SaaS product" : "New service");
+
+    const result = await db.query(
+      `INSERT INTO sales_deal_products (team_id, name, kind)
+       VALUES ($1, $2, $3)
+       RETURNING id, team_id, name, kind, created_at, updated_at`,
+      [teamId, name, kind]
+    );
+
+    return res.status(200).send(new ServerResponse(true, { ...result.rows[0], onboarding_steps: [] }));
+  }
+
+  @HandleExceptions()
+  public static async deleteProduct(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
+    const teamId = req.user?.team_id;
+    if (!teamId) return res.status(400).send(new ServerResponse(false, null, "Team not found"));
+
+    const result = await db.query(
+      `DELETE FROM sales_deal_products WHERE id = $1 AND team_id = $2 RETURNING id`,
+      [req.params.id, teamId]
+    );
+    if (!result.rows[0]) return res.status(404).send(new ServerResponse(false, null, "Product not found"));
+    return res.status(200).send(new ServerResponse(true, { id: req.params.id }));
   }
 
   @HandleExceptions()

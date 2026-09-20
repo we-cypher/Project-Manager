@@ -70,6 +70,11 @@
   "meeting": "Meeting",
   "task": "Task",
   "productsHint": "Each SaaS product has its own onboarding checklist. Won deals copy these steps.",
+  "addProduct": "Add product",
+  "removeProduct": "Remove",
+  "removeProductConfirm": "Remove this product? Deals that used it keep the deal, but lose this product.",
+  "productRemoved": "Product removed",
+  "noProducts": "No products yet. Add a Service or SaaS product to get started.",
   "stages": {
     "new": "New",
     "contacted": "Contacted",
