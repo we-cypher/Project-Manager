@@ -60,7 +60,7 @@ const Navbar = () => {
 
   const { setIdentity } = useMixpanelTracking();
   const [navRoutesList, setNavRoutesList] = useState<NavRoutesType[]>(navRoutes);
-  const showUpgradeTypes = useMemo(() => [ISUBSCRIPTION_TYPE.TRIAL], []);
+  const showUpgradeTypes = useMemo(() => [] as ISUBSCRIPTION_TYPE[], []);
   const organization = useAppSelector((state: RootState) => state.adminCenterReducer.organization);
   const currentProject = useAppSelector(selectCurrentProject);
   const guestProjectStateRef = useRef<{ projectId: string | null; isGuest: boolean }>({

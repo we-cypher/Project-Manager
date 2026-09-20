@@ -17,7 +17,6 @@ import { ToolOutlined, MobileOutlined, ReadOutlined, MailOutlined, MessageOutlin
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useAuthService } from '@/hooks/useAuth';
-import { ISUBSCRIPTION_TYPE } from '@/shared/constants';
 import { toggleUpgradeModal } from '@/features/admin-center/admin-center.slice';
 import { toggleTheme } from '@/features/theme/themeSlice';
 import { useNavigate } from 'react-router-dom';
@@ -132,7 +131,7 @@ const PlannerLeftSidebar: React.FC<PlannerLeftSidebarProps> = ({ activeView, onV
     [t]
   );
 
-  const isTrial = currentSession?.subscription_type === ISUBSCRIPTION_TYPE.TRIAL;
+  const isTrial = false;
 
   const trialDaysLeft = React.useMemo(() => {
     if (!isTrial) return null;

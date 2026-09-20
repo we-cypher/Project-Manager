@@ -14,7 +14,6 @@ import {
 } from '@/shared/antd-imports';
 import { ToolOutlined, MobileOutlined, ReadOutlined, MailOutlined, MessageOutlined } from '@ant-design/icons';
 import { useAuthService } from '@/hooks/useAuth';
-import { ISUBSCRIPTION_TYPE } from '@/shared/constants';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { toggleUpgradeModal } from '@/features/admin-center/admin-center.slice';
 import { toggleTheme } from '@/features/theme/themeSlice';
@@ -124,7 +123,7 @@ const HomeLeftSidebar: React.FC<HomeLeftSidebarProps> = ({ activeView, onViewCha
     [t]
   );
 
-  const isTrial = currentSession?.subscription_type === ISUBSCRIPTION_TYPE.TRIAL;
+  const isTrial = false;
 
   const trialDaysLeft = React.useMemo(() => {
     if (!isTrial) return null;
