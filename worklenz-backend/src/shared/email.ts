@@ -8,9 +8,10 @@ import { log_error, isValidateEmail } from "./utils";
 import emailRequestSchema from "../json_schemas/email-request-schema";
 import db from "../config/db";
 
-const MAIL_FROM_NAME = process.env.APP_NAME || "WeProject";
-const MAIL_FROM_EMAIL =
-  process.env.SMTP_FROM_EMAIL || process.env.SES_FROM_EMAIL || "noreply@example.com";
+import { APP_BRAND_NAME, DEFAULT_FROM_EMAIL, applyEmailBrandHtml, applyEmailBrandText } from "./brand";
+
+const MAIL_FROM_NAME = APP_BRAND_NAME;
+const MAIL_FROM_EMAIL = DEFAULT_FROM_EMAIL;
 
 function isSmtpConfigured(): boolean {
   return Boolean(process.env.SMTP_HOST);
@@ -250,6 +251,9 @@ export async function sendEmailEnhanced(email: IEmail): Promise<IEmailResult> {
         },
       };
     }
+
+    options.subject = applyEmailBrandText(options.subject || "");
+    options.html = applyEmailBrandHtml(options.html || "");
 
     if (!isValidMailBody(options)) {
       return {

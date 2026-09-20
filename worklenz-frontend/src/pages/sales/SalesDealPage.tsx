@@ -38,6 +38,7 @@ import {
 } from '@/types/sales/sales.types';
 import { DealEditorForm } from './DealEditorForm';
 import { formatMoney, STAGE_COLORS } from './sales.constants';
+import { useOrgCurrency } from '@/hooks/useOrgCurrency';
 
 const { Text, Title } = Typography;
 
@@ -48,6 +49,7 @@ export const SalesDealPage = () => {
   const navigate = useNavigate();
   const authService = useAuthService();
   const canDelete = authService.isOwnerOrAdmin();
+  const orgCurrency = useOrgCurrency();
 
   const [deal, setDeal] = useState<ISalesDeal | null>(null);
   const [activities, setActivities] = useState<ISalesActivity[]>([]);
@@ -297,10 +299,11 @@ export const SalesDealPage = () => {
             clients={clients}
             dealType={dealType}
             onDealTypeChange={setDealType}
+            defaultCurrency={orgCurrency}
           />
           <Flex justify="space-between" align="center">
             <Text type="secondary">
-              {t('amount', { defaultValue: 'Amount' })}: {formatMoney(deal.amount, deal.currency || 'USD')}
+              {t('amount', { defaultValue: 'Amount' })}: {formatMoney(deal.amount, deal.currency || orgCurrency)}
             </Text>
             <Button type="primary" loading={saving} onClick={() => void handleSave()}>
               {t('save', { defaultValue: 'Save' })}

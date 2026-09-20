@@ -17,7 +17,7 @@ interface OrgConfigState extends IOrgConfig {
 
 const initialState: OrgConfigState = {
   restrict_task_creation: false,
-  base_currency: 'USD',
+  base_currency: 'INR',
   timelog_backdate_limit_days: 0,
   isLoading: false,
   isInitialized: false,
@@ -54,7 +54,7 @@ const orgConfigSlice = createSlice({
   reducers: {
     setOrgConfig: (state, action: PayloadAction<IOrgConfig>) => {
       state.restrict_task_creation = action.payload.restrict_task_creation;
-      state.base_currency = action.payload.base_currency || 'USD';
+      state.base_currency = action.payload.base_currency || 'INR';
       state.timelog_backdate_limit_days = Number(action.payload.timelog_backdate_limit_days) || 0;
     },
   },
@@ -68,7 +68,7 @@ const orgConfigSlice = createSlice({
         state.isLoading = false;
         state.isInitialized = true;
         state.restrict_task_creation = action.payload.restrict_task_creation;
-        state.base_currency = action.payload.base_currency || 'USD';
+        state.base_currency = action.payload.base_currency || 'INR';
         state.timelog_backdate_limit_days = Number(action.payload.timelog_backdate_limit_days) || 0;
       })
       .addCase(fetchOrgConfig.rejected, (state, action) => {
@@ -78,7 +78,7 @@ const orgConfigSlice = createSlice({
       })
       .addCase(updateOrgConfig.fulfilled, (state, action) => {
         state.restrict_task_creation = action.payload.restrict_task_creation;
-        state.base_currency = action.payload.base_currency || 'USD';
+        state.base_currency = action.payload.base_currency || 'INR';
         state.timelog_backdate_limit_days = Number(action.payload.timelog_backdate_limit_days) || 0;
       });
   },

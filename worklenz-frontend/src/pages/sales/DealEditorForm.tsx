@@ -13,6 +13,7 @@ interface DealEditorFormProps {
   clients: IClient[];
   dealType: SalesDealType;
   onDealTypeChange: (value: SalesDealType) => void;
+  defaultCurrency?: string;
 }
 
 export const DealEditorForm = ({
@@ -22,6 +23,7 @@ export const DealEditorForm = ({
   clients,
   dealType,
   onDealTypeChange,
+  defaultCurrency = 'INR',
 }: DealEditorFormProps) => {
   const { t } = useTranslation('sales');
   const saasProducts = products.filter(product => product.kind === 'saas');
@@ -93,7 +95,7 @@ export const DealEditorForm = ({
       <Form.Item name="amount" label={t('amount', { defaultValue: 'Amount' })}>
         <InputNumber min={0} style={{ width: '100%' }} />
       </Form.Item>
-      <Form.Item name="currency" label={t('currency', { defaultValue: 'Currency' })} initialValue="USD">
+      <Form.Item name="currency" label={t('currency', { defaultValue: 'Currency' })} initialValue={defaultCurrency}>
         <Input maxLength={10} />
       </Form.Item>
       <Form.Item name="owner_id" label={t('owner', { defaultValue: 'Owner' })}>

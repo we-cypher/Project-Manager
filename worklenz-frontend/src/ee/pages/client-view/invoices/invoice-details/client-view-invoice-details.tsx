@@ -72,7 +72,7 @@ const ClientViewInvoiceDetails = () => {
   const handleDownloadInvoice = () => {
     // Using admin-only route that bypasses client portal authentication
     // Note: clientId parameter is not used by backend, just for route matching
-    window.open(`/api/v1/clients/admin/invoices/${id}/download`, '_blank');
+    window.open(`/api/v1/clients/portal/invoices/${id}/download`, '_blank');
   };
 
   const handlePrintInvoice = () => {

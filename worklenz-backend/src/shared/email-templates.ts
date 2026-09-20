@@ -5,12 +5,9 @@ import {sanitize, sanitizePlainText} from "./utils";
 import FileConstants from "./file-constants";
 import db from "../config/db";
 
-// Ensure FRONTEND_URL is always an absolute URL with a scheme.
-// Without https://, email clients (e.g. Outlook Safe Links) strip the <a> tag.
-const _rawFrontendUrl = process.env.FRONTEND_URL || "localhost:5000";
-const FRONTEND_URL = (_rawFrontendUrl.startsWith("http") ? _rawFrontendUrl : `https://${_rawFrontendUrl}`).replace(/\/+$/, "");
+import { FRONTEND_URL, getEmailLogoUrl } from "./brand";
 
-const DEFAULT_LOGO_URL = process.env.EMAIL_LOGO_URL || "/assets/images/worklenz-light-mode.png";
+const DEFAULT_LOGO_URL = getEmailLogoUrl();
 
 /**
  * Validates that a URL is a safe http/https URL for use in email templates.
@@ -57,10 +54,11 @@ export function sendWelcomeEmail(email: string, name: string) {
   // Names should never contain HTML markup
   content = content.replace("[VAR_USER_NAME]", sanitizePlainText(name));
   content = content.replace("[VAR_HOSTNAME]", FRONTEND_URL);
+  content = content.replaceAll("[VAR_LOGO_URL]", getEmailLogoUrl());
 
   sendEmail({
     to: [email],
-    subject: "Welcome to Worklenz.",
+    subject: "Welcome to WeCypher.",
     html: content
   });
 }
@@ -72,7 +70,7 @@ export function sendNewSubscriberNotification(subscriberEmail: string) {
   content = content.replace("[VAR_EMAIL]", sanitize(subscriberEmail));
 
   sendEmail({
-    subject: "Worklenz - New Subscriber.",
+    subject: "WeCypher - New Subscriber.",
     html: content
   });
 }
@@ -95,7 +93,7 @@ export async function sendJoinTeamInvitation(myName: string, teamName: string, t
 
   sendEmail({
     to: [toEmail],
-    subject: `${sanitizePlainText(myName)} has invited you to work with ${sanitizePlainText(teamName)} in Worklenz`,
+    subject: `${sanitizePlainText(myName)} has invited you to work with ${sanitizePlainText(teamName)} in WeCypher`,
     html: content
   });
 }
@@ -120,7 +118,7 @@ export async function sendRegisterAndJoinTeamInvitation(myName: string, userName
 
   sendEmail({
     to: [toEmail],
-    subject: `${sanitizePlainText(myName)} has invited you to work with ${sanitizePlainText(teamName)} in Worklenz`,
+    subject: `${sanitizePlainText(myName)} has invited you to work with ${sanitizePlainText(teamName)} in WeCypher`,
     html: content
   });
 }
@@ -137,7 +135,7 @@ export async function sendResetEmail(toEmail: string, user_id: string, hash: str
 
   await sendEmail({
     to: [toEmail],
-    subject: "Reset your password on Worklenz.",
+    subject: "Reset your password on WeCypher.",
     html: content
   });
 }

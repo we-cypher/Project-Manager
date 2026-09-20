@@ -425,7 +425,7 @@ export default class ClientPortalAuthController extends ClientPortalControllerBa
       let organizationBranding = {
         logoUrl: null,
         primaryColor: "#52c41a",
-        companyName: invitation.team_name || "Worklenz",
+        companyName: invitation.team_name || "WeCypher",
       };
 
       if (invitation.team_id) {
@@ -451,7 +451,7 @@ export default class ClientPortalAuthController extends ClientPortalControllerBa
             companyName:
               settings.company_name ||
               invitation.team_name ||
-              "Worklenz",
+              "WeCypher",
           };
         } else {
           // If no client_portal_settings record exists, check organization logo directly
@@ -473,7 +473,7 @@ export default class ClientPortalAuthController extends ClientPortalControllerBa
       const organizationName =
         organizationBranding.companyName ||
         invitation.team_name ||
-        "Worklenz";
+        "WeCypher";
 
       const emailHtml = generateWelcomeEmailHTML({
         userName: newUser.name,
@@ -487,7 +487,7 @@ export default class ClientPortalAuthController extends ClientPortalControllerBa
 
       const emailRequest = new EmailRequest(
         [newUser.email],
-        `Welcome to ${organizationName} on Worklenz`,
+        `Welcome to ${organizationName} on WeCypher`,
         emailHtml,
       );
 
@@ -1317,7 +1317,7 @@ export default class ClientPortalAuthController extends ClientPortalControllerBa
       // Get team name for email
       const teamQuery = `SELECT name FROM teams WHERE id = $1`;
       const teamResult = await db.query(teamQuery, [teamId]);
-      const teamName = teamResult.rows[0]?.name || "Worklenz Team";
+      const teamName = teamResult.rows[0]?.name || "WeCypher Team";
 
       // Get the email template (same as initial invitation)
       const template = FileConstants.getEmailTemplate(
@@ -1389,7 +1389,7 @@ export default class ClientPortalAuthController extends ClientPortalControllerBa
       // Get team information
       const teamQuery = `SELECT name FROM teams WHERE id = $1`;
       const teamResult = await db.query(teamQuery, [teamId]);
-      const teamName = teamResult.rows[0]?.name || "Worklenz Team";
+      const teamName = teamResult.rows[0]?.name || "WeCypher Team";
 
       // Generate secure token for invitation (short random token)
       const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days from now
@@ -1454,7 +1454,7 @@ export default class ClientPortalAuthController extends ClientPortalControllerBa
       // Get team information
       const teamQuery = `SELECT name FROM teams WHERE id = $1`;
       const teamResult = await db.query(teamQuery, [teamId]);
-      const teamName = teamResult.rows[0]?.name || "Worklenz Team";
+      const teamName = teamResult.rows[0]?.name || "WeCypher Team";
 
       // Generate secure token for organization invitation
       const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days from now

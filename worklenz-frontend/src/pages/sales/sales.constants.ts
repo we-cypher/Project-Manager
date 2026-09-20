@@ -9,7 +9,7 @@ export const STAGE_COLORS: Record<SalesDealStage, string> = {
   lost: '#ff4d4f',
 };
 
-export const formatMoney = (value: number | string | null | undefined, currency = 'USD'): string => {
+export const formatMoney = (value: number | string | null | undefined, currency = 'INR'): string => {
   const amount = Number(value || 0);
   return `${currency} ${new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 0,

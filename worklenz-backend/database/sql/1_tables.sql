@@ -613,7 +613,7 @@ CREATE TABLE IF NOT EXISTS organizations (
     calculation_method       TEXT                     DEFAULT 'hourly',
     hours_per_day            INTEGER                  DEFAULT 8,
     logo_url                 TEXT,
-    base_currency            VARCHAR(10)              DEFAULT 'USD'              NOT NULL,
+    base_currency            VARCHAR(10)              DEFAULT 'INR'              NOT NULL,
     restrict_task_creation   BOOLEAN                  DEFAULT FALSE,
     timelog_backdate_limit_days INTEGER               DEFAULT 0                  NOT NULL
 );

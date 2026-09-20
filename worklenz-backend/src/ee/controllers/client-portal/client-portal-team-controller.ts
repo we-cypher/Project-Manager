@@ -156,7 +156,7 @@ export default class ClientPortalTeamController extends ClientPortalControllerBa
       // Send invitation email using shared email function
       const emailRequest = new EmailRequest(
         [email],
-        `You're invited to join ${client.name} on Worklenz`,
+        `You're invited to join ${client.name} on WeCypher`,
         emailHtml
       );
 
@@ -534,7 +534,7 @@ export default class ClientPortalTeamController extends ClientPortalControllerBa
       // Send invitation email using shared email function
       const emailRequest = new EmailRequest(
         [invitation.email],
-        `You're invited to join ${client.name} on Worklenz`,
+        `You're invited to join ${client.name} on WeCypher`,
         emailHtml
       );
 

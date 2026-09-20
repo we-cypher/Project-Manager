@@ -5,6 +5,7 @@ import { IWorkLenzResponse } from "../../../interfaces/worklenz-response";
 import { ServerResponse } from "../../../models/server-response";
 import db from "../../../config/db";
 import SqlHelper from "../../../shared/sql-helpers";
+import { getOrgBaseCurrency } from "../../../shared/org-currency";
 
 export default class ClientPortalInvoicesController extends ClientPortalControllerBase {
 
@@ -386,7 +387,6 @@ export default class ClientPortalInvoicesController extends ClientPortalControll
       const { 
         requestId, 
         amount, 
-        currency = "USD", 
         dueDate, 
         notes, 
         status = "draft",
@@ -398,6 +398,7 @@ export default class ClientPortalInvoicesController extends ClientPortalControll
         discountAmount
       } = req.body;
       const organizationId = req.user?.team_id;
+      const currency = (req.body.currency || (await getOrgBaseCurrency(organizationId))).toUpperCase();
       const createdBy = req.user?.id;
 
       if (!requestId) {
@@ -1028,6 +1029,7 @@ export default class ClientPortalInvoicesController extends ClientPortalControll
         const html = InvoiceTemplateGenerator.generateInvoiceHTML(invoiceData);
         const browser = await puppeteer.launch({
           headless: true,
+          executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
         });
 

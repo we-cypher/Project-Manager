@@ -38,6 +38,7 @@ import dayjs from 'dayjs';
 import type { ColumnsType } from 'antd/es/table';
 import './invoice-builder.css';
 import { CURRENCY_OPTIONS, DEFAULT_CURRENCY, getCurrencySymbol } from '@/shared/currencies';
+import { useOrgCurrency } from '@/hooks/useOrgCurrency';
 
 interface InvoiceLineItem {
   key: string;
@@ -58,6 +59,7 @@ const InvoiceBuilder = () => {
   const { invoiceId } = useParams<{ invoiceId: string }>();
   const requestId = searchParams.get('requestId');
   const isEditMode = !!invoiceId;
+  const orgCurrency = useOrgCurrency().toLowerCase();
 
   const [form] = Form.useForm();
 
@@ -167,6 +169,12 @@ const InvoiceBuilder = () => {
 
   // Currency state
   const [currency, setCurrency] = useState<string>(DEFAULT_CURRENCY);
+
+  useEffect(() => {
+    if (!isEditMode) {
+      setCurrency(orgCurrency || DEFAULT_CURRENCY);
+    }
+  }, [isEditMode, orgCurrency]);
 
   // Loading state for tracking which button was clicked
   const [savingAs, setSavingAs] = useState<'draft' | 'sent' | null>(null);

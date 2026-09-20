@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
-import { SocketProvider } from '@/socket/socketContext';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { fetchOrgConfig } from '@/features/org-config/org-config.slice';
+import { DEFAULT_CURRENCY } from '@/shared/currencies';
 
-export const AuthenticatedLayout = () => {
+export const useOrgCurrency = (): string => {
   const dispatch = useAppDispatch();
+  const baseCurrency = useAppSelector(state => state.orgConfigReducer.base_currency);
   const isInitialized = useAppSelector(state => state.orgConfigReducer.isInitialized);
 
   useEffect(() => {
@@ -15,9 +15,5 @@ export const AuthenticatedLayout = () => {
     }
   }, [dispatch, isInitialized]);
 
-  return (
-    <SocketProvider>
-      <Outlet />
-    </SocketProvider>
-  );
+  return (baseCurrency || DEFAULT_CURRENCY).toUpperCase();
 };

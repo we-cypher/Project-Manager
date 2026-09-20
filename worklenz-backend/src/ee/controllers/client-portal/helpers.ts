@@ -21,7 +21,7 @@ export function generateInvitationEmailHTML(data: IInvitationEmailData): string 
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>You're Invited to Join ${data.clientName} on Worklenz</title>
+      <title>You're Invited to Join ${data.clientName} on WeCypher</title>
       <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -38,15 +38,15 @@ export function generateInvitationEmailHTML(data: IInvitationEmailData): string 
         </div>
         <div class="content">
           <p>Hello ${data.inviteeName},</p>
-          <p>${data.inviterName} has invited you to join <strong>${data.clientName}</strong> on Worklenz as a <strong>${data.role}</strong>.</p>
-          <p>Worklenz is a comprehensive project management platform that will help you collaborate effectively with your team and stay updated on project progress.</p>
+          <p>${data.inviterName} has invited you to join <strong>${data.clientName}</strong> on WeCypher as a <strong>${data.role}</strong>.</p>
+          <p>WeCypher is a comprehensive project management platform that will help you collaborate effectively with your team and stay updated on project progress.</p>
           <p>Click the button below to accept the invitation and set up your account:</p>
           <a href="${data.inviteLink}" class="button">Accept Invitation</a>
           <p>This invitation will expire on ${expiryDate}.</p>
           <p>If you have any questions, please contact ${data.inviterName} or reply to this email.</p>
         </div>
         <div class="footer">
-          <p>© 2024 Worklenz. All rights reserved.</p>
+          <p>© 2024 WeCypher. All rights reserved.</p>
           <p>If you didn't expect this invitation, you can safely ignore this email.</p>
         </div>
       </div>
@@ -71,7 +71,7 @@ export function generateWelcomeEmailHTML(data: IWelcomeEmailData): string {
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Welcome to ${data.organizationName} on Worklenz</title>
+      <title>Welcome to ${data.organizationName} on WeCypher</title>
       <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
         .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -111,7 +111,7 @@ export function generateWelcomeEmailHTML(data: IWelcomeEmailData): string {
           <p>Hello ${data.userName},</p>
 
           <p>
-            Welcome to <strong>${data.organizationName}</strong> on Worklenz!
+            Welcome to <strong>${data.organizationName}</strong> on WeCypher!
           </p>
 
           <p>You now have access to a comprehensive project management platform where you can stay connected with your team and track project progress in real-time.</p>
@@ -137,7 +137,7 @@ export function generateWelcomeEmailHTML(data: IWelcomeEmailData): string {
           <p>If you have any questions about using your client portal or need assistance, please don't hesitate to reach out to your project team.</p>
         </div>
         <div class="footer">
-          <p>© 2024 Worklenz. All rights reserved.</p>
+          <p>© 2024 WeCypher. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -157,7 +157,7 @@ export function generateOrganizationInvitationEmailHTML(data: IOrganizationInvit
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>You're Invited to Join ${data.organizationName} on Worklenz</title>
+      <title>You're Invited to Join ${data.organizationName} on WeCypher</title>
       <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -174,14 +174,14 @@ export function generateOrganizationInvitationEmailHTML(data: IOrganizationInvit
         </div>
         <div class="content">
           <p>Hello ${data.inviteeName},</p>
-          <p>${data.inviterName} has invited you to join <strong>${data.organizationName}</strong> on Worklenz.</p>
+          <p>${data.inviterName} has invited you to join <strong>${data.organizationName}</strong> on WeCypher.</p>
           <p>Click the button below to accept the invitation and access the client portal:</p>
           <a href="${data.inviteLink}" class="button">Accept Invitation</a>
           <p>This invitation will expire on ${expiryDate}.</p>
           <p>If you have any questions, please contact ${data.inviterName} or reply to this email.</p>
         </div>
         <div class="footer">
-          <p>© 2024 Worklenz. All rights reserved.</p>
+          <p>© 2024 WeCypher. All rights reserved.</p>
           <p>If you didn't expect this invitation, you can safely ignore this email.</p>
         </div>
       </div>

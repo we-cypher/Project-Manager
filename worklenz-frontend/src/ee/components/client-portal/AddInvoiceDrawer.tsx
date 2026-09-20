@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { useGetClientsQuery, useGetRequestsQuery } from '@/ee/api/client-portal/client-portal-api';
 import dayjs from 'dayjs';
 import { CURRENCY_OPTIONS } from '@/shared/currencies';
+import { useOrgCurrency } from '@/hooks/useOrgCurrency';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -57,6 +58,7 @@ interface InvoiceItem {
 
 const AddInvoiceDrawer: React.FC<AddInvoiceDrawerProps> = ({ open, onClose, onSuccess }) => {
   const { t } = useTranslation(['client-portal-invoices', 'common']);
+  const orgCurrency = useOrgCurrency();
   const [form] = Form.useForm<InvoiceForm>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [items, setItems] = useState<InvoiceItem[]>([
@@ -87,11 +89,11 @@ const AddInvoiceDrawer: React.FC<AddInvoiceDrawerProps> = ({ open, onClose, onSu
 
       // Set default values
       form.setFieldsValue({
-        currency: 'USD',
+        currency: orgCurrency,
         dueDate: dayjs().add(30, 'days'), // 30 days from today
       });
     }
-  }, [open, form]);
+  }, [open, form, orgCurrency]);
 
   const handleSubmit = async (values: InvoiceForm) => {
     try {

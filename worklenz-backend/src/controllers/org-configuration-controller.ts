@@ -20,7 +20,7 @@ export default class OrgConfigurationController extends WorklenzControllerBase {
     const q = `
       SELECT
         COALESCE(restrict_task_creation, FALSE)     AS restrict_task_creation,
-        COALESCE(base_currency, 'USD')              AS base_currency,
+        COALESCE(base_currency, 'INR')              AS base_currency,
         COALESCE(timelog_backdate_limit_days, 0)    AS timelog_backdate_limit_days
       FROM organizations
       WHERE user_id = (
@@ -35,7 +35,7 @@ export default class OrgConfigurationController extends WorklenzControllerBase {
     if (!data) {
       return res.status(200).send(new ServerResponse(true, {
         restrict_task_creation: false,
-        base_currency: 'USD',
+        base_currency: 'INR',
         timelog_backdate_limit_days: 0,
       }));
     }
@@ -76,12 +76,11 @@ export default class OrgConfigurationController extends WorklenzControllerBase {
     }
 
     if (base_currency !== undefined) {
-      // Never allow empty/null — fall back to USD
       const normalized = base_currency
         ? String(base_currency).toUpperCase().substring(0, 10).trim()
-        : 'USD';
+        : 'INR';
       updates.push(`base_currency = $${idx++}`);
-      values.push(normalized || 'USD');
+      values.push(normalized || 'INR');
     }
 
     if (timelog_backdate_limit_days !== undefined) {
@@ -108,7 +107,7 @@ export default class OrgConfigurationController extends WorklenzControllerBase {
       WHERE user_id = (
         SELECT user_id FROM teams WHERE id = $${idx} LIMIT 1
       )
-      RETURNING restrict_task_creation, COALESCE(base_currency, 'USD') AS base_currency, timelog_backdate_limit_days;
+      RETURNING restrict_task_creation, COALESCE(base_currency, 'INR') AS base_currency, timelog_backdate_limit_days;
     `;
 
     const result = await db.query(q, values);

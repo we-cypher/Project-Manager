@@ -55,7 +55,7 @@ export class LkrReceiptTemplate {
 <div class="page">
   <div class="header">
     <div>
-      <div class="brand">Work<span>lenz</span></div>
+      <div class="brand">WeCypher</div>
     </div>
     <div class="badge">✓ Payment Successful</div>
   </div>
@@ -96,8 +96,8 @@ export class LkrReceiptTemplate {
   </table>
 
   <div class="footer">
-    <strong>Worklenz</strong> — This is an automatically generated receipt.<br />
-    For support, contact <strong>${process.env.SUPPORT_EMAIL || "support@example.com"}</strong>
+    <strong>WeCypher</strong> — This is an automatically generated receipt.<br />
+    For support, contact <strong>${process.env.SUPPORT_EMAIL || "mail@wecypher.com"}</strong>
   </div>
 </div>
 </body>

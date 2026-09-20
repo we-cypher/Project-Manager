@@ -66,7 +66,7 @@ const HELP_QUICK_LINKS: HelpQuickLink[] = [
     label: 'Support Email',
     icon: <MailOutlined />,
     onClick: () => {
-      window.location.href = 'mailto:support@example.com';
+      window.location.href = 'mailto:mail@wecypher.com';
     },
   },
   {

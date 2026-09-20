@@ -82,7 +82,7 @@ export async function sendAssignmentUpdate(
     const template = FileConstants.getEmailTemplate(IEmailTemplateType.TaskAssigneeChange) as compileTemplate;
     const isSent = assignment.teams?.length
       ? await sendEmail({
-        subject: "You have new assignments on Worklenz",
+        subject: "You have new assignments on WeCypher",
         to: [toEmail],
         html: template(assignment)
       })

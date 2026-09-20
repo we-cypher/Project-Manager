@@ -28,12 +28,12 @@ const OrganizationCurrencySettings = () => {
 
   const orgConfig = useAppSelector(state => state.orgConfigReducer);
 
-  const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('INR');
   const [saving, setSaving] = useState(false);
   const [ratesData, setRatesData] = useState<ICurrencyRatesResponse | null>(null);
   const [ratesLoading, setRatesLoading] = useState(false);
 
-  const savedCurrency = orgConfig.base_currency || 'USD';
+  const savedCurrency = orgConfig.base_currency || 'INR';
   const hasUnsavedChanges = selectedCurrency !== savedCurrency;
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const OrganizationCurrencySettings = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    setSelectedCurrency(orgConfig.base_currency || 'USD');
+    setSelectedCurrency(orgConfig.base_currency || 'INR');
   }, [orgConfig.base_currency]);
 
   const fetchRates = useCallback(async (base: string) => {

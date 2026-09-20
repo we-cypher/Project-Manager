@@ -45,4 +45,4 @@ export const CURRENCY_OPTIONS: CurrencyOption[] = [
   { value: 'ZAR', label: 'ZAR - South African Rand', symbol: 'R' },
 ];
 
-export const DEFAULT_CURRENCY = 'USD';
+export const DEFAULT_CURRENCY = 'INR';

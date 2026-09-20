@@ -7,6 +7,8 @@ import WorklenzControllerBase from "./worklenz-controller-base";
 import { hasTeamAdminPrivileges } from "../shared/team-permissions";
 import { LOG_DESCRIPTIONS } from "../shared/constants";
 import { generateProjectKey } from "../utils/generate-project-key";
+import { getOrgBaseCurrency } from "../shared/org-currency";
+import { DEFAULT_CURRENCY } from "../shared/brand";
 
 const DEAL_TYPES = ["service", "saas"] as const;
 const STAGES = ["new", "contacted", "qualified", "proposal", "won", "lost"] as const;
@@ -294,7 +296,7 @@ export default class SalesController extends WorklenzControllerBase {
         contactPhone,
         parseMoney(req.body.budget),
         parseMoney(req.body.amount),
-        emptyToNull(req.body.currency) || "USD",
+        emptyToNull(req.body.currency) || (await getOrgBaseCurrency(teamId)),
         emptyToNull(req.body.owner_id) || userId,
         emptyToNull(req.body.expected_close_date),
         emptyToNull(req.body.notes),
@@ -365,7 +367,7 @@ export default class SalesController extends WorklenzControllerBase {
         contactPhone,
         req.body.budget !== undefined ? parseMoney(req.body.budget) : existing.budget,
         req.body.amount !== undefined ? parseMoney(req.body.amount) : existing.amount,
-        emptyToNull(req.body.currency) || existing.currency || "USD",
+        emptyToNull(req.body.currency) || existing.currency || (await getOrgBaseCurrency(teamId)),
         req.body.owner_id !== undefined ? emptyToNull(req.body.owner_id) : existing.owner_id,
         req.body.expected_close_date !== undefined
           ? emptyToNull(req.body.expected_close_date)
@@ -683,7 +685,7 @@ export default class SalesController extends WorklenzControllerBase {
            currency = $3,
            client_id = COALESCE($4, client_id)
        WHERE id = $1`,
-      [project.id, parseMoney(deal.budget), deal.currency || "USD", deal.client_id]
+      [project.id, parseMoney(deal.budget), deal.currency || DEFAULT_CURRENCY, deal.client_id]
     );
 
     await db.query(

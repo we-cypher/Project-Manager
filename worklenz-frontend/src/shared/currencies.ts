@@ -42,7 +42,7 @@ export const CURRENCY_OPTIONS: CurrencyOption[] = [
   { value: 'zar', label: 'ZAR - South African Rand', symbol: 'R' },
 ];
 
-export const DEFAULT_CURRENCY = 'usd';
+export const DEFAULT_CURRENCY = 'inr';
 
 export const getCurrencySymbol = (currencyCode: string): string => {
   const currency = CURRENCY_OPTIONS.find(c => c.value === currencyCode.toLowerCase());

@@ -104,7 +104,7 @@ const FinanceOverviewPage = () => {
     const [exporting, setExporting] = useState(false);
 
     // ── Base currency & exchange rates ────────────────────────────────────
-    const baseCurrency = orgConfig.base_currency || 'USD';
+    const baseCurrency = orgConfig.base_currency || 'INR';
     const [exchangeRates, setExchangeRates] = useState<Record<string, number> | null>(null);
     const [ratesLoading, setRatesLoading] = useState(false);
     const [ratesFetchedAt, setRatesFetchedAt] = useState<string | null>(null);

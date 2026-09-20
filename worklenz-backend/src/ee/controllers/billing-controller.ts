@@ -1218,6 +1218,7 @@ export default class BillingController extends WorklenzControllerBase {
     try {
       const browser = await puppeteer.launch({
         headless: true,
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
       });
       const page = await browser.newPage();

@@ -31,6 +31,7 @@ import {
 } from '@/api/projects/projects.v1.api.service';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useAppSelector } from '@/hooks/useAppSelector';
+import { useOrgCurrency } from '@/hooks/useOrgCurrency';
 import { projectColors } from '@/lib/project/project-constants';
 import { setProject, setProjectId, mergeProject } from '@/features/project/project.slice';
 import { fetchProjectCategories } from '@/features/projects/lookups/projectCategories/projectCategoriesSlice';
@@ -87,6 +88,7 @@ import { projectFinanceApiService } from '@/ee/api/project-finance-ratecard/proj
 
 export const ProjectSettingsModal = ({ onClose }: { onClose: () => void }) => {
   const dispatch = useAppDispatch();
+  const orgCurrency = useOrgCurrency();
   const navigate = useNavigate();
   const { trackMixpanelEvent } = useMixpanelTracking();
   const { t } = useTranslation('project-drawer');
@@ -266,7 +268,7 @@ export const ProjectSettingsModal = ({ onClose }: { onClose: () => void }) => {
         form.setFieldsValue({
           ...defaultFormValues,
           budget: 0,
-          currency: 'USD',
+          currency: orgCurrency,
         });
       }
       setSelectedProjectManager(null);

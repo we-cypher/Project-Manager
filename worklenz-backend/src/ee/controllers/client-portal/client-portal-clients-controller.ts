@@ -446,7 +446,7 @@ export default class ClientPortalClientsController extends ClientPortalControlle
       // Get team information
       const teamQuery = `SELECT name FROM teams WHERE id = $1`;
       const teamResult = await db.query(teamQuery, [teamId]);
-      const teamName = teamResult.rows[0]?.name || "Worklenz Team";
+      const teamName = teamResult.rows[0]?.name || "WeCypher Team";
 
       // Generate secure token for invitation (short random token)
       const expiresAt = Date.now() + (7 * 24 * 60 * 60 * 1000); // 7 days from now

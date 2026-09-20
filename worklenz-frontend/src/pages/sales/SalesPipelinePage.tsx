@@ -35,6 +35,7 @@ import {
 } from '@/types/sales/sales.types';
 import { DealEditorForm } from './DealEditorForm';
 import { formatMoney, STAGE_COLORS } from './sales.constants';
+import { useOrgCurrency } from '@/hooks/useOrgCurrency';
 
 const { Text, Title } = Typography;
 
@@ -58,6 +59,7 @@ export const SalesPipelinePage = () => {
   const [saving, setSaving] = useState(false);
   const [dealType, setDealType] = useState<SalesDealType>('service');
   const [form] = Form.useForm();
+  const orgCurrency = useOrgCurrency();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -111,7 +113,7 @@ export const SalesPipelinePage = () => {
 
   const openCreate = () => {
     form.resetFields();
-    form.setFieldsValue({ deal_type: 'service', source: 'other', currency: 'USD', budget: 0, amount: 0 });
+    form.setFieldsValue({ deal_type: 'service', source: 'other', currency: orgCurrency, budget: 0, amount: 0 });
     setDealType('service');
     setModalOpen(true);
   };
@@ -348,6 +350,7 @@ export const SalesPipelinePage = () => {
           clients={clients}
           dealType={dealType}
           onDealTypeChange={setDealType}
+          defaultCurrency={orgCurrency}
         />
       </Modal>
     </Flex>
