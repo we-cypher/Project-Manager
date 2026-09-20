@@ -32,9 +32,44 @@ export default class TaskStatusesController extends WorklenzControllerBase {
   @HandleExceptions()
   public static async getCreated(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
     const team_id = req.user?.team_id;
-    const q = `SELECT create_task_status($1, $2)`;
-    const result = await db.query(q, [JSON.stringify(req.body), team_id]);
-    const data = result.rows[0].create_task_status[0];
+    // Insert after the last status in the same category so a new "Doing"
+    // status (e.g. Testing) lands before Done, not at the end of the board.
+    const q = `
+      WITH insert_at AS (
+        SELECT COALESCE(
+          (SELECT MAX(ts.sort_order) FROM task_statuses ts
+           WHERE ts.project_id = $2 AND ts.category_id = $4),
+          (SELECT MAX(ts.sort_order) FROM task_statuses ts
+           JOIN sys_task_status_categories c ON c.id = ts.category_id
+           WHERE ts.project_id = $2
+             AND c.index < (SELECT index FROM sys_task_status_categories WHERE id = $4)),
+          -1
+        ) + 1 AS sort_order
+      ),
+      shifted AS (
+        UPDATE task_statuses ts
+        SET sort_order = ts.sort_order + 1
+        FROM insert_at
+        WHERE ts.project_id = $2 AND ts.sort_order >= insert_at.sort_order
+        RETURNING ts.id
+      ),
+      inserted AS (
+        INSERT INTO task_statuses (name, project_id, team_id, category_id, sort_order)
+        SELECT TRIM($1::TEXT), $2::UUID, $3::UUID, $4::UUID, insert_at.sort_order
+        FROM insert_at
+        RETURNING id, name, project_id, team_id, category_id, sort_order
+      )
+      SELECT inserted.id,
+             inserted.name,
+             inserted.project_id,
+             inserted.team_id,
+             inserted.category_id,
+             inserted.sort_order,
+             (SELECT color_code FROM sys_task_status_categories WHERE id = inserted.category_id) AS color_code
+      FROM inserted;
+    `;
+    const result = await db.query(q, [req.body.name, req.body.project_id, team_id, req.body.category_id]);
+    const data = result.rows[0];
     TaskStatusesController.notifyProjectStatusUpdate(req.body.project_id);
     return res.status(200).send(new ServerResponse(true, data));
   }

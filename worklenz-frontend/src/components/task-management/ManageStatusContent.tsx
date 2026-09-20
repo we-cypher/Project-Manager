@@ -575,61 +575,53 @@ const ManageStatusContent: React.FC<ManageStatusContentProps> = ({ projectId }) 
 
         await statusApiService.updateStatusCategory(id, categoryId, finalProjectId);
 
-        // If we have an insert index, we need to update the order as well
-        if (insertIndex !== undefined) {
-          // Create a complete new order for ALL statuses in the project
-          const updatedStatuses = localStatuses.map(status => {
-            if (status.id === id) {
-              return { ...status, category_id: categoryId } as IKanbanTaskStatus;
-            }
-            return status;
-          });
+        const updatedStatuses = localStatuses.map(status => {
+          if (status.id === id) {
+            return { ...status, category_id: categoryId } as IKanbanTaskStatus;
+          }
+          return status;
+        });
 
-          // Group statuses by category with the updated category assignment
-          const statusesByUpdatedCategory = statusCategories.map(category => ({
-            ...category,
-            statuses: updatedStatuses.filter(
-              status => (status as IKanbanTaskStatus).category_id === category.id
-            ),
-          }));
+        const statusesByUpdatedCategory = statusCategories.map(category => ({
+          ...category,
+          statuses: updatedStatuses.filter(
+            status => (status as IKanbanTaskStatus).category_id === category.id
+          ),
+        }));
 
-          // Find the target category and insert the moved status at the correct position
-          const targetCategoryIndex = statusesByUpdatedCategory.findIndex(
-            cat => cat.id === categoryId
+        const targetCategoryIndex = statusesByUpdatedCategory.findIndex(
+          cat => cat.id === categoryId
+        );
+        if (targetCategoryIndex !== -1) {
+          const targetCategory = statusesByUpdatedCategory[targetCategoryIndex];
+          const movedStatus = updatedStatuses.find((s: IKanbanTaskStatus) => s.id === id);
+          const otherStatuses = targetCategory.statuses.filter(
+            (s: IKanbanTaskStatus) => s.id !== id
           );
-          if (targetCategoryIndex !== -1) {
-            const targetCategory = statusesByUpdatedCategory[targetCategoryIndex];
-            const movedStatus = updatedStatuses.find((s: IKanbanTaskStatus) => s.id === id);
-            const otherStatuses = targetCategory.statuses.filter(
-              (s: IKanbanTaskStatus) => s.id !== id
-            );
 
-            // Insert at the specified index
-            const newCategoryOrder = [...otherStatuses];
-            if (movedStatus) {
-              newCategoryOrder.splice(insertIndex, 0, movedStatus);
-            }
-
-            // Update the category with the new order
-            statusesByUpdatedCategory[targetCategoryIndex] = {
-              ...targetCategory,
-              statuses: newCategoryOrder,
-            };
+          const newCategoryOrder = [...otherStatuses];
+          if (movedStatus) {
+            const at =
+              insertIndex !== undefined ? insertIndex : otherStatuses.length;
+            newCategoryOrder.splice(at, 0, movedStatus);
           }
 
-          // Create the final global order: flatten all categories in their display order
-          const globalOrder: string[] = [];
-          statusesByUpdatedCategory.forEach(category => {
-            category.statuses.forEach((status: IKanbanTaskStatus) => {
-              if (status.id) {
-                globalOrder.push(status.id);
-              }
-            });
-          });
-
-          const requestBody = { status_order: globalOrder };
-          await statusApiService.updateStatusOrder(requestBody, finalProjectId);
+          statusesByUpdatedCategory[targetCategoryIndex] = {
+            ...targetCategory,
+            statuses: newCategoryOrder,
+          };
         }
+
+        const globalOrder: string[] = [];
+        statusesByUpdatedCategory.forEach(category => {
+          category.statuses.forEach((status: IKanbanTaskStatus) => {
+            if (status.id) {
+              globalOrder.push(status.id);
+            }
+          });
+        });
+
+        await statusApiService.updateStatusOrder({ status_order: globalOrder }, finalProjectId);
 
         // Refresh from server to ensure consistency
         dispatch(fetchStatuses(finalProjectId));
