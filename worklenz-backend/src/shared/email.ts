@@ -16,18 +16,38 @@ function isSmtpConfigured(): boolean {
   return Boolean(process.env.SMTP_HOST);
 }
 
+function envValue(name: string): string {
+  return (process.env[name] || "").trim().replace(/^['"]|['"]$/g, "");
+}
+
 let smtpTransporter: nodemailer.Transporter | null = null;
 function getSmtpTransporter(): nodemailer.Transporter {
   if (!smtpTransporter) {
-    const port = parseInt(process.env.SMTP_PORT || "587", 10);
-    smtpTransporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
+    const host = envValue("SMTP_HOST");
+    const port = parseInt(envValue("SMTP_PORT") || "587", 10);
+    const user = envValue("SMTP_USER");
+    const pass = envValue("SMTP_PASSWORD");
+    const authMethod = (envValue("SMTP_AUTH") || "LOGIN").toUpperCase();
+    const secure = envValue("SMTP_SECURE") === "true" || port === 465;
+
+    console.log("SMTP config:", {
+      host,
       port,
-      secure: process.env.SMTP_SECURE === "true" || port === 465,
-      auth: process.env.SMTP_USER
+      secure,
+      user,
+      authMethod,
+      passwordSet: Boolean(pass),
+    });
+
+    smtpTransporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: user
         ? {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASSWORD,
+            user,
+            pass,
+            method: authMethod,
           }
         : undefined,
     });
