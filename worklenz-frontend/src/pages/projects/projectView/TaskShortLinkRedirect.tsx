@@ -30,7 +30,7 @@ const TaskShortLinkRedirect = () => {
 
         const projectId = task.project_id;
         navigate(
-          `/projects/${projectId}?tab=tasks-list&pinned_tab=tasks-list&task=${taskId}`,
+          `/projects/${projectId}?tab=board&pinned_tab=board&task=${taskId}`,
           { replace: true }
         );
       } catch (error) {

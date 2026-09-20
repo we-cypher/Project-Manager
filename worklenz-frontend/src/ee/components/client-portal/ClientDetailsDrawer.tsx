@@ -556,7 +556,7 @@ const ClientDetailsDrawer = () => {
                         onClick={() =>
                           project.id &&
                           navigate(
-                            `/projects/${project.id}?tab=tasks-list&pinned_tab=tasks-list`
+                            `/projects/${project.id}?tab=board&pinned_tab=board`
                           )
                         }
                       >

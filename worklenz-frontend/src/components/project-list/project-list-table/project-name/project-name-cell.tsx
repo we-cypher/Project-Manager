@@ -23,17 +23,7 @@ export const ProjectNameCell: React.FC<{
   const selectProject = (record: IProjectViewModel) => {
     if (!record.id) return;
 
-    let viewTab = 'tasks-list';
-    switch (record.team_member_default_view) {
-      case 'TASK_LIST':
-        viewTab = 'tasks-list';
-        break;
-      case 'BOARD':
-        viewTab = 'board';
-        break;
-      default:
-        viewTab = 'tasks-list';
-    }
+    const viewTab = record.team_member_default_view === 'TASK_LIST' ? 'tasks-list' : 'board';
 
     const searchParams = new URLSearchParams({
       tab: viewTab,

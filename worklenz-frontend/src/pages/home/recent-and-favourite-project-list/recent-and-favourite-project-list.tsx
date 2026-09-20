@@ -81,7 +81,7 @@ const RecentAndFavouriteProjectList = () => {
             key={record.id}
             style={{ margin: 0, paddingInlineEnd: 6, cursor: 'pointer' }}
             onClick={() =>
-              navigate(`/projects/${record.id}?tab=tasks-list&pinned_tab=tasks-list`)
+              navigate(`/projects/${record.id}?tab=board&pinned_tab=board`)
             }
           >
             <Badge color={record.color_code} style={{ marginInlineEnd: 4 }} />

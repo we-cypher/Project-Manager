@@ -120,6 +120,6 @@ export const parsePositiveIntegerParam = (value: string | null): number | null =
 };
 
 export const buildProjectRoute = (projectId: string, defaultView: string | undefined): string => {
-  const tab = defaultView === 'BOARD' ? 'board' : 'tasks-list';
+  const tab = defaultView === 'TASK_LIST' ? 'tasks-list' : 'board';
   return `/projects/${projectId}?tab=${tab}&pinned_tab=${tab}`;
 };

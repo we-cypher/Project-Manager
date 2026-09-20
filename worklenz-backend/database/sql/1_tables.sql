@@ -751,7 +751,7 @@ CREATE TABLE IF NOT EXISTS project_members (
     project_id              UUID                                                NOT NULL,
     role_id                 UUID                                                NOT NULL,
     created_at              TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
-    default_view            TEXT                     DEFAULT 'TASK_LIST'::TEXT  NOT NULL
+    default_view            TEXT                     DEFAULT 'BOARD'::TEXT      NOT NULL
 );
 
 ALTER TABLE project_members

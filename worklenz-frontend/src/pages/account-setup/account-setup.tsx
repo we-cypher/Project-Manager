@@ -253,7 +253,7 @@ const AccountSetup: React.FC = () => {
           return;
         }
 
-        navigate(`/projects/${res.body.id}?tab=tasks-list&pinned_tab=tasks-list`);
+        navigate(`/projects/${res.body.id}?tab=board&pinned_tab=board`);
       }
     } catch (error) {
       logger.error('completeAccountSetup', error);
@@ -319,7 +319,7 @@ const AccountSetup: React.FC = () => {
           return;
         }
 
-        navigate(`/projects/${res.body.id}?tab=tasks-list&pinned_tab=tasks-list`);
+        navigate(`/projects/${res.body.id}?tab=board&pinned_tab=board`);
       }
     } catch (error) {
       logger.error('completeAccountSetupWithTemplate', error);

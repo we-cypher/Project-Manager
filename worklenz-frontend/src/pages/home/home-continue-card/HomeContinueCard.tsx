@@ -78,7 +78,7 @@ const HomeContinueCard: React.FC = () => {
   const handleOpenProject = useCallback(
     (e: React.MouseEvent, projectId: string) => {
       e.stopPropagation();
-      navigate(`/projects/${projectId}?tab=tasks-list&pinned_tab=tasks-list`);
+      navigate(`/projects/${projectId}?tab=board&pinned_tab=board`);
     },
     [navigate]
   );
@@ -244,7 +244,7 @@ const HomeContinueCard: React.FC = () => {
                   <div
                     key={p.id}
                     style={{ ...ROW_STYLE, cursor: 'pointer' }}
-                    onClick={() => navigate(`/projects/${p.id}?tab=tasks-list&pinned_tab=tasks-list`)}
+                    onClick={() => navigate(`/projects/${p.id}?tab=board&pinned_tab=board`)}
                   >
                     <span
                       style={{

@@ -134,7 +134,7 @@ const GlobalSearchButton: React.FC = () => {
     closeAndReset();
     switch (result.type) {
       case 'Project':
-        navigate(`/projects/${result.id}?tab=tasks-list&pinned_tab=tasks-list`);
+        navigate(`/projects/${result.id}?tab=board&pinned_tab=board`);
         break;
       case 'Client':
         navigate('/settings/clients');
@@ -145,7 +145,7 @@ const GlobalSearchButton: React.FC = () => {
       case 'Task':
         if (result.projectId) {
           navigate(
-            `/projects/${result.projectId}?tab=tasks-list&pinned_tab=tasks-list&task=${result.id}&task_project=${result.projectId}`
+            `/projects/${result.projectId}?tab=board&pinned_tab=board&task=${result.id}&task_project=${result.projectId}`
           );
         }
         break;

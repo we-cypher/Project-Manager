@@ -112,13 +112,12 @@ const ProjectView = React.memo(() => {
 
   // Memoize URL params to prevent unnecessary state updates
   const urlParams = useMemo(() => {
-    const filteredTabItems = getFilteredTabItems(currentSession, selectedProject, canCreateTask);
     return {
-      tab: searchParams.get('tab') || filteredTabItems[0]?.key || 'tasks-list',
-      pinnedTab: searchParams.get('pinned_tab') || '',
+      tab: searchParams.get('tab') || 'board',
+      pinnedTab: searchParams.get('pinned_tab') || 'board',
       taskId: searchParams.get('task') || '',
     };
-  }, [searchParams, currentSession, selectedProject, canCreateTask]);
+  }, [searchParams]);
 
   const [activeTab, setActiveTab] = useState<string>(urlParams.tab);
   const [pinnedTab, setPinnedTab] = useState<string>(urlParams.pinnedTab);
@@ -312,7 +311,7 @@ const ProjectView = React.memo(() => {
           // Set project context for field visibility
           dispatch(setProjectContext(projectId));
 
-          const requestedTab = searchParams.get('tab') || 'tasks-list';
+          const requestedTab = searchParams.get('tab') || 'board';
           const shouldPreloadTaskList = requestedTab === 'tasks-list';
 
           // Load project and essential data in parallel

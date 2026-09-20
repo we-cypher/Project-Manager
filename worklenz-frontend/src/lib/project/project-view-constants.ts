@@ -86,7 +86,7 @@ export const tabItems: TabItems[] = [
     key: 'tasks-list',
     defaultLabel: 'Task List',
     label: getTabLabel('taskList'),
-    isPinned: true,
+    isPinned: false,
     element: React.createElement(TaskListV2),
   },
   {

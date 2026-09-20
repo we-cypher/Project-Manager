@@ -505,7 +505,7 @@ export const ProjectSettingsModal = ({ onClose }: { onClose: () => void }) => {
         if (!editMode) {
           trackMixpanelEvent(evt_projects_create);
           navigate(
-            `/projects/${response.data.body.id}?tab=tasks-list&pinned_tab=tasks-list`
+            `/projects/${response.data.body.id}?tab=board&pinned_tab=board`
           );
           setTimeout(() => {
             window.location.reload();
