@@ -1248,8 +1248,16 @@ CREATE TABLE IF NOT EXISTS task_comments (
     task_id        UUID                                                NOT NULL,
     created_at     TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
     updated_at     TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
-    ses_message_id TEXT
+    ses_message_id TEXT,
+    is_edited      BOOLEAN                  DEFAULT FALSE              NOT NULL,
+    is_deleted     BOOLEAN                  DEFAULT FALSE              NOT NULL
 );
+
+ALTER TABLE task_comments
+    ADD COLUMN IF NOT EXISTS is_edited BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE task_comments
+    ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE;
 
 ALTER TABLE task_comments
     ADD CONSTRAINT task_comments_pk
