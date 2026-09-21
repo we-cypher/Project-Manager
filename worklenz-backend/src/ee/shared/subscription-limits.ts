@@ -16,6 +16,19 @@ const parsePositiveInt = (value: unknown): number => {
   return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0;
 };
 
+/**
+ * Whether team-member seat caps should be enforced.
+ * Self-hosted: never enforce (same policy as Business feature gates).
+ * Also honors organizations.team_member_limit_override when that flag is set.
+ */
+export const shouldEnforceTeamMemberSeatLimits = (
+  _subscriptionData?: { team_member_limit_override?: unknown } | null,
+): boolean => {
+  // Self-hosted policy: never cap seats. The DB override is still set TRUE
+  // so older builds and other code paths that still read the flag stay unlocked.
+  return false;
+};
+
 export const getTeamMemberSeatLimit = (
   subscriptionData: ISubscriptionDataForLimits | null | undefined,
   defaultLimit = 25,

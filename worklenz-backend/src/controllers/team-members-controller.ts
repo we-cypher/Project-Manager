@@ -24,7 +24,7 @@ import {
 } from "../shared/constants";
 import { checkTeamSubscriptionStatus } from "../ee/shared/paddle-utils";
 import { updateUsers } from "../ee/shared/paddle-requests";
-import { getTeamMemberSeatLimit } from "../ee/shared/subscription-limits";
+import { getTeamMemberSeatLimit, shouldEnforceTeamMemberSeatLimits } from "../ee/shared/subscription-limits";
 import {
   canAssignRole,
   canManageTargetRole,
@@ -259,7 +259,7 @@ export default class TeamMembersController extends WorklenzControllerBase {
      * Sends a response if there is an issue with the subscription.
      */
     // Skip all limit checks if team_member_limit_override is enabled
-    if (subscriptionData.team_member_limit_override !== true) {
+    if (shouldEnforceTeamMemberSeatLimits(subscriptionData)) {
       // Check Business plan limits first - Business plans override AppSumo lifetime limits
       if (
         !subscriptionData.is_credit &&
@@ -1727,7 +1727,7 @@ export default class TeamMembersController extends WorklenzControllerBase {
       const [status] = result1.rows;
 
       // Check if reactivating an inactive member would exceed limits
-      if (!status.active && subscriptionData.team_member_limit_override !== true) {
+      if (!status.active && shouldEnforceTeamMemberSeatLimits(subscriptionData)) {
         const currentCount = parseInt(subscriptionData.current_count) || 0;
 
         // Check Business plan limits first - Business plans override AppSumo lifetime limits
@@ -1822,7 +1822,7 @@ export default class TeamMembersController extends WorklenzControllerBase {
       const [status] = result1.rows;
 
       // Check if reactivating an inactive member would exceed limits
-      if (!status.active && subscriptionData.team_member_limit_override !== true) {
+      if (!status.active && shouldEnforceTeamMemberSeatLimits(subscriptionData)) {
         const currentCount = parseInt(subscriptionData.current_count) || 0;
 
         // Check Business plan limits first - Business plans override AppSumo lifetime limits
@@ -1990,7 +1990,7 @@ export default class TeamMembersController extends WorklenzControllerBase {
     /**
      * Checks trial user team member limit
      */
-    if (subscriptionData.subscription_status === "trialing" && subscriptionData.team_member_limit_override !== true) {
+    if (subscriptionData.subscription_status === "trialing" && shouldEnforceTeamMemberSeatLimits(subscriptionData)) {
       const currentTrialMembers = parseInt(subscriptionData.current_count) || 0;
       const emailsToAdd = req.body.emails?.length || 1;
 
@@ -2081,7 +2081,7 @@ export default class TeamMembersController extends WorklenzControllerBase {
       }
 
       // Check trial user limit - warn if close to limit (skip for Business plan trials)
-      if (subscriptionData.subscription_status === "trialing") {
+      if (subscriptionData.subscription_status === "trialing" && shouldEnforceTeamMemberSeatLimits(subscriptionData)) {
         const currentTrialMembers =
           parseInt(subscriptionData.current_count) || 0;
         if (currentTrialMembers >= TRIAL_MEMBER_LIMIT) {
@@ -2109,7 +2109,7 @@ export default class TeamMembersController extends WorklenzControllerBase {
       }
 
       // Check life_time_deal (AppSumo) user limit for link generation
-      if (subscriptionData.subscription_status === "life_time_deal" && subscriptionData.is_ltd) {
+      if (subscriptionData.subscription_status === "life_time_deal" && subscriptionData.is_ltd && shouldEnforceTeamMemberSeatLimits(subscriptionData)) {
         const currentLtdMembers = parseInt(subscriptionData.current_count) || 0;
         const ltdLimit = parseInt(subscriptionData.ltd_users) || 0;
 
@@ -2140,7 +2140,8 @@ export default class TeamMembersController extends WorklenzControllerBase {
       if (
         !subscriptionData.is_credit &&
         !subscriptionData.is_custom &&
-        subscriptionData.subscription_status === "active"
+        subscriptionData.subscription_status === "active" &&
+        shouldEnforceTeamMemberSeatLimits(subscriptionData)
       ) {
         const currentCount = parseInt(subscriptionData.current_count) || 0;
         const effectiveUserLimit = getTeamMemberSeatLimit(subscriptionData);
@@ -2183,7 +2184,7 @@ export default class TeamMembersController extends WorklenzControllerBase {
         subscriptionData.is_ltd &&
         subscriptionData.current_count &&
         !isBusinessPlan &&
-        subscriptionData.team_member_limit_override !== true
+        shouldEnforceTeamMemberSeatLimits(subscriptionData)
       ) {
         const currentCount = parseInt(subscriptionData.current_count) || 0;
         const ltdLimit = parseInt(subscriptionData.ltd_users) || 0;
@@ -2501,7 +2502,7 @@ export default class TeamMembersController extends WorklenzControllerBase {
           subscriptionData.is_ltd &&
           subscriptionData.current_count &&
           !isBusinessPlanLink &&
-          subscriptionData.team_member_limit_override !== true
+          shouldEnforceTeamMemberSeatLimits(subscriptionData)
         ) {
           const currentCount = parseInt(subscriptionData.current_count) || 0;
           const ltdLimit = parseInt(subscriptionData.ltd_users) || 0;
@@ -2519,7 +2520,7 @@ export default class TeamMembersController extends WorklenzControllerBase {
         }
 
         // Check trial member limit
-        if (subscriptionData.subscription_status === "trialing" && subscriptionData.team_member_limit_override !== true) {
+        if (subscriptionData.subscription_status === "trialing" && shouldEnforceTeamMemberSeatLimits(subscriptionData)) {
           const currentTrialMembers =
             parseInt(subscriptionData.current_count) || 0;
           if (currentTrialMembers + incrementBy > TRIAL_MEMBER_LIMIT) {
@@ -2535,7 +2536,7 @@ export default class TeamMembersController extends WorklenzControllerBase {
           }
         }
 
-        if (subscriptionData.subscription_status === "life_time_deal" && subscriptionData.is_ltd) {
+        if (subscriptionData.subscription_status === "life_time_deal" && subscriptionData.is_ltd && shouldEnforceTeamMemberSeatLimits(subscriptionData)) {
           const currentLtdMembers = parseInt(subscriptionData.current_count) || 0;
           const ltdLimit = parseInt(subscriptionData.ltd_users) || 0;
 

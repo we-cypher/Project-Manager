@@ -615,7 +615,9 @@ CREATE TABLE IF NOT EXISTS organizations (
     logo_url                 TEXT,
     base_currency            VARCHAR(10)              DEFAULT 'INR'              NOT NULL,
     restrict_task_creation   BOOLEAN                  DEFAULT FALSE,
-    timelog_backdate_limit_days INTEGER               DEFAULT 0                  NOT NULL
+    timelog_backdate_limit_days INTEGER               DEFAULT 0                  NOT NULL,
+    business_plan_override      BOOLEAN                  DEFAULT FALSE              NOT NULL,
+    team_member_limit_override  BOOLEAN                  DEFAULT TRUE               NOT NULL
 );
 
 ALTER TABLE organizations

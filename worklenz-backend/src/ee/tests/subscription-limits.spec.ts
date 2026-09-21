@@ -1,4 +1,4 @@
-const { getTeamMemberSeatLimit } = jest.requireActual("../shared/subscription-limits") as typeof import("../ee/shared/subscription-limits");
+const { getTeamMemberSeatLimit, shouldEnforceTeamMemberSeatLimits } = jest.requireActual("../shared/subscription-limits") as typeof import("../ee/shared/subscription-limits");
 
 describe("getTeamMemberSeatLimit", () => {
   it("returns the default limit when no subscription data is provided", () => {
@@ -18,5 +18,15 @@ describe("getTeamMemberSeatLimit", () => {
 
   it("ignores invalid or non-positive values", () => {
     expect(getTeamMemberSeatLimit({ effective_user_limit: "abc", quantity: -2, is_ltd: true, ltd_users: 0 })).toBe(25);
+  });
+});
+
+describe("shouldEnforceTeamMemberSeatLimits", () => {
+  it("never enforces seat caps on self-hosted, including when override is unset", () => {
+    expect(shouldEnforceTeamMemberSeatLimits(undefined)).toBe(false);
+    expect(shouldEnforceTeamMemberSeatLimits(null)).toBe(false);
+    expect(shouldEnforceTeamMemberSeatLimits({})).toBe(false);
+    expect(shouldEnforceTeamMemberSeatLimits({ team_member_limit_override: false })).toBe(false);
+    expect(shouldEnforceTeamMemberSeatLimits({ team_member_limit_override: true })).toBe(false);
   });
 });

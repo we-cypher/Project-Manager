@@ -12,7 +12,7 @@ import TeamMembersController from "./team-members-controller";
 import { checkTeamSubscriptionStatus } from "../ee/shared/paddle-utils";
 import { updateUsers } from "../ee/shared/paddle-requests";
 import { statusExclude, TRIAL_MEMBER_LIMIT, APPSUMO_PLAN_LIMIT, BUSINESS_PLAN_LIMIT } from "../shared/constants";
-import { getTeamMemberSeatLimit } from "../ee/shared/subscription-limits";
+import { getTeamMemberSeatLimit, shouldEnforceTeamMemberSeatLimits } from "../ee/shared/subscription-limits";
 import { getGuestSeatLimit } from "../shared/guest-seat-limits";
 import { NotificationsService } from "../services/notifications/notifications.service";
 import { sendInvitationEmail } from "../shared/email-templates";
@@ -241,7 +241,7 @@ export default class ProjectMembersController extends WorklenzControllerBase {
       /**
      * Checks trial user team member limit
      */
-      if (subscriptionData.subscription_status === "trialing" && subscriptionData.team_member_limit_override !== true) {
+      if (subscriptionData.subscription_status === "trialing" && shouldEnforceTeamMemberSeatLimits(subscriptionData)) {
         const currentTrialMembers = parseInt(subscriptionData.current_count) || 0;
 
         if (currentTrialMembers + 1 > TRIAL_MEMBER_LIMIT) {
@@ -266,7 +266,7 @@ export default class ProjectMembersController extends WorklenzControllerBase {
       /**
              * Checks life_time_deal (AppSumo) user team member limit based on redeemed coupon codes
              */
-      if (subscriptionData.subscription_status === "life_time_deal" && subscriptionData.is_ltd) {
+      if (subscriptionData.subscription_status === "life_time_deal" && subscriptionData.is_ltd && shouldEnforceTeamMemberSeatLimits(subscriptionData)) {
         const currentLtdMembers = parseInt(subscriptionData.current_count) || 0;
         const ltdLimit = parseInt(subscriptionData.ltd_users) || 0;
 
@@ -294,7 +294,7 @@ export default class ProjectMembersController extends WorklenzControllerBase {
       }
 
       // Skip limit checks if team_member_limit_override is enabled
-      if (subscriptionData.team_member_limit_override !== true) {
+      if (shouldEnforceTeamMemberSeatLimits(subscriptionData)) {
         // Check Business plan limits first - Business plans override AppSumo lifetime limits
         if (!userExists && !subscriptionData.is_credit && !subscriptionData.is_custom && subscriptionData.subscription_status !== "trialing") {
           // if (subscriptionData.subscription_status === "active") {
@@ -483,7 +483,7 @@ export default class ProjectMembersController extends WorklenzControllerBase {
       }
 
       // Skip limit checks if team_member_limit_override is enabled
-      if (subscriptionData.team_member_limit_override !== true) {
+      if (shouldEnforceTeamMemberSeatLimits(subscriptionData)) {
         // Check trial user limit - warn if close to limit (skip for Business plan trials)
         if (subscriptionData.subscription_status === "trialing") {
             const currentTrialMembers = parseInt(subscriptionData.current_count) || 0;
@@ -507,7 +507,7 @@ export default class ProjectMembersController extends WorklenzControllerBase {
         }
 
         // Check life_time_deal (AppSumo) user limit for link generation
-        if (subscriptionData.subscription_status === "life_time_deal" && subscriptionData.is_ltd) {
+        if (subscriptionData.subscription_status === "life_time_deal" && subscriptionData.is_ltd && shouldEnforceTeamMemberSeatLimits(subscriptionData)) {
           const currentLtdMembers = parseInt(subscriptionData.current_count) || 0;
           const ltdLimit = parseInt(subscriptionData.ltd_users) || 0;
 
@@ -818,7 +818,7 @@ export default class ProjectMembersController extends WorklenzControllerBase {
         }
 
         // Skip limit checks if team_member_limit_override is enabled
-        if (subscriptionData.team_member_limit_override !== true) {
+        if (shouldEnforceTeamMemberSeatLimits(subscriptionData)) {
           // Check seat availability for active subscriptions (Business plans override LTD limits)
           if (!subscriptionData.is_credit && !subscriptionData.is_custom && subscriptionData.subscription_status === "active") {
             const updatedCount = parseInt(subscriptionData.current_count) + incrementBy;
@@ -857,7 +857,7 @@ export default class ProjectMembersController extends WorklenzControllerBase {
             }
           }
 
-          if (subscriptionData.subscription_status === "life_time_deal" && subscriptionData.is_ltd) {
+          if (subscriptionData.subscription_status === "life_time_deal" && subscriptionData.is_ltd && shouldEnforceTeamMemberSeatLimits(subscriptionData)) {
             const currentLtdMembers = parseInt(subscriptionData.current_count) || 0;
             const ltdLimit = parseInt(subscriptionData.ltd_users) || 0;
 
