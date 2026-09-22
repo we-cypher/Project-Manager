@@ -12,6 +12,7 @@
   "forgotPasswordButton": "Keni harruar fjalëkalimin?",
   "signInWithGoogleButton": "Hyr me Google",
   "dontHaveAccountText": "Nuk keni llogari?",
+  "inviteOnlyText": "Llogaritë e reja bashkohen vetëm me ftesë.",
   "orText": "OSE",
   "successMessage": "Jeni futur me sukses!",
   "loginError": "Hyrja dështoi",

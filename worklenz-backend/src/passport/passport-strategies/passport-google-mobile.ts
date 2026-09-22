@@ -4,6 +4,11 @@ import { Request } from "express";
 import db from "../../config/db";
 import { log_error } from "../../shared/utils";
 import { ERROR_KEY } from "./passport-constants";
+import {
+  hasInviteSignupIds,
+  isPublicSignupDisabled,
+  PUBLIC_SIGNUP_DISABLED_MESSAGE,
+} from "../../shared/public-signup";
 
 interface GoogleTokenProfile {
   sub: string;
@@ -98,6 +103,13 @@ async function handleMobileGoogleAuth(req: Request, done: any) {
       return done(null, false, {
         message: "No account found with this Google account. Please sign up first.",
         [ERROR_KEY]: "USER_NOT_FOUND"
+      });
+    }
+
+    if (isPublicSignupDisabled() && !hasInviteSignupIds(req.body?.team_id, req.body?.team_member_id)) {
+      return done(null, false, {
+        message: PUBLIC_SIGNUP_DISABLED_MESSAGE,
+        [ERROR_KEY]: "PUBLIC_SIGNUP_DISABLED",
       });
     }
 

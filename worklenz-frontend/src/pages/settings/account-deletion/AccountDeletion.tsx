@@ -74,12 +74,10 @@ const AccountDeletion: React.FC = () => {
               // Clear all caches using the utility
               await CacheCleanup.clearAllCaches();
 
-              // Force a hard reload to signup page
-              CacheCleanup.forceReload('/auth/signup');
+              CacheCleanup.forceReload('/auth/login');
             } catch (error) {
               console.error('Logout error after account deletion:', error);
-              // Fallback: force reload to signup page
-              CacheCleanup.forceReload('/auth/signup');
+              CacheCleanup.forceReload('/auth/login');
             }
           },
         });

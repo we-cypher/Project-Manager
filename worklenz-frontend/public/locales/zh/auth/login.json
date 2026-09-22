@@ -12,6 +12,7 @@
   "forgotPasswordButton": "忘记密码？",
   "signInWithGoogleButton": "使用Google登录",
   "dontHaveAccountText": "没有账户？",
+  "inviteOnlyText": "新账户仅可通过邀请加入。",
   "orText": "或",
   "successMessage": "您已成功登录！",
   "loginError": "登录失败",

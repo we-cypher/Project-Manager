@@ -13,6 +13,7 @@
   "signInWithGoogleButton": "Sign in with Google",
   "signInWithAppleButton": "Sign in with Apple",
   "dontHaveAccountText": "Don't have an account?",
+  "inviteOnlyText": "New accounts join by invitation only.",
   "orText": "OR",
   "successMessage": "You have successfully logged in!",
   "loginError": "Login failed",

@@ -12,6 +12,7 @@
   "forgotPasswordButton": "Passwort vergessen?",
   "signInWithGoogleButton": "Mit Google anmelden",
   "dontHaveAccountText": "Noch kein Konto?",
+  "inviteOnlyText": "Neue Konten können nur per Einladung beitreten.",
   "orText": "ODER",
   "successMessage": "Sie haben sich erfolgreich angemeldet!",
   "loginError": "Anmeldung fehlgeschlagen",

@@ -4,6 +4,11 @@ import { log_error } from "../../shared/utils";
 import db from "../../config/db";
 import { ERROR_KEY } from "./passport-constants";
 import { Request } from "express";
+import {
+  hasInviteSignupIds,
+  isPublicSignupDisabled,
+  PUBLIC_SIGNUP_DISABLED_MESSAGE,
+} from "../../shared/public-signup";
 
 async function handleGoogleLogin(req: Request, _accessToken: string, _refreshToken: string, profile: GoogleStrategy.Profile, done: GoogleStrategy.VerifyCallback) {
   try {
@@ -74,7 +79,11 @@ async function handleGoogleLogin(req: Request, _accessToken: string, _refreshTok
       return done(null, { id: deletedUser.id, email: deletedUser.email, google_id: body.id });
     }
 
-    // Register new user
+    // Register new user — only when public signup is on or this is an invitation
+    if (isPublicSignupDisabled() && !hasInviteSignupIds(state.team, state.teamMember)) {
+      return done(null, false, { message: PUBLIC_SIGNUP_DISABLED_MESSAGE });
+    }
+
     const q2 = `SELECT register_google_user($1) AS user;`;
     const result2 = await db.query(q2, [JSON.stringify(body)]);
     const [data] = result2.rows;

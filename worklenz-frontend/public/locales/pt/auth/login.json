@@ -13,6 +13,7 @@
   "signInWithGoogleButton": "Entrar com Google",
   "successMessage": "Você entrou com sucesso!",
   "dontHaveAccountText": "Não tem uma conta?",
+  "inviteOnlyText": "Novas contas entram apenas por convite.",
   "orText": "OU",
   "loginError": "Login falhou",
   "googleLoginError": "Login com Google falhou",

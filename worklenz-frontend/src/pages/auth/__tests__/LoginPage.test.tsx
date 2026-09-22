@@ -90,6 +90,7 @@ i18n.init({
         orText: 'or',
         dontHaveAccountText: "Don't have an account?",
         signupButton: 'Sign up',
+        inviteOnlyText: 'New accounts join by invitation only.',
         successMessage: 'Login successful!',
         'validationMessages.email': 'Please enter a valid email!',
         'validationMessages.password': 'Password must be at least 8 characters!',
@@ -246,15 +247,11 @@ describe('LoginPage', () => {
     expect(window.location.href).toBe('http://localhost:3000/secure/google');
   });
 
-  it('navigates to signup page', async () => {
-    const user = userEvent.setup();
+  it('hides public signup and shows invite-only copy', () => {
     renderWithProviders(<LoginPage />);
 
-    const signupLink = screen.getByText('Sign up');
-    await user.click(signupLink);
-
-    // Link navigation is handled by React Router, so we just check the element exists
-    expect(signupLink.closest('a')).toHaveAttribute('href', '/auth/signup');
+    expect(screen.queryByText('Sign up')).not.toBeInTheDocument();
+    expect(screen.getByText('New accounts join by invitation only.')).toBeInTheDocument();
   });
 
   it('navigates to forgot password page', async () => {

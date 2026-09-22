@@ -5,6 +5,11 @@ import jwksClient from "jwks-rsa";
 import db from "../../config/db";
 import { log_error } from "../../shared/utils";
 import { ERROR_KEY } from "./passport-constants";
+import {
+  hasInviteSignupIds,
+  isPublicSignupDisabled,
+  PUBLIC_SIGNUP_DISABLED_MESSAGE,
+} from "../../shared/public-signup";
 
 /**
  * Apple ID Token Payload Interface
@@ -204,6 +209,13 @@ async function handleAppleMobileAuth(req: Request, done: any) {
       return done(null, false, {
         message: "No account found with this Apple ID. Please sign up first.",
         [ERROR_KEY]: "USER_NOT_FOUND"
+      });
+    }
+
+    if (isPublicSignupDisabled() && !hasInviteSignupIds(req.body?.team_id, req.body?.team_member_id)) {
+      return done(null, false, {
+        message: PUBLIC_SIGNUP_DISABLED_MESSAGE,
+        [ERROR_KEY]: "PUBLIC_SIGNUP_DISABLED",
       });
     }
 

@@ -6,6 +6,11 @@ import db from "../../config/db";
 import { log_error } from "../../shared/utils";
 import { ERROR_KEY } from "./passport-constants";
 import { sendWelcomeEmail } from "../../shared/email-templates";
+import {
+  hasInviteSignupIds,
+  isPublicSignupDisabled,
+  PUBLIC_SIGNUP_DISABLED_MESSAGE,
+} from "../../shared/public-signup";
 
 /**
  * Apple ID Token Payload Interface
@@ -195,6 +200,11 @@ async function handleAppleWebAuth(
         "Email is required for registration. Please sign in with Apple again and provide your email.";
       (req.session as any).error = message;
       return done(null, undefined, { message: req.flash(ERROR_KEY, message) });
+    }
+
+    if (isPublicSignupDisabled() && !hasInviteSignupIds(state.team, state.teamMember)) {
+      (req.session as any).error = PUBLIC_SIGNUP_DISABLED_MESSAGE;
+      return done(null, false, { message: PUBLIC_SIGNUP_DISABLED_MESSAGE });
     }
 
     // Register new user via database function

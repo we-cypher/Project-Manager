@@ -18,6 +18,7 @@ import FileConstants from "../shared/file-constants";
 import axios from "axios";
 import { log_error } from "../shared/utils";
 import { DEFAULT_ERROR_MESSAGE } from "../shared/constants";
+import { isPublicSignupDisabled, PUBLIC_SIGNUP_DISABLED_MESSAGE } from "../shared/public-signup";
 
 export default class AuthController extends WorklenzControllerBase {
   /** This just send ok response to the client when the request came here through the sign-up-validator */
@@ -540,6 +541,10 @@ export default class AuthController extends WorklenzControllerBase {
           }
         }
       } else {
+        if (isPublicSignupDisabled()) {
+          return res.status(403).send(new ServerResponse(false, null, PUBLIC_SIGNUP_DISABLED_MESSAGE));
+        }
+
         // New user - register
         const googleUserData = {
           id: profile.sub,

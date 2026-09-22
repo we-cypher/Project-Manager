@@ -1,8 +1,9 @@
 import { lazy, Suspense } from 'react';
 import AuthLayout from '@/layouts/AuthLayout';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { SuspenseFallback } from '@/components/suspense-fallback/suspense-fallback';
 import ChunkErrorHandler from '@/utils/chunk-error-handler';
+import { isPublicSignupDisabled } from '@/shared/public-signup';
 
 // Lazy load auth page components for better code splitting with chunk error handling
 const LoginPage = lazy(
@@ -39,6 +40,21 @@ const ResetPasswordRedirect = lazy(
   )
 );
 
+const InviteOnlySignupPage = () => {
+  const [searchParams] = useSearchParams();
+  const hasInvite = Boolean(searchParams.get('team') && searchParams.get('user'));
+
+  if (isPublicSignupDisabled() && !hasInvite) {
+    return <Navigate to="/auth/login" replace />;
+  }
+
+  return (
+    <Suspense fallback={<SuspenseFallback />}>
+      <SignupPage />
+    </Suspense>
+  );
+};
+
 const authRoutes = [
   {
     path: '/auth',
@@ -58,11 +74,7 @@ const authRoutes = [
       },
       {
         path: 'signup',
-        element: (
-          <Suspense fallback={<SuspenseFallback />}>
-            <SignupPage />
-          </Suspense>
-        ),
+        element: <InviteOnlySignupPage />,
       },
       {
         path: 'forgot-password',

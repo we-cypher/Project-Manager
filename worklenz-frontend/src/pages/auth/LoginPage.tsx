@@ -42,6 +42,7 @@ import { useDocumentTitle } from '@/hooks/useDoumentTItle';
 import alertService from '@/services/alerts/alertService';
 import { useAuthService } from '@/hooks/useAuth';
 import { WORKLENZ_REDIRECT_PROJ_KEY } from '@/shared/constants';
+import { isPublicSignupDisabled } from '@/shared/public-signup';
 
 interface LoginFormValues {
   email: string;
@@ -93,6 +94,11 @@ const LoginPage: React.FC = () => {
       if (projectId) {
         localStorage.setItem(WORKLENZ_REDIRECT_PROJ_KEY, projectId);
       }
+    }
+
+    const oauthError = searchParams.get('error');
+    if (oauthError) {
+      message.error(oauthError);
     }
 
     // Then, check and unregister ngsw-worker if present
@@ -391,16 +397,24 @@ const LoginPage: React.FC = () => {
         </Form.Item>
 
         <Form.Item>
-          <Space>
-            <Typography.Text style={styles.link}>{t('dontHaveAccountText')}</Typography.Text>
-            <Link
-              to="/auth/signup"
-              className="ant-typography ant-typography-link blue-link"
-              style={styles.link}
-            >
-              {t('signupButton')}
-            </Link>
-          </Space>
+          {isPublicSignupDisabled() ? (
+            <Typography.Text style={styles.link}>
+              {t('inviteOnlyText', {
+                defaultValue: 'New accounts join by invitation only.',
+              })}
+            </Typography.Text>
+          ) : (
+            <Space>
+              <Typography.Text style={styles.link}>{t('dontHaveAccountText')}</Typography.Text>
+              <Link
+                to="/auth/signup"
+                className="ant-typography ant-typography-link blue-link"
+                style={styles.link}
+              >
+                {t('signupButton')}
+              </Link>
+            </Space>
+          )}
         </Form.Item>
       </Form>
     </Card>

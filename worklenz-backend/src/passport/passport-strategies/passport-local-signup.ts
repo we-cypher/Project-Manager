@@ -8,6 +8,11 @@ import { log_error, sanitizePlainText } from "../../shared/utils";
 import db from "../../config/db";
 import { Request } from "express";
 import { ERROR_KEY, SUCCESS_KEY } from "./passport-constants";
+import {
+  hasInviteSignupIds,
+  isPublicSignupDisabled,
+  PUBLIC_SIGNUP_DISABLED_MESSAGE,
+} from "../../shared/public-signup";
 
 async function isGoogleAccountFound(email: string) {
   const q = `
@@ -57,6 +62,10 @@ async function handleSignUp(req: Request, email: string, password: string, done:
   (req.session as any).flash = {};
   // team = Invited team_id if req.body.from_invitation is true
   const { name, team_name, team_member_id, team_id, timezone } = req.body;
+
+  if (isPublicSignupDisabled() && !hasInviteSignupIds(team_id, team_member_id)) {
+    return done(null, null, req.flash(ERROR_KEY, PUBLIC_SIGNUP_DISABLED_MESSAGE));
+  }
 
   if (!team_name) return done(null, null, req.flash(ERROR_KEY, "Team name is required"));
 

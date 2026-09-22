@@ -4,6 +4,7 @@ import passport from "passport";
 import AuthController from "../../controllers/auth-controller";
 
 import signUpValidator from "../../middlewares/validators/sign-up-validator";
+import requireInviteSignup from "../../middlewares/validators/require-invite-signup";
 import resetEmailValidator from "../../middlewares/validators/reset-email-validator";
 import updatePasswordValidator from "../../middlewares/validators/update-password-validator";
 import passwordValidator from "../../middlewares/validators/password-validator";
@@ -27,8 +28,8 @@ const options = (key: string): passport.AuthenticateOptions => ({
 });
 
 authRouter.post("/login", passport.authenticate("local-login", options("login")));
-authRouter.post("/signup", signUpValidator, passwordValidator, passport.authenticate("local-signup", options("signup")));
-authRouter.post("/signup/check", signUpValidator, passwordValidator, safeControllerFunction(AuthController.status_check));
+authRouter.post("/signup", signUpValidator, requireInviteSignup, passwordValidator, passport.authenticate("local-signup", options("signup")));
+authRouter.post("/signup/check", signUpValidator, requireInviteSignup, passwordValidator, safeControllerFunction(AuthController.status_check));
 authRouter.get("/verify", AuthController.verify);
 authRouter.get("/check-password", safeControllerFunction(AuthController.checkPasswordStrength));
 
@@ -78,7 +79,9 @@ authRouter.get("/google/verify", (req, res, next) => {
 
     if (!user) {
       console.error("[Google OAuth] verify - no user returned. info:", JSON.stringify(info));
-      return res.redirect(failureRedirect || "/");
+      const message = info?.message || (req.session as any).error;
+      const query = message ? `?error=${encodeURIComponent(String(message))}` : "";
+      return res.redirect((process.env.LOGIN_FAILURE_REDIRECT || failureRedirect || "/auth/login") + query);
     }
 
     req.logIn(user, (loginErr) => {
