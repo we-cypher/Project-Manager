@@ -23,6 +23,7 @@ import {
   APPSUMO_PLAN_LIMIT,
 } from "../shared/constants";
 import { checkTeamSubscriptionStatus } from "../ee/shared/paddle-utils";
+import { classifyInvitationError } from "../shared/invitation-link";
 import { updateUsers } from "../ee/shared/paddle-requests";
 import { getTeamMemberSeatLimit, shouldEnforceTeamMemberSeatLimits } from "../ee/shared/subscription-limits";
 import {
@@ -2345,10 +2346,17 @@ export default class TeamMembersController extends WorklenzControllerBase {
       const result = await db.query(q, [token]);
       const [validation] = result.rows;
 
-      if (!validation.is_valid) {
+      if (!validation?.is_valid) {
+        const errorMessage = validation?.error_message || "Invalid invitation link";
         return res
           .status(200)
-          .send(new ServerResponse(false, null, validation.error_message));
+          .send(
+            new ServerResponse(
+              false,
+              { reason: classifyInvitationError(errorMessage) },
+              errorMessage,
+            ),
+          );
       }
 
       // Get team information
@@ -2407,10 +2415,17 @@ export default class TeamMembersController extends WorklenzControllerBase {
       const validationResult = await db.query(validationQuery, [token]);
       const [validation] = validationResult.rows;
 
-      if (!validation.is_valid) {
+      if (!validation?.is_valid) {
+        const errorMessage = validation?.error_message || "Invalid invitation link";
         return res
           .status(200)
-          .send(new ServerResponse(false, null, validation.error_message));
+          .send(
+            new ServerResponse(
+              false,
+              { reason: classifyInvitationError(errorMessage) },
+              errorMessage,
+            ),
+          );
       }
 
       const teamId = validation.team_id;

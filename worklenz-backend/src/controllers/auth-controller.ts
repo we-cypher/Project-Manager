@@ -26,6 +26,39 @@ export default class AuthController extends WorklenzControllerBase {
     return res.status(200).send(new ServerResponse(true, null));
   }
 
+  @HandleExceptions()
+  public static async validateEmailInvite(req: IWorkLenzRequest, res: IWorkLenzResponse) {
+    const teamId = typeof req.query.team === "string" ? req.query.team : "";
+    const teamMemberId = typeof req.query.user === "string" ? req.query.user : "";
+
+    if (!teamId || !teamMemberId) {
+      return res.status(200).send(
+        new ServerResponse(false, { reason: "invalid" }, "Invalid invitation link.")
+      );
+    }
+
+    const result = await db.query(
+      `SELECT 1
+       FROM email_invitations
+       WHERE team_id = $1
+         AND team_member_id = $2
+       LIMIT 1`,
+      [teamId, teamMemberId]
+    );
+
+    if (!result.rowCount) {
+      return res.status(200).send(
+        new ServerResponse(
+          false,
+          { reason: "expired" },
+          "This invitation has expired or is no longer valid."
+        )
+      );
+    }
+
+    return res.status(200).send(new ServerResponse(true, { team_id: teamId, team_member_id: teamMemberId }));
+  }
+
   public static async checkPasswordStrength(req: IWorkLenzRequest, res: IWorkLenzResponse) {
     // Coerce to a scalar string — a repeated query param (?password=a&password=b) arrives as an array
     const rawPassword = req.query.password;

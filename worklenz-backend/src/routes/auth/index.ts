@@ -30,6 +30,7 @@ const options = (key: string): passport.AuthenticateOptions => ({
 authRouter.post("/login", passport.authenticate("local-login", options("login")));
 authRouter.post("/signup", signUpValidator, requireInviteSignup, passwordValidator, passport.authenticate("local-signup", options("signup")));
 authRouter.post("/signup/check", signUpValidator, requireInviteSignup, passwordValidator, safeControllerFunction(AuthController.status_check));
+authRouter.get("/invite/validate", safeControllerFunction(AuthController.validateEmailInvite));
 authRouter.get("/verify", AuthController.verify);
 authRouter.get("/check-password", safeControllerFunction(AuthController.checkPasswordStrength));
 

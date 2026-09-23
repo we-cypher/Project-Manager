@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
 import { LockOutlined, MailOutlined, UserOutlined } from '@/shared/antd-imports';
-import { Form, Card, Input, Flex, Button, Typography, Space, message } from '@/shared/antd-imports';
+import { Form, Card, Input, Flex, Button, Typography, Space, message, Result } from '@/shared/antd-imports';
 import { Rule } from 'antd/es/form';
 import { CheckCircleTwoTone, CloseCircleTwoTone } from '@/shared/antd-imports';
 import { useAppSelector } from '@/hooks/useAppSelector';
@@ -29,6 +29,7 @@ import { useDocumentTitle } from '@/hooks/useDoumentTItle';
 import logger from '@/utils/errorLogger';
 import alertService from '@/services/alerts/alertService';
 import { WORKLENZ_REDIRECT_PROJ_KEY } from '@/shared/constants';
+import { isExpiredInvitation } from '@/shared/invitation-link';
 
 // Define the global grecaptcha type
 declare global {
@@ -47,6 +48,7 @@ const SignupPage = () => {
   const { trackMixpanelEvent } = useMixpanelTracking();
 
   const { t } = useTranslation('auth/signup');
+  const { t: tInvite } = useTranslation('invitation');
   const isMobile = useMediaQuery({ query: '(max-width: 576px)' });
 
   useDocumentTitle('Signup');
@@ -60,6 +62,9 @@ const SignupPage = () => {
     teamMemberId: '',
     projectId: '',
   });
+  const [inviteStatus, setInviteStatus] = useState<'checking' | 'ok' | 'expired' | 'invalid'>(
+    'checking'
+  );
 
   const setProjectId = (projectId: string) => {
     if (!projectId) {
@@ -83,11 +88,13 @@ const SignupPage = () => {
   useEffect(() => {
     trackMixpanelEvent(evt_signup_page_visit);
     const searchParams = new URLSearchParams(window.location.search);
+    const teamId = searchParams.get('team') || '';
+    const teamMemberId = searchParams.get('user') || '';
     setUrlParams({
       email: searchParams.get('email') || '',
       name: searchParams.get('name') || '',
-      teamId: searchParams.get('team') || '',
-      teamMemberId: searchParams.get('user') || '',
+      teamId,
+      teamMemberId,
       projectId: searchParams.get('project') || '',
     });
 
@@ -97,6 +104,33 @@ const SignupPage = () => {
       email: searchParams.get('email') || '',
       name: searchParams.get('name') || '',
     });
+
+    const validateInvite = async () => {
+      if (!teamId || !teamMemberId) {
+        setInviteStatus('invalid');
+        return;
+      }
+
+      try {
+        const response = await authApiService.validateEmailInvite(teamId, teamMemberId);
+        if (response.done) {
+          setInviteStatus('ok');
+          return;
+        }
+
+        setInviteStatus(
+          isExpiredInvitation(response.message, (response.body as { reason?: string } | null)?.reason)
+            ? 'expired'
+            : 'invalid'
+        );
+      } catch (error: any) {
+        const messageText = error?.response?.data?.message;
+        const reason = error?.response?.data?.body?.reason;
+        setInviteStatus(isExpiredInvitation(messageText, reason) ? 'expired' : 'invalid');
+      }
+    };
+
+    void validateInvite();
   }, [trackMixpanelEvent]);
 
   useEffect(() => {
@@ -380,6 +414,41 @@ const SignupPage = () => {
       }}
       variant="outlined"
     >
+      {inviteStatus === 'checking' ? (
+        <Result
+          status="info"
+          title={tInvite('validatingInvitation', { defaultValue: 'Validating Invitation' })}
+          subTitle={tInvite('validatingSubtitle', {
+            defaultValue: 'Please wait while we verify your invitation...',
+          })}
+        />
+      ) : inviteStatus !== 'ok' ? (
+        <Result
+          status="warning"
+          title={
+            inviteStatus === 'expired'
+              ? tInvite('expiredInvitation', { defaultValue: 'This invitation has expired' })
+              : tInvite('invalidInvitation', { defaultValue: 'Invalid Invitation' })
+          }
+          subTitle={
+            inviteStatus === 'expired'
+              ? tInvite('expiredInvitationSubtitle', {
+                  defaultValue:
+                    'Ask a team admin to send a new invitation. Do not create a new account from this link.',
+                })
+              : tInvite('invalidInvitationSubtitle', {
+                  defaultValue:
+                    'This invitation link is not valid. Ask a team admin for a new one.',
+                })
+          }
+          extra={
+            <Button type="primary" onClick={() => navigate('/auth/login')}>
+              {tInvite('goToLogin', { defaultValue: 'Go to Login' })}
+            </Button>
+          }
+        />
+      ) : (
+      <>
       <PageHeader
         description={t('headerDescription', { defaultValue: 'Sign up to get started' })}
       />
@@ -576,6 +645,8 @@ const SignupPage = () => {
           </Space>
         </Form.Item>
       </Form>
+      </>
+      )}
     </Card>
   );
 };

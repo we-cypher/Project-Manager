@@ -37,6 +37,17 @@ export const authApiService = {
     return response.data;
   },
 
+  async validateEmailInvite(
+    teamId: string,
+    teamMemberId: string
+  ): Promise<IServerResponse<{ reason?: string }>> {
+    const response = await apiClient.get<IServerResponse<{ reason?: string }>>(
+      `${rootUrl}/invite/validate`,
+      { params: { team: teamId, user: teamMemberId } }
+    );
+    return response.data;
+  },
+
   async resetPassword(email: string): Promise<IServerResponse<string>> {
     const response = await apiClient.post<IServerResponse<string>>(`${rootUrl}/reset-password`, {
       email,

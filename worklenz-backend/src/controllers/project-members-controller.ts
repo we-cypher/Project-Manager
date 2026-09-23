@@ -17,6 +17,7 @@ import { getGuestSeatLimit } from "../shared/guest-seat-limits";
 import { NotificationsService } from "../services/notifications/notifications.service";
 import { sendInvitationEmail } from "../shared/email-templates";
 import { hasTeamAdminPrivileges } from "../shared/team-permissions";
+import { classifyInvitationError } from "../shared/invitation-link";
 
 const normalizeProjectAccessLevel = (value: unknown): string => {
   const accessLevel = String(value ?? '').trim().toUpperCase();
@@ -702,8 +703,11 @@ export default class ProjectMembersController extends WorklenzControllerBase {
       const result = await db.query(q, [token]);
       const [validation] = result.rows;
 
-      if (!validation.is_valid) {
-        return res.status(200).send(new ServerResponse(false, null, validation.error_message));
+      if (!validation?.is_valid) {
+        const errorMessage = validation?.error_message || "Invalid invitation link";
+        return res.status(200).send(
+          new ServerResponse(false, { reason: classifyInvitationError(errorMessage) }, errorMessage)
+        );
       }
 
       // Get project and team information
@@ -750,8 +754,11 @@ export default class ProjectMembersController extends WorklenzControllerBase {
       const validationResult = await db.query(validationQuery, [token]);
       const [validation] = validationResult.rows;
 
-      if (!validation.is_valid) {
-        return res.status(200).send(new ServerResponse(false, null, validation.error_message));
+      if (!validation?.is_valid) {
+        const errorMessage = validation?.error_message || "Invalid invitation link";
+        return res.status(200).send(
+          new ServerResponse(false, { reason: classifyInvitationError(errorMessage) }, errorMessage)
+        );
       }
 
       const teamId = validation.team_id;

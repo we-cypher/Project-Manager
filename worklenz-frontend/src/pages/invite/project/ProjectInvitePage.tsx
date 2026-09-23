@@ -23,6 +23,7 @@ import { useAuthService } from '@/hooks/useAuth';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { invitationRedirectService } from '@/services/invitation-redirect.service';
+import { isExpiredInvitation } from '@/shared/invitation-link';
 import { useTranslation } from 'react-i18next';
 import { verifyAuthentication } from '@/features/auth/authSlice';
 import { setUser } from '@/features/user/userSlice';
@@ -43,9 +44,9 @@ const ProjectInvitePage: React.FC = () => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation('invitation');
 
-  const [status, setStatus] = useState<'loading' | 'form' | 'success' | 'error' | 'invalid'>(
-    'loading'
-  );
+  const [status, setStatus] = useState<
+    'loading' | 'form' | 'success' | 'error' | 'invalid' | 'expired'
+  >('loading');
   const [errorMessage, setErrorMessage] = useState('');
   const [projectInfo, setProjectInfo] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -65,6 +66,16 @@ const ProjectInvitePage: React.FC = () => {
     validateInvitation();
   }, [token]);
 
+  const showInvitationFailure = (message?: string, reason?: string) => {
+    invitationRedirectService.clearPendingInvitation();
+    if (isExpiredInvitation(message, reason)) {
+      setStatus('expired');
+      return;
+    }
+    setStatus('error');
+    setErrorMessage(message || t('errorInvalidLink', { defaultValue: 'Invalid invitation link' }));
+  };
+
   const validateInvitation = async () => {
     try {
       const response = await projectMembersApiService.validateInvitationLink(token!);
@@ -73,15 +84,16 @@ const ProjectInvitePage: React.FC = () => {
         setProjectInfo(response.body);
         setStatus('form');
       } else {
-        setStatus('error');
-        setErrorMessage(response.message || 'Invalid invitation link');
+        showInvitationFailure(response.message, (response.body as { reason?: string } | null)?.reason);
       }
     } catch (error: any) {
       if (error?.response?.status === 401) {
         return;
       }
-      setStatus('error');
-      setErrorMessage(error?.response?.data?.message || 'Failed to validate invitation');
+      showInvitationFailure(
+        error?.response?.data?.message,
+        error?.response?.data?.body?.reason
+      );
     }
   };
 
@@ -114,18 +126,13 @@ const ProjectInvitePage: React.FC = () => {
           window.location.href = `/projects/${projectId}`;
         }, 1500);
       } else {
-        message.error(response.message || t('joinFailed'));
-        // Navigate to home page if join failed (using window.location to bypass auth guards)
-        setTimeout(() => {
-          window.location.href = '/home';
-        }, 1500);
+        showInvitationFailure(response.message, response.body?.reason);
       }
     } catch (error: any) {
-      message.error(error?.response?.data?.message || t('joinFailed'));
-      // Navigate to home page if join failed (using window.location to bypass auth guards)
-      setTimeout(() => {
-        window.location.href = '/home';
-      }, 1500);
+      showInvitationFailure(
+        error?.response?.data?.message,
+        error?.response?.data?.body?.reason
+      );
     } finally {
       setSubmitting(false);
     }
@@ -286,20 +293,34 @@ const ProjectInvitePage: React.FC = () => {
           />
         );
 
+      case 'expired':
+        return (
+          <Result
+            status="warning"
+            title={t('expiredInvitation', { defaultValue: 'This invitation has expired' })}
+            subTitle={t('expiredInvitationSubtitle', {
+              defaultValue:
+                'Ask a team admin to send a new invitation. Do not create a new account from this link.',
+            })}
+            extra={
+              <Button type="primary" onClick={() => navigate('/auth/login')}>
+                {t('goToLogin')}
+              </Button>
+            }
+          />
+        );
+
       case 'error':
         return (
           <Result
             status="warning"
-            title={errorMessage}
+            title={errorMessage || t('invalidInvitation')}
             subTitle={t('invalidInvitationSubtitle')}
-            extra={[
-              <Button key="home" onClick={() => navigate('/')}>
-                {t('goToHome')}
-              </Button>,
-              <Button key="login" type="primary" onClick={() => navigate('/auth/login')}>
+            extra={
+              <Button type="primary" onClick={() => navigate('/auth/login')}>
                 {t('goToLogin')}
-              </Button>,
-            ]}
+              </Button>
+            }
           />
         );
 
