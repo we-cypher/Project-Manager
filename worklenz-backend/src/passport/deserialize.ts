@@ -52,7 +52,24 @@ export async function deserialize(user: { id: string | null }, done: IDeserializ
       }
     }
     return done(null, null);
-  } catch (error) {
+  } catch (error: any) {
+    const message = String(error?.message || error);
+    if (message.includes("notification_settings") || message.includes("team_id")) {
+      try {
+        const fallback = await db.query(
+          `SELECT id, name, email, active_team, setup_completed
+           FROM users
+           WHERE id = $1
+             AND is_deleted IS FALSE;`,
+          [user.id]
+        );
+        if (fallback.rowCount) {
+          return done(null, fallback.rows[0] as IPassportSession);
+        }
+      } catch {
+        // fall through to the original error
+      }
+    }
     return done(error, null);
   }
 }

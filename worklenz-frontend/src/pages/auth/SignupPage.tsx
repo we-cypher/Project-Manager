@@ -218,11 +218,20 @@ const SignupPage = () => {
         }
       }
 
-      const body = {
+      const body: IUserSignUpRequest = {
         name: values.name,
         email: values.email.toLowerCase().trim(),
         password: values.password,
       };
+      if (urlParams.teamId) {
+        body.team_id = urlParams.teamId;
+      }
+      if (urlParams.teamMemberId) {
+        body.team_member_id = urlParams.teamMemberId;
+      }
+      if (urlParams.projectId) {
+        body.project_id = urlParams.projectId;
+      }
 
       const res = await authApiService.signUpCheck(body);
       if (res.done) {

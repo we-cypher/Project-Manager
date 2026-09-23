@@ -203,6 +203,8 @@ function isLoggedIn(req: Request, _res: Response, next: NextFunction) {
     req.path.includes("/client-portal/handle-organization-invite") ||
     req.path.startsWith("/invite/team/") ||
     req.path.startsWith("/invite/project/") ||
+    /\/(team-members|project-members)\/invitation-link\/(validate|accept)\//.test(req.path) ||
+    /\/(team-members|project-members)\/invitation-link\/(validate|accept)\//.test(fullPath) ||
     req.path.includes("/imports/auth/asana/callback") ||
     fullPath.includes("/client-portal/invitation/") ||
     fullPath.includes("/client-portal/auth/login") ||
@@ -260,6 +262,8 @@ app.use((req, res, next) => {
   if (
     path.startsWith("/invite/team/") ||
     path.startsWith("/invite/project/") ||
+    /\/(team-members|project-members)\/invitation-link\/(validate|accept)\//.test(path) ||
+    /\/(team-members|project-members)\/invitation-link\/(validate|accept)\//.test(originalUrl) ||
     path.includes("/client-portal/invitation/") ||
     path.includes("/client-portal/handle-organization-invite") ||
     originalUrl.includes("/client-portal/invitation/") ||

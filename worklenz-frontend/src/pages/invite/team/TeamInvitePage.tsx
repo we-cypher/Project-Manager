@@ -103,17 +103,22 @@ const TeamInvitePage: React.FC = () => {
         console.log('[TeamInvite] Cleared invitation context after successful join');
 
         const teamId = response.body?.team_id;
+        const teamMemberId = response.body?.team_member_id;
 
-        // Redirect to login or dashboard after a delay
         setTimeout(() => {
           if (currentUser && teamId) {
-            // Force full page reload to refresh session with new active team
-            // Backend has already set the active team, so reload will pick it up
             console.log('[TeamInvite] Reloading to refresh session with new active team:', teamId);
             window.location.href = '/projects';
           } else if (currentUser) {
-            // Fallback: reload to pick up the active team set by backend
             window.location.href = '/projects';
+          } else if (teamId && teamMemberId) {
+            const params = new URLSearchParams({
+              email: values.email,
+              name: values.name,
+              team: teamId,
+              user: teamMemberId,
+            });
+            navigate(`/auth/signup?${params.toString()}`);
           } else {
             navigate('/auth/login', {
               state: {

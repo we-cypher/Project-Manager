@@ -1693,12 +1693,13 @@ BEGIN
 
     INSERT INTO notification_settings (user_id, team_id, email_notifications_enabled, popup_notifications_enabled,
                                        show_unread_items_count)
-    SELECT _id,
-           COALESCE((SELECT active_team FROM users WHERE id = _id),
-                    (SELECT id FROM teams WHERE user_id = _id LIMIT 1)),
-           TRUE,
-           TRUE,
-           TRUE
+    SELECT src.user_id, src.team_id, TRUE, TRUE, TRUE
+    FROM (
+             SELECT _id AS user_id,
+                    COALESCE((SELECT active_team FROM users WHERE id = _id),
+                             (SELECT id FROM teams WHERE user_id = _id LIMIT 1)) AS team_id
+         ) src
+    WHERE src.team_id IS NOT NULL
     ON CONFLICT (user_id, team_id) DO NOTHING;
 
     RETURN _result;

@@ -2598,12 +2598,28 @@ export default class TeamMembersController extends WorklenzControllerBase {
           const setActiveTeamQuery = `SELECT set_active_team($1, $2)`;
           await db.query(setActiveTeamQuery, [userId, teamId]);
         }
+
+        const memberLookup = await db.query(
+          `SELECT team_member_id
+           FROM team_member_info_view
+           WHERE LOWER(email) = LOWER($1)
+             AND team_id = $2
+           LIMIT 1`,
+          [email, teamId],
+        );
+
         return res
           .status(200)
           .send(
             new ServerResponse(
               true,
-              { team_id: teamId },
+              {
+                team_id: teamId,
+                team_member_id: memberLookup.rows[0]?.team_member_id || null,
+                email,
+                name,
+                needs_signup: !userId,
+              },
               "You are already a member of this team.",
             ),
           );
@@ -2665,7 +2681,14 @@ export default class TeamMembersController extends WorklenzControllerBase {
         .send(
           new ServerResponse(
             true,
-            { team_id: teamId, members: newMembers },
+            {
+              team_id: teamId,
+              team_member_id: newMembers?.[0]?.team_member_id || null,
+              members: newMembers,
+              email,
+              name,
+              needs_signup: !userId,
+            },
             "Successfully joined the team!",
           ),
         );
