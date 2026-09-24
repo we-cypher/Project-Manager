@@ -2,6 +2,20 @@ import db from "../config/db";
 
 export type InvitationFailureReason = "expired" | "revoked" | "limit" | "invalid";
 
+interface InvitationLinkRow {
+  id: string;
+  team_id: string;
+  project_id?: string | null;
+  expires_at?: Date | string | null;
+  max_usage?: number | null;
+  usage_count?: number | null;
+  job_title_id?: string | null;
+  role_name?: string | null;
+  is_admin?: boolean | null;
+  access_level?: string | null;
+  status?: string | null;
+}
+
 export interface InvitationLinkValidation {
   is_valid: boolean;
   link_id: string | null;
@@ -47,7 +61,9 @@ export async function validateInvitationLink(
   linkType: "team" | "project"
 ): Promise<InvitationLinkValidation> {
   const table = linkType === "team" ? "team_invitation_links" : "project_invitation_links";
-  const extraSelect = linkType === "project" ? "project_id, access_level" : "NULL::uuid AS project_id, NULL::varchar AS access_level";
+  const extraSelect = linkType === "project"
+    ? "project_id, access_level"
+    : "NULL::uuid AS project_id, NULL::varchar AS access_level";
 
   const result = await db.query(
     `SELECT
@@ -71,7 +87,7 @@ export async function validateInvitationLink(
     return invalidResult("Invalid invitation link");
   }
 
-  const row = result.rows[0];
+  const row = result.rows[0] as InvitationLinkRow;
   if (row.status !== "active") {
     return {
       ...mapRow(row),
@@ -101,13 +117,13 @@ export async function validateInvitationLink(
   };
 }
 
-function mapRow(row: any): InvitationLinkValidation {
+function mapRow(row: InvitationLinkRow): InvitationLinkValidation {
   return {
     is_valid: true,
     link_id: row.id,
     team_id: row.team_id,
     project_id: row.project_id || null,
-    expires_at: row.expires_at || null,
+    expires_at: row.expires_at ? new Date(row.expires_at) : null,
     max_usage: row.max_usage ?? null,
     usage_count: row.usage_count ?? 0,
     job_title_id: row.job_title_id || null,

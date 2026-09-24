@@ -759,6 +759,11 @@ export default class ProjectMembersController extends WorklenzControllerBase {
 
       const teamId = validation.team_id;
       const projectId = validation.project_id;
+      if (!teamId || !projectId) {
+        return res.status(200).send(
+          new ServerResponse(false, { reason: "invalid" }, "Invalid invitation link")
+        );
+      }
 
       // Get team owner ID for checking user existence
       const ownerQuery = `

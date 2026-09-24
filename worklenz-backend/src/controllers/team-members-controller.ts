@@ -2425,6 +2425,11 @@ export default class TeamMembersController extends WorklenzControllerBase {
       }
 
       const teamId = validation.team_id;
+      if (!teamId) {
+        return res
+          .status(200)
+          .send(new ServerResponse(false, { reason: "invalid" }, "Invalid invitation link"));
+      }
 
       // Get team owner ID for checking user existence
       const ownerQuery = `
