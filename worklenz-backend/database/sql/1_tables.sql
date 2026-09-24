@@ -2777,3 +2777,62 @@ CREATE INDEX IF NOT EXISTS idx_sales_deal_activities_due_at ON sales_deal_activi
 CREATE INDEX IF NOT EXISTS idx_sales_onboarding_steps_product_id ON sales_onboarding_steps (product_id);
 CREATE INDEX IF NOT EXISTS idx_user_notifications_deal_id ON user_notifications (deal_id);
 
+CREATE TABLE IF NOT EXISTS team_invitation_links (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    token TEXT NOT NULL UNIQUE,
+    created_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'expired', 'revoked')),
+    usage_count INTEGER DEFAULT 0,
+    max_usage INTEGER DEFAULT NULL,
+    job_title_id UUID REFERENCES job_titles(id) ON DELETE SET NULL,
+    role_name VARCHAR(50) DEFAULT 'MEMBER',
+    is_admin BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS project_invitation_links (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    token TEXT NOT NULL UNIQUE,
+    created_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'expired', 'revoked')),
+    usage_count INTEGER DEFAULT 0,
+    max_usage INTEGER DEFAULT NULL,
+    access_level VARCHAR(50) DEFAULT 'MEMBER',
+    job_title_id UUID REFERENCES job_titles(id) ON DELETE SET NULL,
+    role_name VARCHAR(50) DEFAULT 'MEMBER',
+    is_admin BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS invitation_link_usage (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    team_invitation_link_id UUID REFERENCES team_invitation_links(id) ON DELETE CASCADE,
+    project_invitation_link_id UUID REFERENCES project_invitation_links(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    team_member_id UUID REFERENCES team_members(id) ON DELETE CASCADE,
+    project_member_id UUID REFERENCES project_members(id) ON DELETE CASCADE,
+    email VARCHAR(255) NOT NULL,
+    name VARCHAR(255),
+    ip_address INET,
+    user_agent TEXT,
+    used_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS unique_active_team_invitation_idx
+    ON team_invitation_links (team_id)
+    WHERE status = 'active';
+
+CREATE UNIQUE INDEX IF NOT EXISTS unique_active_project_invitation_idx
+    ON project_invitation_links (project_id)
+    WHERE status = 'active';
+
+CREATE INDEX IF NOT EXISTS idx_team_invitation_links_token ON team_invitation_links(token);
+CREATE INDEX IF NOT EXISTS idx_project_invitation_links_token ON project_invitation_links(token);
+

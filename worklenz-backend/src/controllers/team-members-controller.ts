@@ -23,7 +23,7 @@ import {
   APPSUMO_PLAN_LIMIT,
 } from "../shared/constants";
 import { checkTeamSubscriptionStatus } from "../ee/shared/paddle-utils";
-import { classifyInvitationError } from "../shared/invitation-link";
+import { classifyInvitationError, validateInvitationLink } from "../shared/invitation-link";
 import { updateUsers } from "../ee/shared/paddle-requests";
 import { getTeamMemberSeatLimit, shouldEnforceTeamMemberSeatLimits } from "../ee/shared/subscription-limits";
 import {
@@ -2342,9 +2342,7 @@ export default class TeamMembersController extends WorklenzControllerBase {
     }
 
     try {
-      const q = `SELECT * FROM validate_invitation_link($1, 'team')`;
-      const result = await db.query(q, [token]);
-      const [validation] = result.rows;
+      const validation = await validateInvitationLink(token, "team");
 
       if (!validation?.is_valid) {
         const errorMessage = validation?.error_message || "Invalid invitation link";
@@ -2411,9 +2409,7 @@ export default class TeamMembersController extends WorklenzControllerBase {
 
     try {
       // Validate the invitation link
-      const validationQuery = `SELECT * FROM validate_invitation_link($1, 'team')`;
-      const validationResult = await db.query(validationQuery, [token]);
-      const [validation] = validationResult.rows;
+      const validation = await validateInvitationLink(token, "team");
 
       if (!validation?.is_valid) {
         const errorMessage = validation?.error_message || "Invalid invitation link";

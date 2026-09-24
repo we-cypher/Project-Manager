@@ -17,7 +17,7 @@ import { getGuestSeatLimit } from "../shared/guest-seat-limits";
 import { NotificationsService } from "../services/notifications/notifications.service";
 import { sendInvitationEmail } from "../shared/email-templates";
 import { hasTeamAdminPrivileges } from "../shared/team-permissions";
-import { classifyInvitationError } from "../shared/invitation-link";
+import { classifyInvitationError, validateInvitationLink } from "../shared/invitation-link";
 
 const normalizeProjectAccessLevel = (value: unknown): string => {
   const accessLevel = String(value ?? '').trim().toUpperCase();
@@ -699,9 +699,7 @@ export default class ProjectMembersController extends WorklenzControllerBase {
     }
 
     try {
-      const q = `SELECT * FROM validate_invitation_link($1, 'project')`;
-      const result = await db.query(q, [token]);
-      const [validation] = result.rows;
+      const validation = await validateInvitationLink(token, "project");
 
       if (!validation?.is_valid) {
         const errorMessage = validation?.error_message || "Invalid invitation link";
@@ -750,9 +748,7 @@ export default class ProjectMembersController extends WorklenzControllerBase {
 
     try {
       // Validate the invitation link
-      const validationQuery = `SELECT * FROM validate_invitation_link($1, 'project')`;
-      const validationResult = await db.query(validationQuery, [token]);
-      const [validation] = validationResult.rows;
+      const validation = await validateInvitationLink(token, "project");
 
       if (!validation?.is_valid) {
         const errorMessage = validation?.error_message || "Invalid invitation link";

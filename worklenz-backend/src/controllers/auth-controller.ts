@@ -19,6 +19,7 @@ import axios from "axios";
 import { log_error } from "../shared/utils";
 import { DEFAULT_ERROR_MESSAGE } from "../shared/constants";
 import { isPublicSignupDisabled, PUBLIC_SIGNUP_DISABLED_MESSAGE } from "../shared/public-signup";
+import { hasActiveEmailInvite } from "../shared/invitation-link";
 
 export default class AuthController extends WorklenzControllerBase {
   /** This just send ok response to the client when the request came here through the sign-up-validator */
@@ -37,16 +38,9 @@ export default class AuthController extends WorklenzControllerBase {
       );
     }
 
-    const result = await db.query(
-      `SELECT 1
-       FROM email_invitations
-       WHERE team_id = $1
-         AND team_member_id = $2
-       LIMIT 1`,
-      [teamId, teamMemberId]
-    );
+    const isActive = await hasActiveEmailInvite(teamId, teamMemberId);
 
-    if (!result.rowCount) {
+    if (!isActive) {
       return res.status(200).send(
         new ServerResponse(
           false,
