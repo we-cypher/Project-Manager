@@ -2777,6 +2777,20 @@ CREATE INDEX IF NOT EXISTS idx_sales_deal_activities_due_at ON sales_deal_activi
 CREATE INDEX IF NOT EXISTS idx_sales_onboarding_steps_product_id ON sales_onboarding_steps (product_id);
 CREATE INDEX IF NOT EXISTS idx_user_notifications_deal_id ON user_notifications (deal_id);
 
+CREATE TABLE IF NOT EXISTS sales_access (
+    id         UUID                     DEFAULT uuid_generate_v4() NOT NULL,
+    team_id    UUID                                                NOT NULL,
+    user_id    UUID                                                NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+    CONSTRAINT sales_access_pk PRIMARY KEY (id),
+    CONSTRAINT sales_access_team_user_unique UNIQUE (team_id, user_id),
+    CONSTRAINT sales_access_team_id_fk FOREIGN KEY (team_id) REFERENCES teams ON DELETE CASCADE,
+    CONSTRAINT sales_access_user_id_fk FOREIGN KEY (user_id) REFERENCES users ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_sales_access_team_id ON sales_access (team_id);
+CREATE INDEX IF NOT EXISTS idx_sales_access_user_id ON sales_access (user_id);
+
 CREATE TABLE IF NOT EXISTS team_invitation_links (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,

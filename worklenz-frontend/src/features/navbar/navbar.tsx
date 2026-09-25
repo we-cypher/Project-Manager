@@ -39,6 +39,7 @@ import {
 import { isTeamLeadRole, ROLE_DEFINITIONS, ROLE_NAMES } from '@/types/roles/role.types';
 import { ConnectionStatusIndicator } from '@/components/connection-status/ConnectionStatusIndicator';
 import { getSessionRoleName } from '@/utils/role-permissions.utils';
+import { useCanAccessSales } from '@/hooks/useCanAccessSales';
 
 const Navbar = () => {
   const dispatch = useAppDispatch();
@@ -54,6 +55,7 @@ const Navbar = () => {
   const authService = useAuthService();
   const currentSession = useMemo(() => authService.getCurrentSession(), [authService]);
   const isOwnerOrAdmin = useMemo(() => authService.isOwnerOrAdmin(), [authService]);
+  const { canAccess: canAccessSales } = useCanAccessSales();
   const currentRole = useMemo(() => getSessionRoleName(currentSession), [currentSession]);
   const isFreePlan = currentSession?.subscription_type === ISUBSCRIPTION_TYPE.FREE;
   const canInviteMembers = ROLE_DEFINITIONS[currentRole].canInviteMembers;
@@ -185,12 +187,13 @@ const Navbar = () => {
 
     return navRoutesList.filter(route => {
       if (route.adminOnly && !isOwnerOrAdmin) return false;
+      if (route.name === 'sales' && !canAccessSales) return false;
       if (route.selfHostedExcluded && isSelfHosted) return false;
       if (route.teamLeadOnly && !isTeamLead) return false;
       if (route.guestExcluded && shouldHideGuestHome) return false; // Hide Home for guest-only users
       return true;
     });
-  }, [navRoutesList, isOwnerOrAdmin, currentSession, shouldHideGuestHome]);
+  }, [navRoutesList, isOwnerOrAdmin, canAccessSales, currentSession, shouldHideGuestHome]);
 
   const visibleRoutes = useMemo(() => {
     return filteredRoutes

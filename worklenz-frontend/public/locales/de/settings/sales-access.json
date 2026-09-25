@@ -1,0 +1,14 @@
+{
+  "pageTitle": "Vertriebszugriff",
+  "description": "Inhaber und Admins sehen Vertrieb immer. Schalten Sie ihn für andere Personen frei, die die Pipeline sehen sollen.",
+  "nameColumn": "Name",
+  "emailColumn": "E-Mail",
+  "roleColumn": "Rolle",
+  "accessColumn": "Vertriebszugriff",
+  "accessSwitchLabel": "Vertriebszugriff für {{name}}",
+  "searchPlaceholder": "Personen suchen",
+  "loadError": "Vertriebszugriff konnte nicht geladen werden.",
+  "saveError": "Vertriebszugriff konnte nicht aktualisiert werden.",
+  "retry": "Erneut versuchen",
+  "empty": "Keine Teammitglieder gefunden."
+}

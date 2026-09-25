@@ -1,0 +1,14 @@
+{
+  "pageTitle": "销售权限",
+  "description": "所有者和管理员始终可以查看销售。为需要查看销售管道的其他人打开此权限。",
+  "nameColumn": "姓名",
+  "emailColumn": "邮箱",
+  "roleColumn": "角色",
+  "accessColumn": "销售权限",
+  "accessSwitchLabel": "{{name}} 的销售权限",
+  "searchPlaceholder": "搜索人员",
+  "loadError": "无法加载销售权限。",
+  "saveError": "无法更新销售权限。",
+  "retry": "重试",
+  "empty": "未找到团队成员。"
+}

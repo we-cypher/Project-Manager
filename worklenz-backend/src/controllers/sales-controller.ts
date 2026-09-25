@@ -903,4 +903,107 @@ export default class SalesController extends WorklenzControllerBase {
 
     return res.status(200).send(new ServerResponse(true, result.rows));
   }
+
+  private static readonly SALES_ACCESS_MEMBERS_SQL = `
+    SELECT
+      u.id AS user_id,
+      u.name,
+      u.email,
+      r.name AS role_name,
+      (COALESCE(r.owner, FALSE) OR r.name IN ('Owner', 'Admin')) AS always_allowed,
+      (
+        COALESCE(r.owner, FALSE)
+        OR r.name IN ('Owner', 'Admin')
+        OR EXISTS (
+          SELECT 1
+          FROM sales_access sa
+          WHERE sa.team_id = tm.team_id
+            AND sa.user_id = u.id
+        )
+      ) AS granted
+    FROM team_members tm
+    JOIN users u ON u.id = tm.user_id
+    JOIN roles r ON r.id = tm.role_id
+    WHERE tm.team_id = $1
+      AND COALESCE(tm.active, TRUE) = TRUE
+      AND u.is_deleted = FALSE
+    ORDER BY u.name ASC
+  `;
+
+  @HandleExceptions()
+  public static async getMyAccess(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
+    const teamId = req.user?.team_id;
+    const userId = req.user?.id;
+    if (!teamId || !userId) return res.status(400).send(new ServerResponse(false, null, "Team not found"));
+
+    if (hasTeamAdminPrivileges(req.user)) {
+      return res.status(200).send(new ServerResponse(true, { can_access: true }));
+    }
+
+    const result = await db.query(
+      `SELECT EXISTS(
+         SELECT 1 FROM sales_access WHERE team_id = $1::UUID AND user_id = $2::UUID
+       ) AS granted`,
+      [teamId, userId]
+    );
+
+    return res.status(200).send(new ServerResponse(true, { can_access: !!result.rows[0]?.granted }));
+  }
+
+  @HandleExceptions()
+  public static async getAccessMembers(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
+    const teamId = req.user?.team_id;
+    if (!teamId) return res.status(400).send(new ServerResponse(false, null, "Team not found"));
+
+    const result = await db.query(SalesController.SALES_ACCESS_MEMBERS_SQL, [teamId]);
+    return res.status(200).send(new ServerResponse(true, result.rows));
+  }
+
+  @HandleExceptions()
+  public static async updateAccess(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
+    const teamId = req.user?.team_id;
+    if (!teamId) return res.status(400).send(new ServerResponse(false, null, "Team not found"));
+
+    const rawIds = req.body?.user_ids;
+    if (!Array.isArray(rawIds)) {
+      return res.status(400).send(new ServerResponse(false, null, "user_ids must be an array"));
+    }
+
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const userIds = [...new Set(rawIds.map((id: unknown) => String(id)))];
+    if (userIds.some(id => !uuidPattern.test(id))) {
+      return res.status(400).send(new ServerResponse(false, null, "user_ids must be UUIDs"));
+    }
+
+    const client = await db.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query(`DELETE FROM sales_access WHERE team_id = $1`, [teamId]);
+      if (userIds.length) {
+        await client.query(
+          `INSERT INTO sales_access (team_id, user_id)
+           SELECT $1, u.id
+           FROM unnest($2::uuid[]) AS requested(id)
+           JOIN team_members tm
+             ON tm.user_id = requested.id
+            AND tm.team_id = $1
+            AND COALESCE(tm.active, TRUE) = TRUE
+           JOIN users u ON u.id = tm.user_id AND u.is_deleted = FALSE
+           JOIN roles r ON r.id = tm.role_id
+           WHERE NOT (COALESCE(r.owner, FALSE) OR r.name IN ('Owner', 'Admin'))
+           ON CONFLICT (team_id, user_id) DO NOTHING`,
+          [teamId, userIds]
+        );
+      }
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+
+    const result = await db.query(SalesController.SALES_ACCESS_MEMBERS_SQL, [teamId]);
+    return res.status(200).send(new ServerResponse(true, result.rows));
+  }
 }

@@ -17,6 +17,7 @@ import PlannerTimelineView from '@/features/schedule/PlannerTimelineView';
 import PlannerWorkloadView from '@/features/schedule/PlannerWorkloadView';
 import { ControlOutlined, CalendarOutlined, InboxOutlined } from '@ant-design/icons';
 import GuestRedirect from '@/guards/GuestRedirect';
+import { useCanAccessSales } from '@/hooks/useCanAccessSales';
 
 // Lazy load page components for better code splitting with chunk error handling
 const HomeLayout = lazy(
@@ -223,6 +224,20 @@ const AdminGuard = ({ children }: { children: React.ReactNode }) => {
   }
 };
 
+const SalesAccessGuard = ({ children }: { children: React.ReactNode }) => {
+  const { canAccess, isLoading } = useCanAccessSales();
+
+  if (isLoading) {
+    return <SuspenseFallback />;
+  }
+
+  if (!canAccess) {
+    return <Navigate to="/home" replace />;
+  }
+
+  return <>{children}</>;
+};
+
 // Define TeamLeadGuard component
 const TeamLeadGuard = ({ children }: { children: React.ReactNode }) => {
   const authService = useAuthService();
@@ -371,7 +386,11 @@ const FINANCE_BASE_PATH = '/finance';const mainRoutes: RouteObject[] = [
       },
       {
         path: 'sales',
-        element: <SimpleRailLayout surfaceKey="sales" />,
+        element: (
+          <SalesAccessGuard>
+            <SimpleRailLayout surfaceKey="sales" />
+          </SalesAccessGuard>
+        ),
         children: [
           {
             index: true,
@@ -394,9 +413,11 @@ const FINANCE_BASE_PATH = '/finance';const mainRoutes: RouteObject[] = [
       {
         path: 'sales/:dealId',
         element: (
-          <Suspense fallback={<SuspenseFallback />}>
-            <SalesDealPage />
-          </Suspense>
+          <SalesAccessGuard>
+            <Suspense fallback={<SuspenseFallback />}>
+              <SalesDealPage />
+            </Suspense>
+          </SalesAccessGuard>
         ),
       },
       {

@@ -19,7 +19,7 @@ import {
   ApiOutlined,
   UsergroupAddOutlined,
 } from '@/shared/antd-imports';
-import { MobileOutlined, SwapOutlined } from '@ant-design/icons';
+import { MobileOutlined, ShopOutlined, SwapOutlined } from '@ant-design/icons';
 import React, { ReactNode, lazy } from 'react';
 import { ILocalSession } from '@/types/auth/local-session.types';
 import { hasBusinessFeatureAccess } from '@/ee/utils/subscription-utils';
@@ -41,6 +41,9 @@ const TaskTemplatesSettings = lazy(
 );
 const TeamMembersSettings = lazy(
   () => import('@/pages/settings/team-members/team-members-settings')
+);
+const SalesAccessSettings = lazy(
+  () => import('@/pages/settings/sales-access/sales-access-settings')
 );
 const GuestMembersSettings = lazy(
   () => import('@/pages/settings/guest-members/guest-members-settings')
@@ -220,6 +223,17 @@ export const settingsItems: SettingMenuItem[] = [
     groupDefaultValue: 'Workspace Setup',
     icon: React.createElement(TeamOutlined),
     element: React.createElement(TeamMembersSettings),
+    adminOnly: true,
+  },
+  {
+    key: 'sales-access',
+    name: 'sales-access',
+    defaultValue: 'Sales access',
+    endpoint: 'sales-access',
+    groupKey: 'workspace-setup',
+    groupDefaultValue: 'Workspace Setup',
+    icon: React.createElement(ShopOutlined),
+    element: React.createElement(SalesAccessSettings),
     adminOnly: true,
   },
   {

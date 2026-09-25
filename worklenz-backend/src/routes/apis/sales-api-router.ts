@@ -2,9 +2,25 @@ import express from "express";
 
 import SalesController from "../../controllers/sales-controller";
 import idParamValidator from "../../middlewares/validators/id-param-validator";
+import requireSalesAccess from "../../middlewares/validators/require-sales-access";
+import teamOwnerOrAdminValidator from "../../middlewares/validators/team-owner-or-admin-validator";
 import safeControllerFunction from "../../shared/safe-controller-function";
 
 const salesApiRouter = express.Router();
+
+salesApiRouter.get("/access", safeControllerFunction(SalesController.getMyAccess));
+salesApiRouter.get(
+  "/access/members",
+  teamOwnerOrAdminValidator,
+  safeControllerFunction(SalesController.getAccessMembers)
+);
+salesApiRouter.put(
+  "/access",
+  teamOwnerOrAdminValidator,
+  safeControllerFunction(SalesController.updateAccess)
+);
+
+salesApiRouter.use(requireSalesAccess);
 
 salesApiRouter.get("/deals", safeControllerFunction(SalesController.getDeals));
 salesApiRouter.post("/deals", safeControllerFunction(SalesController.createDeal));

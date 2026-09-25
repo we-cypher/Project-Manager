@@ -178,4 +178,30 @@ export const salesApiService = {
     );
     return response.data;
   },
+
+  async getMyAccess(): Promise<IServerResponse<{ can_access: boolean }>> {
+    const response = await apiClient.get<IServerResponse<{ can_access: boolean }>>(`${rootUrl}/access`);
+    return response.data;
+  },
+
+  async getAccessMembers(): Promise<IServerResponse<ISalesAccessMember[]>> {
+    const response = await apiClient.get<IServerResponse<ISalesAccessMember[]>>(`${rootUrl}/access/members`);
+    return response.data;
+  },
+
+  async updateAccess(userIds: string[]): Promise<IServerResponse<ISalesAccessMember[]>> {
+    const response = await apiClient.put<IServerResponse<ISalesAccessMember[]>>(`${rootUrl}/access`, {
+      user_ids: userIds,
+    });
+    return response.data;
+  },
 };
+
+export interface ISalesAccessMember {
+  user_id: string;
+  name: string;
+  email: string;
+  role_name: string;
+  always_allowed: boolean;
+  granted: boolean;
+}

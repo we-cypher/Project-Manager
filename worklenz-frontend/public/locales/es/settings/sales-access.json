@@ -1,0 +1,14 @@
+{
+  "pageTitle": "Acceso a ventas",
+  "description": "Los propietarios y administradores siempre ven Ventas. Actívelo para las demás personas que deban ver el pipeline.",
+  "nameColumn": "Nombre",
+  "emailColumn": "Correo",
+  "roleColumn": "Rol",
+  "accessColumn": "Acceso a ventas",
+  "accessSwitchLabel": "Acceso a ventas para {{name}}",
+  "searchPlaceholder": "Buscar personas",
+  "loadError": "No se pudo cargar el acceso a ventas.",
+  "saveError": "No se pudo actualizar el acceso a ventas.",
+  "retry": "Reintentar",
+  "empty": "No se encontraron miembros del equipo."
+}

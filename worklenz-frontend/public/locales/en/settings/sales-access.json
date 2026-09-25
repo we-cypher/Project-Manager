@@ -1,0 +1,14 @@
+{
+  "pageTitle": "Sales access",
+  "description": "Owners and admins always see Sales. Turn it on for other people who should see the pipeline.",
+  "nameColumn": "Name",
+  "emailColumn": "Email",
+  "roleColumn": "Role",
+  "accessColumn": "Sales access",
+  "accessSwitchLabel": "Sales access for {{name}}",
+  "searchPlaceholder": "Search people",
+  "loadError": "Could not load Sales access.",
+  "saveError": "Could not update Sales access.",
+  "retry": "Retry",
+  "empty": "No team members found."
+}

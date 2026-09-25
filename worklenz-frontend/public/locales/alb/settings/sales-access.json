@@ -1,0 +1,14 @@
+{
+  "pageTitle": "Qasja te shitjet",
+  "description": "Pronarët dhe administratorët i shohin gjithmonë Shitjet. Aktivizojeni për persona të tjerë që duhet të shohin pipeline-in.",
+  "nameColumn": "Emri",
+  "emailColumn": "Email",
+  "roleColumn": "Roli",
+  "accessColumn": "Qasja te shitjet",
+  "accessSwitchLabel": "Qasja te shitjet për {{name}}",
+  "searchPlaceholder": "Kërko persona",
+  "loadError": "Qasja te shitjet nuk u ngarkua.",
+  "saveError": "Qasja te shitjet nuk u përditësua.",
+  "retry": "Provo përsëri",
+  "empty": "Nuk u gjetën anëtarë të ekipit."
+}
