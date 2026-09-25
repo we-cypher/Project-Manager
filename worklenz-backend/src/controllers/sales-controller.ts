@@ -4,6 +4,7 @@ import { IWorkLenzRequest } from "../interfaces/worklenz-request";
 import { IWorkLenzResponse } from "../interfaces/worklenz-response";
 import { ServerResponse } from "../models/server-response";
 import WorklenzControllerBase from "./worklenz-controller-base";
+import { ensureSalesAccessTable } from "../shared/ensure-sales-access-table";
 import { hasTeamAdminPrivileges } from "../shared/team-permissions";
 import { LOG_DESCRIPTIONS } from "../shared/constants";
 import { generateProjectKey } from "../utils/generate-project-key";
@@ -936,6 +937,8 @@ export default class SalesController extends WorklenzControllerBase {
     const userId = req.user?.id;
     if (!teamId || !userId) return res.status(400).send(new ServerResponse(false, null, "Team not found"));
 
+    await ensureSalesAccessTable();
+
     if (hasTeamAdminPrivileges(req.user)) {
       return res.status(200).send(new ServerResponse(true, { can_access: true }));
     }
@@ -955,6 +958,7 @@ export default class SalesController extends WorklenzControllerBase {
     const teamId = req.user?.team_id;
     if (!teamId) return res.status(400).send(new ServerResponse(false, null, "Team not found"));
 
+    await ensureSalesAccessTable();
     const result = await db.query(SalesController.SALES_ACCESS_MEMBERS_SQL, [teamId]);
     return res.status(200).send(new ServerResponse(true, result.rows));
   }
@@ -963,6 +967,8 @@ export default class SalesController extends WorklenzControllerBase {
   public static async updateAccess(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
     const teamId = req.user?.team_id;
     if (!teamId) return res.status(400).send(new ServerResponse(false, null, "Team not found"));
+
+    await ensureSalesAccessTable();
 
     const rawIds = req.body?.user_ids;
     if (!Array.isArray(rawIds)) {

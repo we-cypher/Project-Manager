@@ -4,6 +4,7 @@ import db from "../../config/db";
 import { IWorkLenzRequest } from "../../interfaces/worklenz-request";
 import { IWorkLenzResponse } from "../../interfaces/worklenz-response";
 import { ServerResponse } from "../../models/server-response";
+import { ensureSalesAccessTable } from "../../shared/ensure-sales-access-table";
 import { hasTeamAdminPrivileges } from "../../shared/team-permissions";
 
 export default async function requireSalesAccess(
@@ -23,6 +24,7 @@ export default async function requireSalesAccess(
   }
 
   try {
+    await ensureSalesAccessTable();
     const result = await db.query(
       `SELECT EXISTS(
          SELECT 1
