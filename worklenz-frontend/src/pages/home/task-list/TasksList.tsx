@@ -21,6 +21,14 @@ import { useDebouncedMediaQuery } from '@/hooks/useDebouncedMediaQuery';
 import ListView from './ListView';
 import HomeAddTaskModal from './HomeAddTaskModal';
 import PillToggle from '../PillToggle';
+import AvatarGroup from '@/components/AvatarGroup';
+import {
+  groupFromScope,
+  HOME_TASKS_EVERYONE,
+  scopeFromGroup,
+  canSeeTeamTasks,
+  type HomeTaskScope,
+} from '../home-task-scope';
 import { WorklenzLogoLoader } from '@/components/worklenz-loader/worklenz-loader';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
@@ -111,7 +119,7 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
     refetchOnFocus: false,
   });
 
-  const { t, ready } = useTranslation('home');
+  const { t } = useTranslation('home');
   const { priorities } = useAppSelector(state => state.priorityReducer);
   const isMobile = useDebouncedMediaQuery({ query: '(max-width: 768px)' });
 
@@ -266,6 +274,32 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
           </Typography.Paragraph>
         ),
       },
+      ...(homeTasksConfig.tasks_group_by === HOME_TASKS_EVERYONE
+        ? [{
+            key: 'assignee',
+            title: t('tasks.assignee', { defaultValue: 'Assignee' }),
+            width: '14%',
+            render: (_: unknown, record: IMyTask) => {
+              const members = record.assignees?.length ? record.assignees : (record.names || []);
+              if (!members.length) {
+                return <span style={{ color: token.colorTextDisabled, fontSize: 12 }}>—</span>;
+              }
+              return (
+                <AvatarGroup
+                  members={members.map(member => ({
+                    team_member_id: member.team_member_id,
+                    name: member.name,
+                    avatar_url: 'avatar_url' in member ? member.avatar_url : undefined,
+                    color_code: 'color_code' in member ? member.color_code : undefined,
+                  }))}
+                  maxCount={3}
+                  size={26}
+                  isDarkMode={themeMode === 'dark'}
+                />
+              );
+            },
+          }]
+        : []),
       {
         key: 'status',
         title: t('tasks.status', { defaultValue: 'Status' }),
@@ -315,11 +349,21 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
         ),
       },
     ],
-    [t, currentPage, pageSize, handleSelectTask, isMobile, themeMode, renderSortableTitle, projectFilterOptions, priorityFilterOptions, selectedProjectIds, selectedPriorityIds]
+    [t, currentPage, pageSize, handleSelectTask, isMobile, themeMode, renderSortableTitle, projectFilterOptions, priorityFilterOptions, selectedProjectIds, selectedPriorityIds, homeTasksConfig.tasks_group_by, token.colorTextDisabled]
   );
 
-  const handleTaskModeChange = (value: number) => {
-    dispatch(setHomeTasksConfig({ ...homeTasksConfig, tasks_group_by: value }));
+  const showAssignee = homeTasksConfig.tasks_group_by === HOME_TASKS_EVERYONE;
+  const taskScope = scopeFromGroup(homeTasksConfig.tasks_group_by);
+  const scopeOptions: { value: HomeTaskScope; label: string }[] = [
+    ...(canSeeTeamTasks()
+      ? [{ value: 'everyone' as const, label: t('tasks.everyone', { defaultValue: 'Everyone' }) }]
+      : []),
+    { value: 'to', label: t('tasks.assignedToMe', { defaultValue: 'Assigned to me' }) },
+    { value: 'by', label: t('tasks.assignedByMe', { defaultValue: 'Assigned by me' }) },
+  ];
+
+  const handleTaskModeChange = (value: HomeTaskScope) => {
+    dispatch(setHomeTasksConfig({ ...homeTasksConfig, tasks_group_by: groupFromScope(value) }));
     setCurrentPage(1);
   };
 
@@ -358,13 +402,10 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
       >
         <div style={{ fontSize: 14, fontWeight: 600 }}>{cardTitle || t('tasks.tasks', { defaultValue: 'Tasks' })}</div>
         <Flex gap={8} align="center" className="task-list-mobile-controls">
-          <PillToggle<'to' | 'by'>
-            value={homeTasksConfig.tasks_group_by === 1 ? 'by' : 'to'}
-            onChange={v => handleTaskModeChange(v === 'by' ? 1 : 0)}
-             options={[
-               { value: 'to', label: ready ? t('tasks.assignedToMe', { defaultValue: 'Assigned to me' }) : 'Assigned to me' },
-               { value: 'by', label: ready ? t('tasks.assignedByMe', { defaultValue: 'Assigned by me' }) : 'Assigned by me' },
-             ]}
+          <PillToggle<HomeTaskScope>
+            value={taskScope}
+            onChange={handleTaskModeChange}
+            options={scopeOptions}
           />
         </Flex>
       </div>

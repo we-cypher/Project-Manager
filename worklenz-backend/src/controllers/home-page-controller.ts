@@ -34,6 +34,8 @@ export default class HomePageController extends WorklenzControllerBase {
   private static readonly GROUP_BY_ASSIGNED_TO_ME = "0";
   private static readonly GROUP_BY_ASSIGN_BY_ME = "1";
   private static readonly GROUP_BY_ALL = "2";
+  // Every open task in the current team. Honored only for the owner and admins.
+  private static readonly GROUP_BY_EVERYONE = "3";
   private static readonly ALL_TAB = "All";
   private static readonly TODAY_TAB = "Today";
   private static readonly UPCOMING_TAB = "Upcoming";
@@ -58,6 +60,20 @@ export default class HomePageController extends WorklenzControllerBase {
     return groupBy === this.GROUP_BY_ASSIGNED_TO_ME
       || groupBy === this.GROUP_BY_ASSIGN_BY_ME
       || groupBy === this.GROUP_BY_ALL;
+  }
+
+  private static canSeeTeamTasks(req: IWorkLenzRequest) {
+    return !!(req.user?.owner || req.user?.is_admin);
+  }
+
+  // group_by=3 is team-wide. Anyone else who sends it is treated as
+  // assigned-to-me so a member cannot read the rest of the team's tasks.
+  private static resolveGroup(req: IWorkLenzRequest): string {
+    const groupBy = req.query.group_by as string;
+    if (groupBy === this.GROUP_BY_EVERYONE) {
+      return this.canSeeTeamTasks(req) ? this.GROUP_BY_EVERYONE : this.GROUP_BY_ASSIGNED_TO_ME;
+    }
+    return this.isValidGroup(groupBy) ? groupBy : this.GROUP_BY_ASSIGNED_TO_ME;
   }
 
   private static isValidView(currentView: string) {
@@ -108,6 +124,10 @@ export default class HomePageController extends WorklenzControllerBase {
                         SELECT task_id
                         FROM tasks_assignees
                         WHERE assigned_by = $2))`;
+
+      // Team-wide. The caller's query already restricts to p.team_id = $1.
+      case this.GROUP_BY_EVERYONE:
+        return "";
 
       case this.GROUP_BY_ASSIGNED_TO_ME:
       default:
@@ -338,7 +358,7 @@ export default class HomePageController extends WorklenzControllerBase {
     const teamId = req.user?.team_id as string;
     const userId = req.user?.id as string;
 
-    const currentGroup = this.isValidGroup(req.query.group_by as string) ? req.query.group_by : this.GROUP_BY_ASSIGNED_TO_ME;
+    const currentGroup = this.resolveGroup(req);
     const groupByClosure = this.getTasksByGroupClosure(currentGroup as string);
 
     const baseWhere = `
@@ -415,7 +435,7 @@ export default class HomePageController extends WorklenzControllerBase {
     const userId = req.user?.id;
     const timeZone = normalizeTimezone((req.query.time_zone as string) || "UTC");
 
-    const currentGroup = this.isValidGroup(req.query.group_by as string) ? req.query.group_by : this.GROUP_BY_ASSIGNED_TO_ME;
+    const currentGroup = this.resolveGroup(req);
     const groupByClosure = this.getTasksByGroupClosure(currentGroup as string);
 
     // Same status-category method the reporting module uses for its project
@@ -529,7 +549,7 @@ export default class HomePageController extends WorklenzControllerBase {
     const timeZone = normalizeTimezone((req.query.time_zone as string) || "UTC");
     const today = new Date();
 
-    const currentGroup = this.isValidGroup(req.query.group_by as string) ? req.query.group_by : this.GROUP_BY_ASSIGNED_TO_ME;
+    const currentGroup = this.resolveGroup(req);
     const groupByClosure = this.getTasksByGroupClosure(currentGroup as string);
     const params = [teamId, userId];
 
@@ -621,7 +641,7 @@ export default class HomePageController extends WorklenzControllerBase {
     const timeZone = normalizeTimezone((req.query.time_zone as string) || "UTC");
     const today = new Date();
 
-    const currentGroup = this.isValidGroup(req.query.group_by as string) ? req.query.group_by : this.GROUP_BY_ASSIGNED_TO_ME;
+    const currentGroup = this.resolveGroup(req);
     const currentTab = this.isValidView(req.query.current_tab as string) ? req.query.current_tab : this.ALL_TAB;
 
     const groupByClosure = this.getTasksByGroupClosure(currentGroup as string);
@@ -804,9 +824,7 @@ export default class HomePageController extends WorklenzControllerBase {
     const teamId = req.user?.team_id;
     const userId = req.user?.id;
     const month = req.query.month as string; // Format: YYYY-MM
-    const currentGroup = this.isValidGroup(req.query.group_by as string)
-      ? req.query.group_by
-      : this.GROUP_BY_ASSIGNED_TO_ME;
+    const currentGroup = this.resolveGroup(req);
 
     const groupByClosure = this.getTasksByGroupClosure(currentGroup as string);
 
@@ -849,9 +867,7 @@ export default class HomePageController extends WorklenzControllerBase {
     const startDate = req.query.start_date as string;
     const endDate = req.query.end_date as string;
 
-    const currentGroup = this.isValidGroup(req.query.group_by as string)
-      ? req.query.group_by
-      : this.GROUP_BY_ASSIGNED_TO_ME;
+    const currentGroup = this.resolveGroup(req);
 
     const groupByClosure = this.getTasksByGroupClosure(currentGroup as string);
 

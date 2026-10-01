@@ -5,6 +5,7 @@ import { useGetMyProgressQuery } from '@/api/home-page/home-page.api.service';
 import { WorklenzLogoLoader } from '@/components/worklenz-loader/worklenz-loader';
 import { Tooltip, InfoCircleOutlined, theme } from '@/shared/antd-imports';
 import type { HomePeriod } from '../HomeOverviewView';
+import { HOME_TASKS_EVERYONE } from '../home-task-scope';
 import { useTranslation } from 'react-i18next';
 
 const DONUT_SIZE = 120;
@@ -28,17 +29,29 @@ interface HomeProgressDonutProps {
 
 const HomeProgressDonut: React.FC<HomeProgressDonutProps> = ({ period }) => {
   const { token } = theme.useToken();
-  // Synced with the Priorities card's assigned-to-me/assigned-by-me toggle
+  // Synced with the Priorities card toggle (Everyone / assigned to me / assigned by me)
   // so the two cards always agree on whose tasks they're counting.
   const tasksGroupBy = useAppSelector(state => state.homePageReducer.homeTasksConfig.tasks_group_by);
   const { data } = useGetMyProgressQuery({ group_by: tasksGroupBy, time_zone: TIME_ZONE });
   const { t } = useTranslation('home');
 
-  const title = period === 'today' ? t('progressDonut.myProgressToday', { defaultValue: 'My Progress Today' }) : t('progressDonut.myProgressThisWeek', { defaultValue: 'My Progress This Week' });
+  const isTeamScope = tasksGroupBy === HOME_TASKS_EVERYONE;
+  const title = isTeamScope
+    ? (period === 'today'
+        ? t('progressDonut.teamProgressToday', { defaultValue: 'Team Progress Today' })
+        : t('progressDonut.teamProgressThisWeek', { defaultValue: 'Team Progress This Week' }))
+    : (period === 'today'
+        ? t('progressDonut.myProgressToday', { defaultValue: 'My Progress Today' })
+        : t('progressDonut.myProgressThisWeek', { defaultValue: 'My Progress This Week' }));
   const periodWord = period === 'today' ? 'today' : 'this week';
   const counts = period === 'today' ? data?.body?.today : data?.body?.week;
 
-  const titleTooltip = t('progressDonut.titleTooltip', { periodWord, defaultValue: 'Progress breakdown for {{periodWord}}.' });
+  const titleTooltip = isTeamScope
+    ? t('progressDonut.teamTitleTooltip', {
+        periodWord,
+        defaultValue: 'Every open or done task in the team with a due date {{periodWord}}, based on your local calendar day.',
+      })
+    : t('progressDonut.titleTooltip', { periodWord, defaultValue: 'Progress breakdown for {{periodWord}}.' });
 
   const titleRow = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 600, marginBottom: 16 }}>
@@ -88,7 +101,13 @@ const HomeProgressDonut: React.FC<HomeProgressDonutProps> = ({ period }) => {
     { label: t('progressDonut.toDo', { defaultValue: 'To Do' }), count: counts.todo, color: '#faad14' },
   ].filter(s => s.count > 0);
 
-  const assignedLabel = period === 'today' ? t('progressDonut.assignedToday', { defaultValue: 'Assigned Today' }) : t('progressDonut.assignedThisWeek', { defaultValue: 'Assigned This Week' });
+  const assignedLabel = isTeamScope
+    ? (period === 'today'
+        ? t('progressDonut.dueToday', { defaultValue: 'Due today' })
+        : t('progressDonut.dueThisWeek', { defaultValue: 'Due this week' }))
+    : (period === 'today'
+        ? t('progressDonut.assignedToday', { defaultValue: 'Assigned Today' })
+        : t('progressDonut.assignedThisWeek', { defaultValue: 'Assigned This Week' }));
   let cumPos = 0;
 
   return (

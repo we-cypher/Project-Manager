@@ -4,6 +4,7 @@ import { useGetUserTimeLoggedSummaryQuery } from '@/api/home-page/user-activity.
 import { useGetTaskStatsQuery } from '@/api/home-page/home-page.api.service';
 import { theme, Tooltip, InfoCircleOutlined } from '@/shared/antd-imports';
 import type { HomePeriod } from '../HomeOverviewView';
+import { HOME_TASKS_EVERYONE } from '../home-task-scope';
 import { useTranslation } from 'react-i18next';
 
 const TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
@@ -61,9 +62,16 @@ const HomeStatCards: React.FC<HomeStatCardsProps> = ({ period }) => {
   };
 
   const periodWord = period === 'today' ? 'today' : 'this week';
-  const tasksTooltip = t('statCards.tasksTooltip', { periodWord, defaultValue: 'Total tasks assigned for {{periodWord}}.' });
-  const overdueTooltip = t('statCards.overdueTooltip', { defaultValue: 'Tasks past their due date.' });
-  const completedTooltip = t('statCards.completedTooltip', { periodWord, defaultValue: 'Tasks completed {{periodWord}}.' });
+  const isTeamScope = groupBy === HOME_TASKS_EVERYONE;
+  const tasksTooltip = isTeamScope
+    ? t('statCards.teamTasksTooltip', { periodWord, defaultValue: 'Open tasks across the team with a due date {{periodWord}}. Tasks already marked Done are excluded.' })
+    : t('statCards.tasksTooltip', { periodWord, defaultValue: 'Total tasks assigned for {{periodWord}}.' });
+  const overdueTooltip = isTeamScope
+    ? t('statCards.teamOverdueTooltip', { defaultValue: 'Open tasks across the team whose due date has passed.' })
+    : t('statCards.overdueTooltip', { defaultValue: 'Tasks past their due date.' });
+  const completedTooltip = isTeamScope
+    ? t('statCards.teamCompletedTooltip', { periodWord, defaultValue: 'Tasks anyone on the team moved to a Done status {{periodWord}}.' })
+    : t('statCards.completedTooltip', { periodWord, defaultValue: 'Tasks completed {{periodWord}}.' });
   const focusTimeTooltip = t('statCards.focusTimeTooltip', { periodWord, defaultValue: 'Time spent on tasks {{periodWord}}.' });
 
   const cards: StatCard[] =

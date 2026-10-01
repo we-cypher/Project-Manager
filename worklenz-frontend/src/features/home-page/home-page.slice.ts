@@ -12,6 +12,7 @@ import { ITaskListGroup } from '@/types/tasks/taskList.types';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
+import { defaultHomeTasksGroupBy } from '@/pages/home/home-task-scope';
 
 const getActiveProjectsFilter = () => +(localStorage.getItem(MY_DASHBOARD_ACTIVE_FILTER) || 0);
 
@@ -47,7 +48,7 @@ const initialState: IHomePageState = {
   homeTasksLoading: false,
   homeTasksUpdating: false,
   homeTasksConfig: {
-    tasks_group_by: 0,
+    tasks_group_by: defaultHomeTasksGroupBy(),
     current_view: getActiveProjectsFilter(),
     current_tab: MY_DASHBOARD_DEFAULT_VIEW,
     is_calendar_view: getActiveProjectsFilter() !== 0,

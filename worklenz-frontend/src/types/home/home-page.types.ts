@@ -4,7 +4,7 @@ import type { Dayjs } from 'dayjs';
 export interface IHomeTasksConfig {
   current_tab: string | null; // active tab in list view
   selected_date: Dayjs | null; // selected date in calendar view
-  tasks_group_by: number; // tasks assigned to me / assigned by me
+  tasks_group_by: number; // 0 assigned to me, 1 assigned by me, 2 both, 3 everyone (owner/admin)
   current_view: number; // list view or calendar view
   is_calendar_view: boolean;
   time_zone: string;

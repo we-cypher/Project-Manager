@@ -27,6 +27,12 @@ import { setProjectId } from '@/features/project/project.slice';
 import { IHomeCalendarTask } from '@/types/home/home-page.types';
 import HomeAddTaskModal from '@/pages/home/task-list/HomeAddTaskModal';
 import PillToggle from '@/pages/home/PillToggle';
+import {
+  canSeeTeamTasks,
+  groupFromScope,
+  scopeFromGroup,
+  type HomeTaskScope,
+} from '@/pages/home/home-task-scope';
 import MultiSelectFilterDropdown from './MultiSelectFilterDropdown';
 import './homeCalendar.css';
 
@@ -96,7 +102,7 @@ const HomeCalendar = () => {
     {
       start_date: rangeStart.format('YYYY-MM-DD'),
       end_date: rangeEnd.format('YYYY-MM-DD'),
-      group_by: homeTasksConfig.tasks_group_by || 0,
+      group_by: homeTasksConfig.tasks_group_by ?? 0,
       time_zone: homeTasksConfig.time_zone || Intl.DateTimeFormat().resolvedOptions().timeZone,
     },
     { refetchOnMountOrArgChange: true }
@@ -199,9 +205,18 @@ const HomeCalendar = () => {
     dispatch(setHomeTasksConfig({ ...homeTasksConfig, selected_date: date }));
   };
 
-  const handleTaskModeChange = (value: 'to' | 'by') => {
-    dispatch(setHomeTasksConfig({ ...homeTasksConfig, tasks_group_by: value === 'by' ? 1 : 0 }));
+  const handleTaskModeChange = (value: HomeTaskScope) => {
+    dispatch(setHomeTasksConfig({ ...homeTasksConfig, tasks_group_by: groupFromScope(value) }));
   };
+
+  const taskScope = scopeFromGroup(homeTasksConfig.tasks_group_by);
+  const scopeOptions: { value: HomeTaskScope; label: string }[] = [
+    ...(canSeeTeamTasks()
+      ? [{ value: 'everyone' as const, label: t('tasks.everyone', { defaultValue: 'Everyone' }) }]
+      : []),
+    { value: 'to', label: t('tasks.assignedToMe', { defaultValue: 'Assigned to me' }) },
+    { value: 'by', label: t('tasks.assignedByMe', { defaultValue: 'Assigned by me' }) },
+  ];
 
   const renderDaySummary = useCallback(
     (dayTasks: IHomeCalendarTask[], date: Dayjs) => {
@@ -507,13 +522,10 @@ const HomeCalendar = () => {
 
         <div className="home-calendar-toolbar-spacer" />
 
-        <PillToggle<'to' | 'by'>
-          value={homeTasksConfig.tasks_group_by === 1 ? 'by' : 'to'}
+        <PillToggle<HomeTaskScope>
+          value={taskScope}
           onChange={handleTaskModeChange}
-          options={[
-            { value: 'to', label: t('tasks.assignedToMe', { defaultValue: 'Assigned to me' }) },
-            { value: 'by', label: t('tasks.assignedByMe', { defaultValue: 'Assigned by me' }) },
-          ]}
+          options={scopeOptions}
         />
 
         <MultiSelectFilterDropdown
