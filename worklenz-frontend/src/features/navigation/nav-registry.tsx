@@ -339,6 +339,11 @@ export const SALES_NAV_SURFACE: NavSurface = {
           label: { i18nNs: 'sales-sidebar', i18nKey: 'products', defaultValue: 'Products' },
           icon: <ShopOutlined />,
         },
+        {
+          key: 'add-client',
+          label: { i18nNs: 'sales-sidebar', i18nKey: 'addClient', defaultValue: 'Add Client' },
+          icon: <UserAddOutlined />,
+        },
       ],
     },
   ],

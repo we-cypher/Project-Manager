@@ -6,15 +6,15 @@ import ClientPortalInvoicesController from "../../ee/controllers/client-portal/c
 import clientsBodyValidator from "../../middlewares/validators/clients-body-validator";
 import idParamValidator from "../../middlewares/validators/id-param-validator";
 import teamOwnerOrAdminValidator from "../../middlewares/validators/team-owner-or-admin-validator";
+import requireClientCreateAccess from "../../middlewares/validators/require-client-create-access";
 import safeControllerFunction from "../../shared/safe-controller-function";
-import projectManagerValidator from "../../middlewares/validators/project-manager-validator";
 import chatIdParamValidator from "../../middlewares/validators/chat-id-param-validator";
 import phoneNumberValidator from "../../middlewares/validators/phone-number-validator";
 import { requireBusinessPlan } from "../../ee/middlewares/subscription-middleware";
 
 const clientsApiRouter = express.Router();
 
-clientsApiRouter.post("/", projectManagerValidator, clientsBodyValidator, safeControllerFunction(ClientsController.create));
+clientsApiRouter.post("/", requireClientCreateAccess, clientsBodyValidator, safeControllerFunction(ClientsController.create));
 clientsApiRouter.get("/", safeControllerFunction(ClientsController.get));
 // Lightweight lookup for filter dropdowns — must be declared before /:id so Express
 // does not treat the literal string "lookup" as an id parameter value.

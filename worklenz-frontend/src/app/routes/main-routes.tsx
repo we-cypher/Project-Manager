@@ -408,6 +408,14 @@ const FINANCE_BASE_PATH = '/finance';const mainRoutes: RouteObject[] = [
               </Suspense>
             ),
           },
+          {
+            path: 'add-client',
+            element: (
+              <Suspense fallback={<SuspenseFallback />}>
+                <HomeAddClient embedded />
+              </Suspense>
+            ),
+          },
         ],
       },
       {

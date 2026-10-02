@@ -7,6 +7,23 @@ import { ServerResponse } from "../../models/server-response";
 import { ensureSalesAccessTable } from "../../shared/ensure-sales-access-table";
 import { hasTeamAdminPrivileges } from "../../shared/team-permissions";
 
+export async function userHasSalesAccess(userId?: string, teamId?: string): Promise<boolean> {
+  if (!userId || !teamId) return false;
+
+  await ensureSalesAccessTable();
+  const result = await db.query(
+    `SELECT EXISTS(
+       SELECT 1
+       FROM sales_access
+       WHERE team_id = $1::UUID
+         AND user_id = $2::UUID
+     ) AS granted`,
+    [teamId, userId]
+  );
+
+  return Boolean(result.rows[0]?.granted);
+}
+
 export default async function requireSalesAccess(
   req: IWorkLenzRequest,
   res: IWorkLenzResponse,
@@ -24,18 +41,7 @@ export default async function requireSalesAccess(
   }
 
   try {
-    await ensureSalesAccessTable();
-    const result = await db.query(
-      `SELECT EXISTS(
-         SELECT 1
-         FROM sales_access
-         WHERE team_id = $1::UUID
-           AND user_id = $2::UUID
-       ) AS granted`,
-      [teamId, userId]
-    );
-
-    if (result.rows[0]?.granted) {
+    if (await userHasSalesAccess(userId, teamId)) {
       return next();
     }
 

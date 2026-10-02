@@ -54,7 +54,11 @@ const getCreateClientErrorMessage = (
   );
 };
 
-const HomeAddClient: React.FC = () => {
+interface HomeAddClientProps {
+  embedded?: boolean;
+}
+
+const HomeAddClient: React.FC<HomeAddClientProps> = ({ embedded = false }) => {
   const { token } = theme.useToken();
   const { t } = useTranslation(['home', 'client-portal-clients']);
   const dispatch = useAppDispatch();
@@ -149,7 +153,7 @@ const HomeAddClient: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: 24 }}>
+    <div style={{ padding: embedded ? 0 : 24 }}>
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>
           {t('addClient.pageTitle', { defaultValue: 'Add New Client' })}
