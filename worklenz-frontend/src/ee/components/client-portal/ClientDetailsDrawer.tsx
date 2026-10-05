@@ -35,6 +35,7 @@ import {
   UpdateClientRequest,
   useLazyGetClientDetailsQuery,
   useDeactivateClientMutation,
+  useDeleteClientMutation,
   useUpdateClientMutation,
 } from '../../api/client-portal/client-portal-api';
 import { useEffect } from 'react';
@@ -108,6 +109,7 @@ const ClientDetailsDrawer = () => {
   const clientStats = client?.stats;
 
   const [deactivateClient, { isLoading: isDeactivating }] = useDeactivateClientMutation();
+  const [deleteClient, { isLoading: isDeleting }] = useDeleteClientMutation();
   const [updateClient, { isLoading: isUpdating }] = useUpdateClientMutation();
 
   const [form] = Form.useForm();
@@ -202,6 +204,32 @@ const ClientDetailsDrawer = () => {
     }
   };
 
+  const handleDeleteClient = () => {
+    if (!selectedClientId) return;
+    Modal.confirm({
+      title: t('deleteConfirmationTitle', { defaultValue: 'Delete Client' }),
+      content: t('deleteConfirmationDescription', {
+        defaultValue: 'Are you sure you want to delete this client? This action cannot be undone.',
+      }),
+      okText: t('deleteConfirmationOk', { defaultValue: 'Delete' }),
+      cancelText: t('deleteConfirmationCancel', { defaultValue: 'Cancel' }),
+      okType: 'danger',
+      onOk: async () => {
+        try {
+          await deleteClient(selectedClientId).unwrap();
+          message.success(t('deleteClientSuccessMessage', { defaultValue: 'Client deleted successfully' }));
+          handleClose();
+        } catch (error: unknown) {
+          const apiError = error as { data?: { message?: string } };
+          message.error(
+            apiError?.data?.message ||
+              t('deleteClientErrorMessage', { defaultValue: 'Failed to delete client' })
+          );
+        }
+      },
+    });
+  };
+
   const handleActivateClient = async () => {
     if (!selectedClientId) return;
     try {
@@ -228,25 +256,33 @@ const ClientDetailsDrawer = () => {
     }
   };
 
-  const moreMenuItems =
-    client?.status === 'inactive'
+  const moreMenuItems = [
+    ...(client?.status === 'inactive'
       ? [
-        {
-          key: 'activate',
-          label: t('activateButton') || 'Activate Client',
-          icon: <EditOutlined />,
-          onClick: handleActivateClient,
-        },
-      ]
+          {
+            key: 'activate',
+            label: t('activateButton') || 'Activate Client',
+            icon: <EditOutlined />,
+            onClick: handleActivateClient,
+          },
+        ]
       : [
-        {
-          key: 'deactivate',
-          label: t('deactivateButton') || 'Deactivate Client',
-          icon: <DeleteOutlined />,
-          danger: true,
-          onClick: handleDeactivateClient,
-        },
-      ];
+          {
+            key: 'deactivate',
+            label: t('deactivateButton') || 'Deactivate Client',
+            icon: <DeleteOutlined />,
+            danger: true,
+            onClick: handleDeactivateClient,
+          },
+        ]),
+    {
+      key: 'delete',
+      label: t('deleteTooltip', { defaultValue: 'Delete' }),
+      icon: <DeleteOutlined />,
+      danger: true,
+      onClick: handleDeleteClient,
+    },
+  ];
 
   if (!selectedClientId || !isClientDetailsDrawerOpen) return null;
 
@@ -295,7 +331,7 @@ const ClientDetailsDrawer = () => {
             <Button
               type="text"
               icon={<MoreOutlined />}
-              loading={isDeactivating}
+              loading={isDeactivating || isDeleting}
               onClick={e => e.stopPropagation()}
             />
           </Dropdown>
@@ -357,7 +393,6 @@ const ClientDetailsDrawer = () => {
                 name="email"
                 label={t('emailLabel') || 'Email'}
                 rules={[
-                  { required: true, message: t('emailRequired') || 'Please enter email' },
                   { type: 'email', message: t('emailInvalid') || 'Enter a valid email' },
                 ]}
               >

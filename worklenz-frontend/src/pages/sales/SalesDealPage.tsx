@@ -19,12 +19,16 @@ import {
   message,
   theme,
 } from '@/shared/antd-imports';
-import { ArrowLeftOutlined, PlusOutlined } from '@/shared/antd-imports';
+import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, PlusOutlined } from '@/shared/antd-imports';
 import dayjs from 'dayjs';
+import { createPortal } from 'react-dom';
 import { useDocumentTitle } from '@/hooks/useDoumentTItle';
 import { useAuthService } from '@/hooks/useAuth';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { clientsApiService } from '@/api/clients/clients.api.service';
 import { salesApiService } from '@/api/sales/sales.api.service';
+import { toggleClientDetailsDrawer } from '@/ee/features/clients-portal/clients/clients-slice';
+import ClientDetailsDrawer from '@/ee/components/client-portal/ClientDetailsDrawer';
 import type { IClient } from '@/types/client.types';
 import {
   ISalesActivity,
@@ -63,10 +67,12 @@ export const SalesDealPage = () => {
   const [linkOpen, setLinkOpen] = useState(false);
   const [activityOpen, setActivityOpen] = useState(false);
   const [activityType, setActivityType] = useState<SalesActivityType>('task');
+  const [editingActivity, setEditingActivity] = useState<ISalesActivity | null>(null);
   const [lostReason, setLostReason] = useState('');
   const [linkProjectId, setLinkProjectId] = useState<string>();
   const [form] = Form.useForm();
   const [activityForm] = Form.useForm();
+  const dispatch = useAppDispatch();
 
   useDocumentTitle(deal?.name || t('title', { defaultValue: 'Sales' }));
 
@@ -186,29 +192,60 @@ export const SalesDealPage = () => {
     }
   };
 
-  const handleAddActivity = async () => {
+  const closeActivityModal = () => {
+    setActivityOpen(false);
+    setEditingActivity(null);
+    activityForm.resetFields();
+  };
+
+  const handleSaveActivity = async () => {
     if (!dealId) return;
     const values = await activityForm.validateFields();
-    const res = await salesApiService.createActivity(dealId, {
+    const payload = {
       type: activityType,
       title: values.title,
       description: values.description,
       due_at: values.due_at ? dayjs(values.due_at).toISOString() : null,
-      assigned_to: values.assigned_to,
-    });
+      assigned_to: values.assigned_to || null,
+    };
+
+    const res = editingActivity
+      ? await salesApiService.updateActivity(editingActivity.id, payload)
+      : await salesApiService.createActivity(dealId, payload);
+
     if (res.done) {
-      message.success(t('activityAdded', { defaultValue: 'Follow-up added' }));
-      setActivityOpen(false);
-      activityForm.resetFields();
+      message.success(
+        editingActivity
+          ? t('activityUpdated', { defaultValue: 'Follow-up updated' })
+          : t('activityAdded', { defaultValue: 'Follow-up added' })
+      );
+      closeActivityModal();
       void load();
     } else {
-      message.error(res.message || t('loadError', { defaultValue: 'Could not add follow-up' }));
+      message.error(res.message || t('loadError', { defaultValue: 'Could not save follow-up' }));
     }
   };
 
   const toggleComplete = async (activity: ISalesActivity, completed: boolean) => {
     const res = await salesApiService.updateActivity(activity.id, { completed });
     if (res.done) void load();
+  };
+
+  const handleDeleteActivity = (activity: ISalesActivity) => {
+    Modal.confirm({
+      title: t('deleteActivityConfirm', { defaultValue: 'Delete this follow-up?' }),
+      okText: t('deleteActivity', { defaultValue: 'Delete' }),
+      okType: 'danger',
+      onOk: async () => {
+        const res = await salesApiService.deleteActivity(activity.id);
+        if (res.done) {
+          message.success(t('activityDeleted', { defaultValue: 'Follow-up deleted' }));
+          void load();
+        } else {
+          message.error(res.message || t('loadError', { defaultValue: 'Could not delete follow-up' }));
+        }
+      },
+    });
   };
 
   const handleDelete = async () => {
@@ -223,10 +260,28 @@ export const SalesDealPage = () => {
   };
 
   const openActivity = (type: SalesActivityType) => {
+    setEditingActivity(null);
     setActivityType(type);
     activityForm.resetFields();
     activityForm.setFieldsValue({ assigned_to: deal?.owner_id });
     setActivityOpen(true);
+  };
+
+  const openEditActivity = (activity: ISalesActivity) => {
+    setEditingActivity(activity);
+    setActivityType(activity.type);
+    activityForm.resetFields();
+    activityForm.setFieldsValue({
+      title: activity.title,
+      description: activity.description,
+      assigned_to: activity.assigned_to,
+      due_at: activity.due_at ? dayjs(activity.due_at) : null,
+    });
+    setActivityOpen(true);
+  };
+
+  const handleViewClient = (clientId: string) => {
+    dispatch(toggleClientDetailsDrawer(clientId));
   };
 
   if (!deal) return null;
@@ -299,6 +354,7 @@ export const SalesDealPage = () => {
             clients={clients}
             dealType={dealType}
             onDealTypeChange={setDealType}
+            onViewClient={handleViewClient}
             defaultCurrency={orgCurrency}
           />
           <Flex justify="space-between" align="center">
@@ -341,23 +397,42 @@ export const SalesDealPage = () => {
               items={activities.map(activity => ({
                 color: activity.completed_at ? 'green' : 'blue',
                 children: (
-                  <Flex gap={8} align="flex-start">
-                    <Checkbox
-                      checked={!!activity.completed_at}
-                      onChange={event => void toggleComplete(activity, event.target.checked)}
-                    />
-                    <div>
-                      <Text delete={!!activity.completed_at} strong>
-                        {activity.title}
-                      </Text>
+                  <Flex gap={8} align="flex-start" justify="space-between">
+                    <Flex gap={8} align="flex-start" style={{ flex: 1, minWidth: 0 }}>
+                      <Checkbox
+                        checked={!!activity.completed_at}
+                        onChange={event => void toggleComplete(activity, event.target.checked)}
+                      />
                       <div>
-                        <Tag>{t(`activityTypes.${activity.type}`, { defaultValue: activity.type })}</Tag>
-                        {activity.due_at ? <Text type="secondary">{dayjs(activity.due_at).format('MMM D, YYYY HH:mm')}</Text> : null}
+                        <Text delete={!!activity.completed_at} strong>
+                          {activity.title}
+                        </Text>
+                        <div>
+                          <Tag>{t(`activityTypes.${activity.type}`, { defaultValue: activity.type })}</Tag>
+                          {activity.due_at ? <Text type="secondary">{dayjs(activity.due_at).format('MMM D, YYYY HH:mm')}</Text> : null}
+                        </div>
+                        {activity.assigned_to_name ? (
+                          <Text type="secondary">{activity.assigned_to_name}</Text>
+                        ) : null}
                       </div>
-                      {activity.assigned_to_name ? (
-                        <Text type="secondary">{activity.assigned_to_name}</Text>
-                      ) : null}
-                    </div>
+                    </Flex>
+                    <Space size={0} onClick={event => event.stopPropagation()}>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<EditOutlined />}
+                        aria-label={t('editActivity', { defaultValue: 'Edit' })}
+                        onClick={() => openEditActivity(activity)}
+                      />
+                      <Button
+                        type="text"
+                        size="small"
+                        danger
+                        icon={<DeleteOutlined />}
+                        aria-label={t('deleteActivity', { defaultValue: 'Delete' })}
+                        onClick={() => handleDeleteActivity(activity)}
+                      />
+                    </Space>
                   </Flex>
                 ),
               }))}
@@ -398,12 +473,14 @@ export const SalesDealPage = () => {
         />
       </Modal>
 
+      {createPortal(<ClientDetailsDrawer />, document.body)}
+
       <Modal
         title={t(`activityTypes.${activityType}`, { defaultValue: activityType })}
         open={activityOpen}
-        onCancel={() => setActivityOpen(false)}
-        onOk={() => void handleAddActivity()}
-        okText={t('create', { defaultValue: 'Create' })}
+        onCancel={closeActivityModal}
+        onOk={() => void handleSaveActivity()}
+        okText={editingActivity ? t('save', { defaultValue: 'Save' }) : t('create', { defaultValue: 'Create' })}
       >
         <Form form={activityForm} layout="vertical">
           <Form.Item name="type" hidden>

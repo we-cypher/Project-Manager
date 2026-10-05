@@ -5,14 +5,26 @@ import {
   Empty,
   Flex,
   Input,
+  Modal,
   Select,
+  Space,
   Table,
   TableProps,
   Tag,
+  Tooltip,
   theme,
   Typography,
+  message,
+  DeleteOutlined,
+  EditOutlined,
 } from '@/shared/antd-imports';
-import { ClientPortalClient, useGetClientsQuery } from '@/ee/api/client-portal/client-portal-api';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { toggleEditClientDrawer } from '@/ee/features/clients-portal/clients/clients-slice';
+import {
+  ClientPortalClient,
+  useDeleteClientMutation,
+  useGetClientsQuery,
+} from '@/ee/api/client-portal/client-portal-api';
 import dayjs from 'dayjs';
 
 const { Search } = Input;
@@ -46,6 +58,8 @@ const getPortalStatus = (
 const HomeClientsTable: React.FC<HomeClientsTableProps> = ({ onCreateClick }) => {
   const { t } = useTranslation(['home', 'client-portal-clients']);
   const { token } = theme.useToken();
+  const dispatch = useAppDispatch();
+  const [deleteClient, { isLoading: isDeleting }] = useDeleteClientMutation();
 
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
@@ -87,6 +101,43 @@ const HomeClientsTable: React.FC<HomeClientsTableProps> = ({ onCreateClick }) =>
       setSortBy(sort.field as string);
       setSortOrder(sort.order === 'ascend' ? 'asc' : 'desc');
     }
+  };
+
+  const handleEdit = (clientId: string) => {
+    dispatch(toggleEditClientDrawer(clientId));
+  };
+
+  const handleDelete = (record: ClientPortalClient) => {
+    Modal.confirm({
+      title: t('deleteConfirmationTitle', { ns: 'client-portal-clients', defaultValue: 'Delete Client' }),
+      content: t('deleteConfirmationDescription', {
+        ns: 'client-portal-clients',
+        defaultValue: 'Are you sure you want to delete this client? This action cannot be undone.',
+      }),
+      okText: t('deleteConfirmationOk', { ns: 'client-portal-clients', defaultValue: 'Delete' }),
+      cancelText: t('deleteConfirmationCancel', { ns: 'client-portal-clients', defaultValue: 'Cancel' }),
+      okType: 'danger',
+      onOk: async () => {
+        try {
+          await deleteClient(record.id).unwrap();
+          message.success(
+            t('deleteClientSuccessMessage', {
+              ns: 'client-portal-clients',
+              defaultValue: 'Client deleted successfully',
+            })
+          );
+        } catch (error: unknown) {
+          const apiError = error as { data?: { message?: string } };
+          message.error(
+            apiError?.data?.message ||
+              t('deleteClientErrorMessage', {
+                ns: 'client-portal-clients',
+                defaultValue: 'Failed to delete client',
+              })
+          );
+        }
+      },
+    });
   };
 
   const columns: TableProps<ClientPortalClient>['columns'] = [
@@ -143,6 +194,35 @@ const HomeClientsTable: React.FC<HomeClientsTableProps> = ({ onCreateClick }) =>
       sorter: true,
       render: (value: string) => (value ? dayjs(value).format('MMM D, YYYY') : '-'),
       width: 120,
+    },
+    {
+      key: 'actions',
+      title: t('actionBtnsColumn', { ns: 'client-portal-clients', defaultValue: 'Actions' }),
+      width: 100,
+      render: (_, record) => (
+        <Space size={4} onClick={event => event.stopPropagation()}>
+          <Tooltip title={t('editClientTooltip', { ns: 'client-portal-clients', defaultValue: 'Edit Client' })}>
+            <Button
+              size="small"
+              type="text"
+              icon={<EditOutlined />}
+              aria-label={t('editClientTooltip', { ns: 'client-portal-clients', defaultValue: 'Edit Client' })}
+              onClick={() => handleEdit(record.id)}
+            />
+          </Tooltip>
+          <Tooltip title={t('deleteTooltip', { ns: 'client-portal-clients', defaultValue: 'Delete' })}>
+            <Button
+              size="small"
+              type="text"
+              danger
+              icon={<DeleteOutlined />}
+              loading={isDeleting}
+              aria-label={t('deleteTooltip', { ns: 'client-portal-clients', defaultValue: 'Delete' })}
+              onClick={() => handleDelete(record)}
+            />
+          </Tooltip>
+        </Space>
+      ),
     },
   ];
 
@@ -228,6 +308,10 @@ const HomeClientsTable: React.FC<HomeClientsTableProps> = ({ onCreateClick }) =>
           size="small"
           loading={isFetching}
           onChange={handleTableChange}
+          onRow={record => ({
+            onClick: () => handleEdit(record.id),
+            style: { cursor: 'pointer' },
+          })}
           scroll={{ x: 'max-content' }}
           pagination={{
             current: page,

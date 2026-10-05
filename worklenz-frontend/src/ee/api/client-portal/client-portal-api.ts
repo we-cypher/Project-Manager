@@ -1107,7 +1107,8 @@ export const clientPortalApi = createApi({
     deactivateClient: builder.mutation<void, string>({
       query: id => ({
         url: `/clients/portal/clients/${id}`,
-        method: 'DELETE',
+        method: 'PUT',
+        body: { status: 'inactive' },
       }),
       invalidatesTags: ['Clients'],
       // Optimistically mark the client as inactive so the Activate/Deactivate
@@ -1137,6 +1138,14 @@ export const clientPortalApi = createApi({
           patches.forEach(p => (p as any).undo?.());
         }
       },
+    }),
+
+    deleteClient: builder.mutation<void, string>({
+      query: id => ({
+        url: `/clients/portal/clients/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Clients'],
     }),
 
     // Client Projects
@@ -1515,6 +1524,7 @@ export const {
   useCreateClientMutation,
   useUpdateClientMutation,
   useDeactivateClientMutation,
+  useDeleteClientMutation,
 
   // Client Projects
   useGetClientProjectsQuery,

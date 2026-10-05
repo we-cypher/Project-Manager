@@ -1132,40 +1132,57 @@ export default class ClientPortalClientsController extends ClientPortalControlle
 
       await dbClient.query("BEGIN");
 
-      // Deactivate the client instead of deleting (soft delete)
-      const deactivateResult = await dbClient.query(
-        "UPDATE clients SET status = 'inactive', updated_at = NOW() WHERE id = $1 AND team_id = $2",
+      const optionalStatements = [
+        "UPDATE client_portal_attachments SET uploaded_by_client_id = NULL WHERE uploaded_by_client_id = $1",
+        "DELETE FROM client_portal_invoice_items WHERE invoice_id IN (SELECT id FROM client_portal_invoices WHERE client_id = $1)",
+        "DELETE FROM client_portal_invoices WHERE client_id = $1",
+        "DELETE FROM client_portal_request_comments WHERE client_id = $1",
+        "DELETE FROM client_portal_requests WHERE client_id = $1",
+        "DELETE FROM client_portal_chat_messages WHERE client_id = $1",
+        "DELETE FROM client_portal_chats WHERE client_id = $1",
+        "DELETE FROM client_portal_task_comments WHERE client_id = $1",
+        "DELETE FROM client_portal_notification_reads WHERE client_id = $1",
+        "DELETE FROM client_task_views WHERE client_id = $1",
+        "DELETE FROM client_users WHERE client_id = $1",
+        "DELETE FROM client_invitations WHERE client_id = $1",
+        "DELETE FROM client_portal_access WHERE client_id = $1",
+      ];
+
+      for (const statement of optionalStatements) {
+        await dbClient.query("SAVEPOINT client_delete_cleanup");
+        try {
+          await dbClient.query(statement, [id]);
+          await dbClient.query("RELEASE SAVEPOINT client_delete_cleanup");
+        } catch (cleanupError) {
+          await dbClient.query("ROLLBACK TO SAVEPOINT client_delete_cleanup");
+          const code = (cleanupError as { code?: string }).code;
+          if (code !== "42P01" && code !== "42703") {
+            throw cleanupError;
+          }
+        }
+      }
+
+      const deleteResult = await dbClient.query(
+        "DELETE FROM clients WHERE id = $1 AND team_id = $2",
         [id, teamId]
       );
 
-      if (deactivateResult.rowCount === 0) {
+      if (deleteResult.rowCount === 0) {
         await dbClient.query("ROLLBACK");
         return res
           .status(404)
           .json(new ServerResponse(false, null, "Client not found"));
       }
 
-      // Also deactivate all client users for this client
-      await dbClient.query(
-        "UPDATE client_users SET status = 'inactive' WHERE client_id = $1",
-        [id]
-      );
-
-      // Deactivate client portal access
-      await dbClient.query(
-        "UPDATE client_portal_access SET is_active = FALSE, updated_at = NOW() WHERE client_id = $1",
-        [id]
-      );
-
       await dbClient.query("COMMIT");
 
-      return res.json(new ServerResponse(true, null, "Client deactivated successfully"));
+      return res.json(new ServerResponse(true, null, "Client deleted successfully"));
     } catch (error) {
       await dbClient.query("ROLLBACK").catch(() => void 0);
-      console.error("Error deactivating client:", error);
+      console.error("Error deleting client:", error);
       return res
         .status(500)
-        .json(new ServerResponse(false, null, "Failed to deactivate client"));
+        .json(new ServerResponse(false, null, "Failed to delete client"));
     } finally {
       dbClient.release();
     }

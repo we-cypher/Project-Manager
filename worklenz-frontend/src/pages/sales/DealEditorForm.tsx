@@ -1,4 +1,4 @@
-import { DatePicker, Form, Input, InputNumber, Select } from '@/shared/antd-imports';
+import { Button, DatePicker, Flex, Form, Input, InputNumber, Select, Typography } from '@/shared/antd-imports';
 import type { FormInstance } from 'antd/es/form';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
@@ -13,6 +13,7 @@ interface DealEditorFormProps {
   clients: IClient[];
   dealType: SalesDealType;
   onDealTypeChange: (value: SalesDealType) => void;
+  onViewClient?: (clientId: string) => void;
   defaultCurrency?: string;
 }
 
@@ -23,12 +24,15 @@ export const DealEditorForm = ({
   clients,
   dealType,
   onDealTypeChange,
+  onViewClient,
   defaultCurrency = 'INR',
 }: DealEditorFormProps) => {
   const { t } = useTranslation('sales');
   const saasProducts = products.filter(product => product.kind === 'saas');
   const serviceProducts = products.filter(product => product.kind === 'service');
   const productOptions = dealType === 'saas' ? saasProducts : serviceProducts;
+  const selectedClientId = Form.useWatch('client_id', form) as string | undefined;
+  const selectedClient = clients.find(client => client.id === selectedClientId);
 
   return (
     <Form form={form} layout="vertical">
@@ -81,6 +85,34 @@ export const DealEditorForm = ({
             .map(client => ({ value: client.id, label: client.name }))}
         />
       </Form.Item>
+      {selectedClient ? (
+        <Flex vertical gap={4} style={{ marginTop: -12, marginBottom: 16 }}>
+          {selectedClient.contact_person ? (
+            <Typography.Text type="secondary">
+              {t('contactName', { defaultValue: 'Contact name' })}: {selectedClient.contact_person}
+            </Typography.Text>
+          ) : null}
+          {selectedClient.email ? (
+            <Typography.Text type="secondary">
+              {t('contactEmail', { defaultValue: 'Email' })}: {selectedClient.email}
+            </Typography.Text>
+          ) : null}
+          {selectedClient.phone ? (
+            <Typography.Text type="secondary">
+              {t('contactPhone', { defaultValue: 'Phone' })}: {selectedClient.phone}
+            </Typography.Text>
+          ) : null}
+          {onViewClient ? (
+            <Button
+              type="link"
+              style={{ padding: 0, height: 'auto', alignSelf: 'flex-start' }}
+              onClick={() => onViewClient(selectedClient.id as string)}
+            >
+              {t('viewClientDetails', { defaultValue: 'View client details' })}
+            </Button>
+          ) : null}
+        </Flex>
+      ) : null}
       <Form.Item name="contact_name" label={t('contactName', { defaultValue: 'Contact name' })}>
         <Input />
       </Form.Item>

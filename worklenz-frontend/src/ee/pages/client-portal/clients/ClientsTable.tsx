@@ -57,6 +57,7 @@ import { ClientPortalClient } from '@/ee/api/client-portal/client-portal-api';
 import {
   useGetClientsQuery,
   useDeactivateClientMutation,
+  useDeleteClientMutation,
   useUpdateClientMutation,
   useBulkDeactivateClientsMutation,
   useBulkUpdateClientsMutation,
@@ -160,6 +161,7 @@ const ClientsTable = () => {
   });
 
   const [deactivateClient, { isLoading: isDeactivating }] = useDeactivateClientMutation();
+  const [deleteClient, { isLoading: isDeleting }] = useDeleteClientMutation();
   const [updateClient, { isLoading: isUpdating }] = useUpdateClientMutation();
   const [bulkDeactivateClients, { isLoading: isBulkDeactivating }] =
     useBulkDeactivateClientsMutation();
@@ -346,6 +348,32 @@ const ClientsTable = () => {
         t('activateClientErrorMessage', { defaultValue: 'Failed to activate client' })
       );
     }
+  };
+
+  const handleDeleteClientWithConfirmation = (clientId: string) => {
+    Modal.confirm({
+      title: t('deleteConfirmationTitle', { defaultValue: 'Delete Client' }),
+      content: t('deleteConfirmationDescription', {
+        defaultValue: 'Are you sure you want to delete this client? This action cannot be undone.',
+      }),
+      okText: t('deleteConfirmationOk', { defaultValue: 'Delete' }),
+      cancelText: t('deleteConfirmationCancel', { defaultValue: 'Cancel' }),
+      okType: 'danger',
+      onOk: async () => {
+        try {
+          await deleteClient(clientId).unwrap();
+          message.success(
+            t('deleteClientSuccessMessage', { defaultValue: 'Client deleted successfully' })
+          );
+        } catch (error: unknown) {
+          const apiError = error as { data?: { message?: string } };
+          message.error(
+            apiError?.data?.message ||
+              t('deleteClientErrorMessage', { defaultValue: 'Failed to delete client' })
+          );
+        }
+      },
+    });
   };
 
   // Handle deactivate client with confirmation
@@ -846,7 +874,16 @@ const ClientsTable = () => {
           onClick: () => {
             handleDeactivateClientWithConfirmation(record.id);
           },
-        }
+        },
+      {
+        key: 'delete',
+        label: t('deleteTooltip', { defaultValue: 'Delete' }),
+        icon: <DeleteOutlined />,
+        danger: true,
+        onClick: () => {
+          handleDeleteClientWithConfirmation(record.id);
+        },
+      }
     );
 
     return menuItems;
@@ -961,16 +998,40 @@ const ClientsTable = () => {
       render: (_, record) => (
         <div
           className="action-buttons-container"
-          style={{ opacity: 0, transition: 'opacity 0.2s' }}
+          style={{ opacity: 1 }}
           onClick={e => e.stopPropagation()}
         >
-          <Dropdown
-            menu={{ items: getActionMenuItems(record) }}
-            trigger={['click']}
-            placement="bottomRight"
-          >
-            <Button shape="default" icon={<MoreOutlined />} size="small" type="text" />
-          </Dropdown>
+          <Space size={4}>
+            <Tooltip title={t('editClientTooltip', { defaultValue: 'Edit Client' })}>
+              <Button
+                shape="default"
+                icon={<EditOutlined />}
+                size="small"
+                type="text"
+                aria-label={t('editClientTooltip', { defaultValue: 'Edit Client' })}
+                onClick={() => dispatch(toggleEditClientDrawer(record.id))}
+              />
+            </Tooltip>
+            <Tooltip title={t('deleteTooltip', { defaultValue: 'Delete' })}>
+              <Button
+                shape="default"
+                icon={<DeleteOutlined />}
+                size="small"
+                type="text"
+                danger
+                loading={isDeleting}
+                aria-label={t('deleteTooltip', { defaultValue: 'Delete' })}
+                onClick={() => handleDeleteClientWithConfirmation(record.id)}
+              />
+            </Tooltip>
+            <Dropdown
+              menu={{ items: getActionMenuItems(record) }}
+              trigger={['click']}
+              placement="bottomRight"
+            >
+              <Button shape="default" icon={<MoreOutlined />} size="small" type="text" />
+            </Dropdown>
+          </Space>
         </div>
       ),
       onCell: () => ({

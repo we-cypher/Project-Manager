@@ -28,6 +28,8 @@ import { hasBusinessFeatureAccess } from '@/ee/utils/subscription-utils';
 import { showUpgradePrompt } from '@/features/admin-center/admin-center.slice';
 import { useResponsive } from '@/hooks/useResponsive';
 import dayjs from 'dayjs';
+import { createPortal } from 'react-dom';
+import ClientDetailsDrawer from '@/ee/components/client-portal/ClientDetailsDrawer';
 import HomeClientsTable from './HomeClientsTable';
 
 const getCreateClientErrorMessage = (
@@ -476,6 +478,7 @@ const HomeAddClient: React.FC<HomeAddClientProps> = ({ embedded = false }) => {
           <HomeClientsTable onCreateClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })} />
         </div>
       </div>
+      {createPortal(<ClientDetailsDrawer />, document.body)}
     </div>
   );
 };
