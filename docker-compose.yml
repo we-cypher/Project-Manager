@@ -41,7 +41,7 @@ services:
       start_period: 40s
 
   minio:
-    image: minio/minio:latest
+    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -54,7 +54,7 @@ services:
     command: server /data --console-address ":9001"
 
   createbuckets:
-    image: minio/mc
+    image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
     depends_on:
       - minio
     restart: unless-stopped
