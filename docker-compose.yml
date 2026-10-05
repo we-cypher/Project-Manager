@@ -41,7 +41,8 @@ services:
       start_period: 40s
 
   minio:
-    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+    image: cgr.dev/chainguard/minio:latest
+    user: "0:0"
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -54,7 +55,7 @@ services:
     command: server /data --console-address ":9001"
 
   createbuckets:
-    image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
+    image: cgr.dev/chainguard/minio-client:latest-dev
     depends_on:
       - minio
     restart: unless-stopped
@@ -64,10 +65,10 @@ services:
         sleep 15;
         for i in 1 2 3 4 5; do
           echo "Attempt $$i to connect to MinIO...";
-          if /usr/bin/mc alias set myminio http://minio:9000 ${AWS_ACCESS_KEY_ID:-minioadmin} ${AWS_SECRET_ACCESS_KEY:-minioadmin}; then
+          if mc alias set myminio http://minio:9000 ${AWS_ACCESS_KEY_ID:-minioadmin} ${AWS_SECRET_ACCESS_KEY:-minioadmin}; then
             echo "Successfully connected to MinIO!";
-            /usr/bin/mc mb --ignore-existing myminio/worklenz-bucket;
-            /usr/bin/mc policy set public myminio/worklenz-bucket;
+            mc mb --ignore-existing myminio/worklenz-bucket;
+            mc anonymous set public myminio/worklenz-bucket || mc policy set public myminio/worklenz-bucket;
             echo "Bucket setup complete. Sleeping...";
             tail -f /dev/null;
           fi
