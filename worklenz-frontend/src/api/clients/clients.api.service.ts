@@ -7,9 +7,8 @@ import { toQueryString } from '@/utils/toQueryString';
 const rootUrl = `${API_BASE_URL}/clients`;
 
 export const clientsApiService = {
-  // Lightweight lookup for filter dropdowns — returns {id, name} for all clients
-  // in the current team. Supports server-side search via the optional `search` param
-  // so the result is never capped to an arbitrary page size.
+  // Lightweight lookup for filter dropdowns — id, name, and contact fields for the current team.
+  // Supports server-side search via the optional `search` param so the result is never capped.
   async getClientsLookup(search?: string): Promise<IServerResponse<IClient[]>> {
     const params: Record<string, string> = {};
     if (search && search.trim()) params['search'] = search.trim();

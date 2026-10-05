@@ -75,6 +75,7 @@ export const DealEditorForm = ({
           allowClear
           showSearch
           optionFilterProp="label"
+          onChange={clientId => fillContactFromClient(form, clients, clientId)}
           options={clients
             .filter((client): client is IClient & { id: string; name: string } => Boolean(client.id && client.name))
             .map(client => ({ value: client.id, label: client.name }))}
@@ -119,4 +120,19 @@ export const DealEditorForm = ({
       </Form.Item>
     </Form>
   );
+};
+
+const fillContactFromClient = (
+  form: FormInstance,
+  clients: IClient[],
+  clientId: string | undefined
+) => {
+  if (!clientId) return;
+  const client = clients.find(item => item.id === clientId);
+  if (!client) return;
+  form.setFieldsValue({
+    contact_name: client.contact_person?.trim() || client.name || '',
+    contact_email: client.email?.trim() || '',
+    contact_phone: client.phone?.trim() || '',
+  });
 };

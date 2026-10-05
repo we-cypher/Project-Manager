@@ -50,7 +50,7 @@ export default class ClientsController extends WorklenzControllerBase {
     if (search) params.push(`%${search}%`);
 
     const q = `
-      SELECT id, name
+      SELECT id, name, email, phone, contact_person, company_name
       FROM clients
       WHERE team_id = $1 ${searchCondition}
       ORDER BY name ASC
