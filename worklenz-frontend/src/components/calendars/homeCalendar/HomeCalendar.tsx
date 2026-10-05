@@ -334,6 +334,56 @@ const HomeCalendar = () => {
     [openTaskDrawer, t]
   );
 
+  const renderWeekTaskList = useCallback(
+    (dayTasks: IHomeCalendarTask[]) => {
+      if (!dayTasks.length) {
+        return (
+          <span className="home-calendar-week-empty">
+            {t('homeCalendar.addHint', { defaultValue: '+ Add' })}
+          </span>
+        );
+      }
+
+      const sorted = [...dayTasks].sort((a, b) => {
+        const rank = (task: IHomeCalendarTask) => (task.is_completed ? 2 : task.is_doing ? 1 : 0);
+        return rank(a) - rank(b);
+      });
+
+      return (
+        <div className="home-calendar-week-task-list">
+          {sorted.map(task => {
+            const assigneeName =
+              taskScope === 'everyone' ? task.assignees?.map(person => person.name).filter(Boolean).join(', ') : '';
+            return (
+              <button
+                type="button"
+                key={task.id}
+                className={`home-calendar-week-task${task.is_completed ? ' home-calendar-week-task-done' : ''}`}
+                onClick={event => {
+                  event.stopPropagation();
+                  openTaskDrawer(task);
+                }}
+              >
+                <span
+                  className="home-calendar-week-task-bar"
+                  style={{ backgroundColor: task.status_color || '#8c8c8c' }}
+                />
+                <span className="home-calendar-week-task-body">
+                  <span className="home-calendar-week-task-name">{task.name}</span>
+                  {task.project_name ? (
+                    <span className="home-calendar-week-task-meta">{task.project_name}</span>
+                  ) : null}
+                  {assigneeName ? <span className="home-calendar-week-task-meta">{assigneeName}</span> : null}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      );
+    },
+    [openTaskDrawer, t, taskScope]
+  );
+
   const navTitle =
     calView === 'year'
       ? cursor.format('YYYY')
@@ -428,7 +478,7 @@ const HomeCalendar = () => {
                   openAddModal(date);
                 }}
               >
-                {renderDaySummary(dayTasks, date)}
+                {renderWeekTaskList(dayTasks)}
               </div>
             </div>
           );
