@@ -6,4 +6,6 @@ coverage
 .git
 *.md
 tests
-
+build
+dist
+database

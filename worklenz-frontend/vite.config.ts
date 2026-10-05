@@ -16,7 +16,7 @@ export default defineConfig(({ command, mode }) => {
       react(),
       // Sentry plugin for source maps upload in production
       // sentryVitePlugin returns an array of plugins, so we spread it
-      ...(isProduction
+      ...(isProduction && env.VITE_SENTRY_AUTH_TOKEN
         ? sentryVitePlugin({
             org: env.VITE_SENTRY_ORG,
             project: env.VITE_SENTRY_PROJECT,
@@ -139,6 +139,12 @@ export default defineConfig(({ command, mode }) => {
       },
     },
 
+    esbuild: isProduction
+      ? {
+          drop: ['console', 'debugger'],
+        }
+      : undefined,
+
     // **Build**
     build: {
       // **Target**
@@ -152,31 +158,18 @@ export default defineConfig(({ command, mode }) => {
       // **Sourcemaps**
       // Generate sourcemaps in production for Sentry (they'll be uploaded, not included in bundle)
       // Use 'hidden' so sourcemaps are generated but not referenced in the bundle
-      sourcemap: !isProduction ? 'inline' : 'hidden',
+      sourcemap: isProduction
+        ? env.VITE_SENTRY_AUTH_TOKEN
+          ? 'hidden'
+          : false
+        : 'inline',
 
       // **Module Preload Polyfill** - Helps with chunk loading reliability
       modulePreload: {
         polyfill: true,
       },
 
-      // **Minification**
-      minify: isProduction ? 'terser' : false,
-      terserOptions: isProduction
-        ? {
-            compress: {
-              drop_console: true,
-              drop_debugger: true,
-              pure_funcs: ['console.log', 'console.info', 'console.debug'],
-              passes: 2, // Multiple passes for better compression
-            },
-            mangle: {
-              safari10: true,
-            },
-            format: {
-              comments: false,
-            },
-          }
-        : undefined,
+      minify: isProduction ? 'esbuild' : false,
 
       // **Chunk Size Warnings**
       chunkSizeWarningLimit: 1000,

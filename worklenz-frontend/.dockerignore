@@ -4,3 +4,7 @@ npm-debug.log
 .gitignore
 .dockerignore
 README.md
+build
+dist
+coverage
+.vite
