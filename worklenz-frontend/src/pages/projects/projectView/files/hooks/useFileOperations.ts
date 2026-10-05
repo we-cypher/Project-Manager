@@ -144,14 +144,38 @@ export const useFileOperations = () => {
     }
   };
 
-  const openTaskAttachmentPreview = (attachment: ITaskAttachmentViewModel) => {
+  const openTaskAttachmentPreview = async (attachment: ITaskAttachmentViewModel) => {
     setPreview({
       open: true,
       name: attachment.name || null,
-      url: attachment.url || null,
-      isLoading: false,
+      url: null,
+      isLoading: true,
       downloadFn: () => void downloadTaskAttachment(attachment),
     });
+
+    if (!attachment.id || !attachment.name) {
+      setPreview(prev => ({
+        ...prev,
+        url: attachment.url || null,
+        isLoading: false,
+      }));
+      return;
+    }
+
+    try {
+      const response = await taskAttachmentsApiService.downloadTaskAttachment(
+        attachment.id,
+        attachment.name
+      );
+      if (response.done && response.body?.url) {
+        setPreview(prev => ({ ...prev, url: response.body.url }));
+      }
+    } catch (error) {
+      logger.error('Error loading task attachment preview', error);
+      message.error(t('downloadFailed', { defaultValue: 'Unable to download file.' }));
+    } finally {
+      setPreview(prev => ({ ...prev, isLoading: false }));
+    }
   };
 
   const closePreview = () => {
