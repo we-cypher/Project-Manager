@@ -8,4 +8,6 @@ coverage
 tests
 build
 dist
-database
+database/*
+!database/pg-migrations
+!database/pg-migrations/**

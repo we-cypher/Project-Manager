@@ -8,7 +8,6 @@ import {
   Input,
   Popconfirm,
   Select,
-  Segmented,
   Space,
   Statistic,
   Table,
@@ -27,6 +26,7 @@ const emptySummary: IWebsiteSummary = {
   total: 0,
   expiring_30: 0,
   expired: 0,
+  expiring_10: 0,
   both_us: 0,
   hosting_us: 0,
   domain_us: 0,
@@ -148,45 +148,52 @@ const RenewalsPage = () => {
       />
 
       <Flex gap={12} wrap="wrap">
-        <Card style={{ minWidth: 160 }}><Statistic title={t('total', { defaultValue: 'Total websites' })} value={summary.total} /></Card>
-        <Card style={{ minWidth: 160 }}><Statistic title={t('expiring30', { defaultValue: 'Expiring in 30 days' })} value={summary.expiring_30} /></Card>
-        <Card style={{ minWidth: 160 }}><Statistic title={t('expired', { defaultValue: 'Expired' })} value={summary.expired} /></Card>
-        <Card style={{ minWidth: 160 }}><Statistic title={t('bothUs', { defaultValue: 'Domain and hosting with us' })} value={summary.both_us} /></Card>
-        <Card style={{ minWidth: 160 }}><Statistic title={t('hostingUs', { defaultValue: 'Hosting only with us' })} value={summary.hosting_us} /></Card>
-        <Card style={{ minWidth: 160 }}><Statistic title={t('domainUs', { defaultValue: 'Domain only with us' })} value={summary.domain_us} /></Card>
-        <Card style={{ minWidth: 160 }}><Statistic title={t('clientManaged', { defaultValue: 'Client managed' })} value={summary.client_managed} /></Card>
+        {[
+          { key: 'total', label: t('total', { defaultValue: 'Total websites' }), value: summary.total },
+          { key: 'expiring30', label: t('expiring30', { defaultValue: 'Expiring in 30 days' }), value: summary.expiring_30 },
+          { key: 'expired', label: t('expired', { defaultValue: 'Expired' }), value: summary.expired },
+          { key: 'expiring10', label: t('expiring10', { defaultValue: 'Expiring in 10 days' }), value: summary.expiring_10 },
+        ].map(card => (
+          <Card key={card.key} style={{ flex: '1 1 180px' }}>
+            <Statistic title={card.label} value={card.value} />
+          </Card>
+        ))}
       </Flex>
 
-      <Flex vertical gap={12}>
-        <Segmented
-          value={query.management}
-          onChange={value => setParam('management', String(value))}
-          options={[
-            { label: t('filterAll', { defaultValue: 'All' }), value: 'all' },
-            { label: t('bothUs', { defaultValue: 'Domain and hosting with us' }), value: 'both_us' },
-            { label: t('hostingUs', { defaultValue: 'Hosting only with us' }), value: 'hosting_us' },
-            { label: t('domainUs', { defaultValue: 'Domain only with us' }), value: 'domain_us' },
-            { label: t('clientManaged', { defaultValue: 'Client managed' }), value: 'client' },
-          ]}
-        />
-        <Segmented
-          value={query.expiry}
-          onChange={value => setParam('expiry', String(value))}
-          options={[
-            { label: t('anyExpiry', { defaultValue: 'Any expiry' }), value: 'any' },
-            { label: t('within7', { defaultValue: 'Expiring in 7 days' }), value: '7' },
-            { label: t('within30', { defaultValue: 'Expiring in 30 days' }), value: '30' },
-            { label: t('within60', { defaultValue: 'Expiring in 60 days' }), value: '60' },
-            { label: t('expired', { defaultValue: 'Expired' }), value: 'expired' },
-          ]}
-        />
-        <Flex gap={8} wrap="wrap">
+      <Flex gap={8} wrap="wrap">
           <Input.Search
             allowClear
-            style={{ maxWidth: 280 }}
+            style={{ width: 280 }}
             placeholder={t('searchPlaceholder', { defaultValue: 'Search name, domain, or client' })}
             value={searchInput}
             onChange={event => setSearchInput(event.target.value)}
+          />
+          <Select
+            allowClear
+            style={{ minWidth: 220 }}
+            placeholder={t('managedByFilter', { defaultValue: 'Domain and hosting' })}
+            value={query.management === 'all' ? undefined : query.management}
+            onChange={value => setParam('management', value || '')}
+            options={[
+              { value: 'both_us', label: t('bothUs', { defaultValue: 'Domain and hosting with us' }) },
+              { value: 'hosting_us', label: t('hostingUs', { defaultValue: 'Hosting only with us' }) },
+              { value: 'domain_us', label: t('domainUs', { defaultValue: 'Domain only with us' }) },
+              { value: 'client', label: t('clientManaged', { defaultValue: 'Client managed' }) },
+            ]}
+          />
+          <Select
+            allowClear
+            style={{ minWidth: 200 }}
+            placeholder={t('anyExpiry', { defaultValue: 'Any expiry' })}
+            value={query.expiry === 'any' ? undefined : query.expiry}
+            onChange={value => setParam('expiry', value || '')}
+            options={[
+              { value: '7', label: t('within7', { defaultValue: 'Expiring in 7 days' }) },
+              { value: '10', label: t('within10', { defaultValue: 'Expiring in 10 days' }) },
+              { value: '30', label: t('within30', { defaultValue: 'Expiring in 30 days' }) },
+              { value: '60', label: t('within60', { defaultValue: 'Expiring in 60 days' }) },
+              { value: 'expired', label: t('expired', { defaultValue: 'Expired' }) },
+            ]}
           />
           <Select
             allowClear
@@ -225,7 +232,6 @@ const RenewalsPage = () => {
               label: t(`status.${status}`, { defaultValue: status }),
             }))}
           />
-        </Flex>
       </Flex>
 
       <Table<IWebsiteListItem>

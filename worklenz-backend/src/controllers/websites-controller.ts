@@ -208,7 +208,7 @@ export default class WebsitesController extends WorklenzControllerBase {
     }
 
     let expirySql = "TRUE";
-    if (expiry === "7" || expiry === "30" || expiry === "60") {
+    if (expiry === "7" || expiry === "10" || expiry === "30" || expiry === "60") {
       expirySql = `days_remaining IS NOT NULL AND days_remaining >= 0 AND days_remaining <= ${Number(expiry)}`;
     } else if (expiry === "expired") {
       expirySql = `days_remaining IS NOT NULL AND days_remaining < 0`;
@@ -270,6 +270,7 @@ export default class WebsitesController extends WorklenzControllerBase {
        SELECT COUNT(*)::int AS total,
               COUNT(*) FILTER (WHERE days_remaining IS NOT NULL AND days_remaining >= 0 AND days_remaining <= 30)::int AS expiring_30,
               COUNT(*) FILTER (WHERE days_remaining IS NOT NULL AND days_remaining < 0)::int AS expired,
+              COUNT(*) FILTER (WHERE days_remaining IS NOT NULL AND days_remaining >= 0 AND days_remaining <= 10)::int AS expiring_10,
               COUNT(*) FILTER (WHERE domain_managed_by = 'us' AND hosting_managed_by = 'us')::int AS both_us,
               COUNT(*) FILTER (WHERE domain_managed_by = 'client' AND hosting_managed_by = 'us')::int AS hosting_us,
               COUNT(*) FILTER (WHERE domain_managed_by = 'us' AND hosting_managed_by = 'client')::int AS domain_us,

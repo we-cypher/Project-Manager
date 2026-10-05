@@ -74,6 +74,7 @@ export interface IWebsiteSummary {
   total: number;
   expiring_30: number;
   expired: number;
+  expiring_10: number;
   both_us: number;
   hosting_us: number;
   domain_us: number;
