@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ITaskAttachmentViewModel } from '@/types/tasks/task-attachment-view-model';
 import { Button, Tooltip, Popconfirm, message, dayjs } from '@/shared/antd-imports';
 import {
@@ -29,9 +30,12 @@ const AttachmentsPreview = ({
   isCommentAttachment = false,
   isGuest = false,
 }: AttachmentsPreviewProps) => {
+  const { t } = useTranslation('task-drawer');
   const { selectedTaskId } = useAppSelector(state => state.taskDrawerReducer);
   const [deleting, setDeleting] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>();
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
   const getFileIcon = (type?: string) => {
@@ -66,7 +70,30 @@ const AttachmentsPreview = ({
     }
   };
 
-  const handlePreviewOpen = () => setPreviewOpen(true);
+  const handlePreviewOpen = async () => {
+    setPreviewOpen(true);
+
+    if (isGuest || !attachment.id || !attachment.name) {
+      setPreviewUrl(attachment.url);
+      return;
+    }
+
+    try {
+      setPreviewLoading(true);
+      setPreviewUrl(undefined);
+      const res = await attachmentsApiService.downloadAttachment(attachment.id, attachment.name);
+      if (res?.done && res.body?.url) {
+        setPreviewUrl(res.body.url);
+      } else {
+        message.error(t('previewFailed', { defaultValue: 'Failed to load preview' }));
+      }
+    } catch (e) {
+      console.error(e);
+      message.error(t('previewFailed', { defaultValue: 'Failed to load preview' }));
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
 
   const handleDelete = async (id?: string) => {
     if (isGuest || !id || !selectedTaskId) return;
@@ -217,7 +244,8 @@ const AttachmentsPreview = ({
       <FilePreviewModal
         open={previewOpen}
         name={attachment.name}
-        url={attachment.url}
+        url={previewUrl}
+        isLoading={previewLoading}
         onClose={() => setPreviewOpen(false)}
         onDownload={isGuest ? undefined : () => void download(attachment.id, attachment.name)}
         downloading={downloading}

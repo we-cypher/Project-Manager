@@ -299,11 +299,35 @@ const ProjectViewFiles = () => {
     }
   };
 
-  const openTaskAttachmentPreview = (attachment: ITaskAttachmentViewModel) => {
+  const openTaskAttachmentPreview = async (attachment: ITaskAttachmentViewModel) => {
     setPreviewName(attachment.name || null);
-    setPreviewUrl(attachment.url || null);
+    setPreviewUrl(null);
+    setPreviewUrlLoading(true);
     setPreviewDownloadFn(() => () => void downloadTaskAttachment(attachment));
     setPreviewOpen(true);
+
+    if (!attachment.id || !attachment.name) {
+      setPreviewUrl(attachment.url || null);
+      setPreviewUrlLoading(false);
+      return;
+    }
+
+    try {
+      const response = await taskAttachmentsApiService.downloadTaskAttachment(
+        attachment.id,
+        attachment.name
+      );
+      if (response.done && response.body?.url) {
+        setPreviewUrl(response.body.url);
+      } else {
+        message.error(t('downloadFailed', { defaultValue: 'Unable to download file.' }));
+      }
+    } catch (error) {
+      logger.error('Error loading task attachment preview', error);
+      message.error(t('downloadFailed', { defaultValue: 'Unable to download file.' }));
+    } finally {
+      setPreviewUrlLoading(false);
+    }
   };
 
   const closePreview = () => {
