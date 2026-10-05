@@ -306,6 +306,7 @@ export interface CreateClientRequest {
   country?: string;
   contact_person: string;
   status?: 'active' | 'inactive' | 'pending';
+  send_invite?: boolean;
 }
 
 export interface UpdateClientRequest {

@@ -65,6 +65,8 @@
   "countryLabel": "Shteti",
   "countryPlaceholder": "Shteti",
   "clientInvitationEmailInfo": "Një email ftesë do të dërgohet tek klienti për të bashkuar në portal. Ju gjithashtu mund të ndani linkun e ftesës nga faqja e Klientëve.",
+  "sendInviteEmailLabel": "Dërgo email ftese për portalin",
+  "sendInviteEmailHint": "Lëreni pa shënuar për ta ruajtur klientin pa email. Ftesën mund ta dërgoni më vonë nga lista e klientëve.",
   "contactPersonLabel": "Personi i Kontaktit",
   "contactPersonPlaceholder": "Shkruani emrin e personit të kontaktit",
   "statusLabel": "Statusi",

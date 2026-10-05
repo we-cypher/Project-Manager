@@ -82,6 +82,8 @@
   "clientPortalAccessDescription": "Comparte este enlace con tu cliente para darle acceso a su portal",
   "clientPortalAccessInfo": "Después de crear el cliente, usa el enlace de invitación de la organización desde la página de Clientes para darle acceso al portal.",
   "clientInvitationEmailInfo": "Se enviará un correo de invitación al cliente para unirse al portal. También puede compartir el enlace de invitación desde la página de Clientes.",
+  "sendInviteEmailLabel": "Enviar correo de invitación al portal",
+  "sendInviteEmailHint": "Déjelo sin marcar para guardar el cliente sin enviar un correo. Puede invitarlo más tarde desde la lista de clientes.",
   "copyButton": "Copiar",
   "linkCopiedMessage": "Enlace copiado al portapapeles",
   "organizationInviteLinkTitle": "Enlace de Invitación de la Organización",

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Button,
+  Checkbox,
   Modal,
   Flex,
   Form,
@@ -62,6 +63,7 @@ const AddClientDrawer = () => {
   const hasBusinessAccess = hasBusinessFeatureAccess(authService.getCurrentSession());
   const [createClient, { isLoading }] = useCreateClientMutation();
   const [form] = Form.useForm();
+  const sendInvite = Form.useWatch('send_invite', form);
   const [alertMessage, setAlertMessage] = useState<{
     type: 'success' | 'warning' | 'error';
     message: string;
@@ -102,6 +104,7 @@ const AddClientDrawer = () => {
         state: values.state,
         zip_code: values.zip_code,
         country: values.country,
+        send_invite: values.send_invite === true,
       }).unwrap();
 
       const response = result as any;
@@ -138,10 +141,15 @@ const AddClientDrawer = () => {
         // New client created successfully
         setAlertMessage({
           type: 'success',
-          message: t('createClientSuccessMessage', {
-            defaultValue:
-              'Client created successfully! Share the organization invite link to give them portal access.',
-          }),
+          message: values.send_invite
+            ? t('createClientSuccessMessageWithInvite', {
+                email: values.email,
+                defaultValue: 'Client created successfully! Invitation sent to {{email}}',
+              })
+            : t('createClientSuccessMessage', {
+                defaultValue:
+                  'Client created successfully! Share the organization invite link to give them portal access.',
+              }),
         });
         window.setTimeout(() => {
           handleClose();
@@ -210,7 +218,13 @@ const AddClientDrawer = () => {
             style={{ marginBottom: 16 }}
           />
         )}
-        <Form form={form} layout="vertical" onFinish={handleFormSubmit} autoComplete="off">
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleFormSubmit}
+          autoComplete="off"
+          initialValues={{ send_invite: false }}
+        >
           <Divider orientation="left" style={{ marginTop: 0 }}>
             <Typography.Text strong>
               {t('basicInformationSection', { defaultValue: 'Basic Information' })}
@@ -380,18 +394,33 @@ const AddClientDrawer = () => {
           <Form.Item name="country" label={t('countryLabel') || 'Country'}>
             <Input placeholder={t('countryPlaceholder') || 'Country'} />
           </Form.Item>
-        </Form>
 
-        <Alert
-          type="info"
-          showIcon
-          message={
-            <Typography.Text style={{ fontSize: 12 }}>
-              {t('clientInvitationEmailInfo') ||
-                'An invitation email will be sent to the client to join the portal. You can also share the invite link from the Clients page.'}
-            </Typography.Text>
-          }
-        />
+          <Form.Item name="send_invite" valuePropName="checked" style={{ marginBottom: 8 }}>
+            <Checkbox>
+              {t('sendInviteEmailLabel', { defaultValue: 'Send portal invite email' })}
+            </Checkbox>
+          </Form.Item>
+          <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 12 }}>
+            {t('sendInviteEmailHint', {
+              defaultValue:
+                'Leave this off to save the client without an email. You can invite them later from the clients list.',
+            })}
+          </Typography.Text>
+          {sendInvite ? (
+            <Alert
+              type="info"
+              showIcon
+              message={
+                <Typography.Text style={{ fontSize: 12 }}>
+                  {t('clientInvitationEmailInfo', {
+                    defaultValue:
+                      'An invitation email will be sent to the client to join the portal. You can also share the invite link from the Clients page.',
+                  })}
+                </Typography.Text>
+              }
+            />
+          ) : null}
+        </Form>
       </Spin>
     </Modal>
   );

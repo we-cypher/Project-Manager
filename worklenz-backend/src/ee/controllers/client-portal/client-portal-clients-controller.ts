@@ -389,8 +389,9 @@ export default class ClientPortalClientsController extends ClientPortalControlle
       const result = await db.query(query, values);
       const newClient = result.rows[0];
 
-      // Send invitation email if email is provided
-      if (newClient.email) {
+      const shouldSendInvite = clientData.send_invite === true && !!newClient.email;
+
+      if (shouldSendInvite) {
         try {
           const userId = (req.user as any)?.id;
           await ClientPortalClientsController.sendClientInvitationEmail(
@@ -427,7 +428,7 @@ export default class ClientPortalClientsController extends ClientPortalControlle
             assigned_projects_count: 0,
             team_members: [],
             existing: false,
-            invitationSent: !!newClient.email
+            invitationSent: shouldSendInvite
           },
           "Client created successfully"
         )

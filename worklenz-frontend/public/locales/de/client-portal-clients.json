@@ -81,6 +81,8 @@
   "clientPortalAccessDescription": "Teilen Sie diesen Link mit Ihrem Kunden, um ihm Zugang zu seinem Portal zu gewähren",
   "clientPortalAccessInfo": "Nach dem Erstellen des Kunden verwenden Sie den Organisations-Einladungslink von der Kundenseite, um ihm Portal-Zugang zu gewähren.",
   "clientInvitationEmailInfo": "Eine Einladungs-E-Mail wird an den Kunden gesendet, um dem Portal beizutreten. Sie können den Einladungslink auch von der Kundenseite aus teilen.",
+  "sendInviteEmailLabel": "Portal-Einladung per E-Mail senden",
+  "sendInviteEmailHint": "Nicht aktivieren, um den Kunden ohne E-Mail zu speichern. Die Einladung kann später in der Kundenliste gesendet werden.",
   "copyButton": "Kopieren",
   "linkCopiedMessage": "Link in die Zwischenablage kopiert",
   "organizationInviteLinkTitle": "Organisations-Einladungslink",

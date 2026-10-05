@@ -67,6 +67,8 @@
   "countryLabel": "País",
   "countryPlaceholder": "País",
   "clientInvitationEmailInfo": "Um e-mail de convite será enviado ao cliente para ingressar no portal. Você também pode compartilhar o link de convite na página de Clientes.",
+  "sendInviteEmailLabel": "Enviar e-mail de convite do portal",
+  "sendInviteEmailHint": "Deixe desmarcado para salvar o cliente sem e-mail. O convite pode ser enviado depois na lista de clientes.",
   "contactPersonLabel": "Pessoa de Contato",
   "contactPersonPlaceholder": "Digite o nome da pessoa de contato",
   "statusLabel": "Status",

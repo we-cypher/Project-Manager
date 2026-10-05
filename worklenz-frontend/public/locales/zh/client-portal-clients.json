@@ -65,6 +65,8 @@
   "countryLabel": "国家",
   "countryPlaceholder": "国家",
   "clientInvitationEmailInfo": "将向客户发送邀请邮件以加入门户。您也可以从客户页面分享邀请链接。",
+  "sendInviteEmailLabel": "发送门户邀请邮件",
+  "sendInviteEmailHint": "不勾选则只保存客户，不发送邮件。之后可以在客户列表中邀请。",
   "contactPersonLabel": "联系人",
   "contactPersonPlaceholder": "输入联系人姓名",
   "statusLabel": "状态",

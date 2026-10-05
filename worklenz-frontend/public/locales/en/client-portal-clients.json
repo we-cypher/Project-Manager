@@ -105,6 +105,8 @@
   "clientPortalAccessDescription": "Share this link with your client to give them access to their portal",
   "clientPortalAccessInfo": "After creating the client, use the organization invite link from the Clients page to give them portal access.",
   "clientInvitationEmailInfo": "An invitation email will be sent to the client to join the portal. You can also share the invite link from the Clients page.",
+  "sendInviteEmailLabel": "Send portal invite email",
+  "sendInviteEmailHint": "Leave this off to save the client without an email. You can invite them later from the clients list.",
   "copyButton": "Copy",
   "linkCopiedMessage": "Link copied to clipboard",
   "organizationInviteLinkTitle": "Organization Invite Link",

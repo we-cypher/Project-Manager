@@ -2,6 +2,7 @@ import React, { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
+  Checkbox,
   Input,
   Form,
   Row,
@@ -135,14 +136,21 @@ const HomeAddClient: React.FC<HomeAddClientProps> = ({ embedded = false }) => {
         state: values.state,
         zip_code: values.zip_code,
         country: values.country,
+        send_invite: values.send_invite === true,
       }).unwrap();
 
       message.success(
-        t('createClientSuccessMessage', {
-          ns: 'client-portal-clients',
-          defaultValue:
-            'Client created successfully! Share the organization invite link to give them portal access.',
-        })
+        values.send_invite
+          ? t('createClientSuccessMessageWithInvite', {
+              ns: 'client-portal-clients',
+              email: values.email,
+              defaultValue: 'Client created successfully! Invitation sent to {{email}}',
+            })
+          : t('createClientSuccessMessage', {
+              ns: 'client-portal-clients',
+              defaultValue:
+                'Client created successfully! Share the organization invite link to give them portal access.',
+            })
       );
       form.resetFields();
       dispatch(clientPortalApi.util.invalidateTags(['Clients']));
@@ -180,7 +188,13 @@ const HomeAddClient: React.FC<HomeAddClientProps> = ({ embedded = false }) => {
             width: isDesktop ? 480 : '100%',
           }}
         >
-          <Form form={form} layout="vertical" onFinish={handleCreate} autoComplete="off">
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleCreate}
+            autoComplete="off"
+            initialValues={{ send_invite: false }}
+          >
             <Divider orientation="left" style={{ marginTop: 0, ...sectionDivider }}>
               <Typography.Text strong style={{ fontSize: 13 }}>
                 {t('basicInformationSection', { ns: 'client-portal-clients', defaultValue: 'Basic Information' })}
@@ -378,20 +392,37 @@ const HomeAddClient: React.FC<HomeAddClientProps> = ({ embedded = false }) => {
               <Input placeholder={t('countryPlaceholder', { ns: 'client-portal-clients', defaultValue: 'Country' })} />
             </Form.Item>
 
-            <Alert
-              type="info"
-              showIcon
-              message={
-                <Typography.Text style={{ fontSize: 12 }}>
-                  {t('clientInvitationEmailInfo', {
-                    ns: 'client-portal-clients',
-                    defaultValue:
-                      'An invitation email will be sent to the client to join the portal once portal invites are enabled.',
-                  })}
-                </Typography.Text>
-              }
-              style={{ marginTop: 4 }}
-            />
+            <Form.Item name="send_invite" valuePropName="checked" style={{ marginBottom: 8 }}>
+              <Checkbox>
+                {t('sendInviteEmailLabel', {
+                  ns: 'client-portal-clients',
+                  defaultValue: 'Send portal invite email',
+                })}
+              </Checkbox>
+            </Form.Item>
+            <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
+              {t('sendInviteEmailHint', {
+                ns: 'client-portal-clients',
+                defaultValue:
+                  'Leave this off to save the client without an email. You can invite them later from the clients list.',
+              })}
+            </Typography.Text>
+            {formValues.send_invite ? (
+              <Alert
+                type="info"
+                showIcon
+                message={
+                  <Typography.Text style={{ fontSize: 12 }}>
+                    {t('clientInvitationEmailInfo', {
+                      ns: 'client-portal-clients',
+                      defaultValue:
+                        'An invitation email will be sent to the client to join the portal. You can also share the invite link from the Clients page.',
+                    })}
+                  </Typography.Text>
+                }
+                style={{ marginTop: 12 }}
+              />
+            ) : null}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
               <Button onClick={() => form.resetFields()}>
