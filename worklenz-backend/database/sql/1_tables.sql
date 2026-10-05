@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS clients (
     email                 WL_EMAIL,
     company_name          TEXT,
     phone                 TEXT,
+    phone_country_code    CHAR(2),
     address               TEXT,
     address_line_1        TEXT,
     city                  TEXT,

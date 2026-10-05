@@ -11,6 +11,7 @@ import { getClientPortalBaseUrl } from "../../../cron_jobs/helpers";
 import FileConstants from "../../../shared/file-constants";
 import { IEmailTemplateType } from "../../../interfaces/email-template-type";
 import crypto from "crypto";
+import { ensureClientPhoneCountryCode } from "../../../shared/ensure-client-phone-country-code";
 
 export default class ClientPortalClientsController extends ClientPortalControllerBase {
 
@@ -19,6 +20,7 @@ export default class ClientPortalClientsController extends ClientPortalControlle
     res: IWorkLenzResponse
   ) {
     try {
+      await ensureClientPhoneCountryCode();
       const {
         page = 1,
         limit = 10,
@@ -257,6 +259,7 @@ export default class ClientPortalClientsController extends ClientPortalControlle
     res: IWorkLenzResponse
   ) {
     try {
+      await ensureClientPhoneCountryCode();
       const clientData = req.body;
       const teamId = (req.user as any)?.team_id;
 
@@ -600,6 +603,7 @@ export default class ClientPortalClientsController extends ClientPortalControlle
     res: IWorkLenzResponse
   ) {
     try {
+      await ensureClientPhoneCountryCode();
       const { id } = req.params;
       const teamId = (req.user as any)?.team_id;
 
@@ -679,6 +683,7 @@ export default class ClientPortalClientsController extends ClientPortalControlle
     res: IWorkLenzResponse
   ) {
     try {
+      await ensureClientPhoneCountryCode();
       const { id } = req.params;
       const teamId = (req.user as any)?.team_id;
 
@@ -835,6 +840,7 @@ export default class ClientPortalClientsController extends ClientPortalControlle
     res: IWorkLenzResponse
   ) {
     try {
+      await ensureClientPhoneCountryCode();
       const { id } = req.params;
       const updateData = req.body;
       const teamId = (req.user as any)?.team_id;
@@ -1799,6 +1805,7 @@ export default class ClientPortalClientsController extends ClientPortalControlle
     res: IWorkLenzResponse
   ) {
     try {
+      await ensureClientPhoneCountryCode();
       const { id } = req.params;
       const { format = "csv", include = "all" } = req.query;
       const teamId = (req.user as any)?.team_id;
