@@ -114,9 +114,11 @@ export class NotificationsService {
   }
 
   public static sendNotification(receiver: IReceiver): void {
-    const url = receiver.project_id
-      ? `/projects/${receiver.project_id}`
-      : null;
+    const url = receiver.url
+      ? receiver.url
+      : receiver.project_id
+        ? `/projects/${receiver.project_id}`
+        : null;
     const notification = new WorklenzNotification(
       receiver.team,
       receiver.team_id,

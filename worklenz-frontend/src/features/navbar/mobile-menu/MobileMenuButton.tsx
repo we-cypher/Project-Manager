@@ -9,6 +9,7 @@ import {
   MenuOutlined,
   ProjectOutlined,
   ReadOutlined,
+  GlobalOutlined,
 } from '@/shared/antd-imports';
 import { ShopOutlined } from '@ant-design/icons';
 import { Card, Dropdown, Flex, MenuProps, Space, theme, Typography } from '@/shared/antd-imports';
@@ -34,6 +35,7 @@ const ROUTE_ICONS: Record<string, ReactNode> = {
   'client-portal': React.createElement(GroupOutlined),
   finance: React.createElement(DollarOutlined),
   reporting: React.createElement(ReadOutlined),
+  renewals: React.createElement(GlobalOutlined),
   'Team Reports': React.createElement(BarChartOutlined),
 };
 const DEFAULT_ROUTE_ICON = React.createElement(AppstoreOutlined);

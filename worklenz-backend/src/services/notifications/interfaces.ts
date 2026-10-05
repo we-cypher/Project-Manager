@@ -13,6 +13,7 @@ export interface IReceiver {
   project_color?: string;
   task_id?: string;
   comment_id?: string;
+  url?: string | null;
 }
 
 export interface ICreateNotificationRequest {

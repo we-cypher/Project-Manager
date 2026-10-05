@@ -87,6 +87,7 @@ import digestApiRouter from "./digest-api-router";
 import DigestPreferencesController from "../../controllers/digest-preferences-controller";
 import financeOverviewApiRouter from "./finance-overview-api-router";
 import salesApiRouter from "./sales-api-router";
+import websitesApiRouter from "./websites-api-router";
 
 const api = express.Router();
 
@@ -142,6 +143,7 @@ api.use("/surveys", surveyApiRouter);
 api.use("/onboarding", onboardingApiRouter);
 api.use("/finance-overview", financeOverviewApiRouter);
 api.use("/sales", salesApiRouter);
+api.use("/websites", websitesApiRouter);
 
 api.get("/overview/:id", safeControllerFunction(OverviewController.getById));
 api.get(

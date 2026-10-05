@@ -23,7 +23,8 @@ export default class NotificationController extends WorklenzControllerBase {
              t.id AS task_id,
              un.team_id,
              un.comment_id,
-             un.deal_id
+             un.deal_id,
+             un.website_id
       FROM user_notifications un
              LEFT JOIN tasks t ON un.task_id = t.id
       WHERE user_id = $1
@@ -37,17 +38,24 @@ export default class NotificationController extends WorklenzControllerBase {
     try {
       result = await db.query(q, [req.user?.id, req.query.filter === "Read"]);
     } catch {
-      const fallback = q.replace("un.deal_id", "NULL::UUID AS deal_id");
-      result = await db.query(fallback, [req.user?.id, req.query.filter === "Read"]);
+      const withoutWebsite = q.replace("un.website_id", "NULL::UUID AS website_id");
+      try {
+        result = await db.query(withoutWebsite, [req.user?.id, req.query.filter === "Read"]);
+      } catch {
+        const fallback = withoutWebsite.replace("un.deal_id", "NULL::UUID AS deal_id");
+        result = await db.query(fallback, [req.user?.id, req.query.filter === "Read"]);
+      }
     }
 
     for (const item of result.rows) {
       item.team_color = getColor(item.team_name);
-      item.url = item.deal_id
-        ? `/sales/${item.deal_id}`
-        : item.project_id
-          ? `/projects/${item.project_id}`
-          : null;
+      item.url = item.website_id
+        ? `/renewals/${item.website_id}`
+        : item.deal_id
+          ? `/sales/${item.deal_id}`
+          : item.project_id
+            ? `/projects/${item.project_id}`
+            : null;
       item.params = item.deal_id
         ? {}
         : { task: item.task_id, tab: "board" };

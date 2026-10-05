@@ -7,7 +7,7 @@ import SimpleRailLayout from '@/layouts/SimpleRailLayout';
 import settingsRoutes from './settings-routes';
 import adminCenterRoutes from './admin-center-routes';
 import { useAuthService } from '@/hooks/useAuth';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { SuspenseFallback } from '@/components/suspense-fallback/suspense-fallback';
 import NavSurfaceIndexRedirect from '@/features/navigation/NavSurfaceIndexRedirect';
 import ChunkErrorHandler from '@/utils/chunk-error-handler';
@@ -110,6 +110,21 @@ const Unauthorized = lazy(
 );
 const GanttDemoPage = lazy(
   ChunkErrorHandler.wrapLazyImport(() => import('@/pages/GanttDemoPage'), 'GanttDemoPage')
+);
+const RenewalsPage = lazy(
+  ChunkErrorHandler.wrapLazyImport(() => import('@/pages/renewals/renewals-page'), 'RenewalsPage')
+);
+const RenewalDetailPage = lazy(
+  ChunkErrorHandler.wrapLazyImport(
+    () => import('@/pages/renewals/renewal-detail-page'),
+    'RenewalDetailPage'
+  )
+);
+const RenewalsSettingsPage = lazy(
+  ChunkErrorHandler.wrapLazyImport(
+    () => import('@/pages/renewals/renewals-settings-page'),
+    'RenewalsSettingsPage'
+  )
 );
 const LicenseExpiredPage = lazy(
   ChunkErrorHandler.wrapLazyImport(
@@ -578,6 +593,22 @@ const FINANCE_BASE_PATH = '/finance';const mainRoutes: RouteObject[] = [
             <LicenseExpiredPage />
           </Suspense>
         ),
+      },
+      {
+        path: 'renewals',
+        element: (
+          <AdminGuard>
+            <Suspense fallback={<SuspenseFallback />}>
+              <Outlet />
+            </Suspense>
+          </AdminGuard>
+        ),
+        children: [
+          { index: true, element: <RenewalsPage /> },
+          { path: 'settings', element: <RenewalsSettingsPage /> },
+          { path: 'new', element: <RenewalDetailPage /> },
+          { path: ':id', element: <RenewalDetailPage /> },
+        ],
       },
       {
         path: 'finance',
