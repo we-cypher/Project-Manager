@@ -30,15 +30,24 @@ RUN echo "$RELEASE_VERSION" > release
 # --- Stage 2: Production Image ---
 FROM node:20-slim
 
+# Invoice/receipt PDFs need system Chromium. Leave this false to skip that
+# install (it is the slow part of the backend image build).
+# Coolify: mark ENABLE_INVOICE_PDF as available at build time, then rebuild.
+ARG ENABLE_INVOICE_PDF=false
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
-    chromium \
-    fonts-liberation \
-    fonts-dejavu-core \
     ca-certificates \
+    && if [ "$ENABLE_INVOICE_PDF" = "true" ]; then \
+         apt-get install -y --no-install-recommends \
+           chromium \
+           fonts-liberation \
+           fonts-dejavu-core; \
+       fi \
     && rm -rf /var/lib/apt/lists/*
 
-ENV PUPPETEER_SKIP_DOWNLOAD=true \
+ENV ENABLE_INVOICE_PDF=${ENABLE_INVOICE_PDF} \
+    PUPPETEER_SKIP_DOWNLOAD=true \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 

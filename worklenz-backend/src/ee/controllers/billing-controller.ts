@@ -14,6 +14,7 @@ import crypto from "crypto";
 import { isIP } from "net";
 import { log_error } from "../../shared/utils";
 import { sendEmail } from "../../shared/email";
+import { INVOICE_PDF_DISABLED_MESSAGE, isInvoicePdfEnabled } from "../../shared/invoice-pdf";
 
 interface IDirectPaySessionOwner {
   userId: string | null;
@@ -1164,6 +1165,10 @@ export default class BillingController extends WorklenzControllerBase {
 
   @HandleExceptions()
   public static async downloadLkrReceipt(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
+    if (!isInvoicePdfEnabled()) {
+      return res.status(503).send(new ServerResponse(false, null, INVOICE_PDF_DISABLED_MESSAGE));
+    }
+
     const { id } = req.params;
     const ownerId = req.user?.owner_id || req.user?.id;
 

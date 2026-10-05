@@ -6,6 +6,7 @@ import { ServerResponse } from "../../../models/server-response";
 import db from "../../../config/db";
 import SqlHelper from "../../../shared/sql-helpers";
 import { getOrgBaseCurrency } from "../../../shared/org-currency";
+import { INVOICE_PDF_DISABLED_MESSAGE, isInvoicePdfEnabled } from "../../../shared/invoice-pdf";
 
 export default class ClientPortalInvoicesController extends ClientPortalControllerBase {
 
@@ -874,6 +875,12 @@ export default class ClientPortalInvoicesController extends ClientPortalControll
     req: AuthenticatedClientRequest | IWorkLenzRequest,
     res: IWorkLenzResponse
   ) {
+    if (!isInvoicePdfEnabled()) {
+      return res
+        .status(503)
+        .json(new ServerResponse(false, null, INVOICE_PDF_DISABLED_MESSAGE));
+    }
+
     try {
       const { id } = req.params;
       
