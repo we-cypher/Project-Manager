@@ -63,6 +63,11 @@ const MainLayout = memo(() => {
     return FINANCE_RAIL_SUB_ROUTES.has(segment);
   }, [location.pathname]);
 
+  const isRenewalsPage = useMemo(
+    () => location.pathname === '/renewals' || location.pathname.startsWith('/renewals/'),
+    [location.pathname]
+  );
+
   const isSalesSubRoute = useMemo(() => {
     const prefix = '/sales/';
     if (!location.pathname.startsWith(prefix)) return false;
@@ -91,8 +96,9 @@ const MainLayout = memo(() => {
   );
 
   const contentClassName = [
-    hasSideRail ? 'w-full' : 'px-4 sm:px-8 lg:px-12 xl:px-16 mx-auto w-full',
-    !isProjectView && !isHomePage && !hasSideRail ? 'overflow-x-clip max-w-[1400px]' : '',
+    isRenewalsPage || hasSideRail ? 'w-full' : 'px-4 sm:px-8 lg:px-12 xl:px-16 mx-auto w-full',
+    isRenewalsPage ? 'px-6' : '',
+    !isRenewalsPage && !isProjectView && !isHomePage && !hasSideRail ? 'overflow-x-clip max-w-[1400px]' : '',
     isProjectListView && !hasSideRail ? 'overflow-x-clip max-w-[1600px]' : '',
   ]
     .filter(Boolean)

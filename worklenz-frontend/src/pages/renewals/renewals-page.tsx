@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
@@ -40,6 +40,12 @@ function daysColor(days: number | null): 'error' | 'warning' | 'gold' | 'success
   if (days < 30) return 'warning';
   if (days < 60) return 'gold';
   return 'success';
+}
+
+function websiteHref(domain: string): string {
+  const trimmed = domain.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
 }
 
 function apiError(error: unknown, fallback: string): string {
@@ -163,17 +169,20 @@ const RenewalsPage = () => {
         ))}
       </Flex>
 
-      <Flex gap={8} wrap="wrap">
-          <Input.Search
-            allowClear
-            style={{ flex: '1 1 220px', maxWidth: 320 }}
-            placeholder={t('searchPlaceholder', { defaultValue: 'Search name or domain' })}
-            value={searchInput}
-            onChange={event => setSearchInput(event.target.value)}
-          />
+      <Flex gap={8} style={{ width: '100%' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <Input.Search
+              allowClear
+              style={{ width: '100%' }}
+              placeholder={t('searchPlaceholder', { defaultValue: 'Search name or domain' })}
+              value={searchInput}
+              onChange={event => setSearchInput(event.target.value)}
+            />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
           <Select
             allowClear
-            style={{ flex: '1 1 200px', maxWidth: 280 }}
+            style={{ width: '100%' }}
             placeholder={t('managedByFilter', { defaultValue: 'Domain and hosting' })}
             value={query.management === 'all' ? undefined : query.management}
             onChange={value => setParam('management', value || '')}
@@ -184,9 +193,11 @@ const RenewalsPage = () => {
               { value: 'client', label: t('clientManaged', { defaultValue: 'Client managed' }) },
             ]}
           />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
           <Select
             allowClear
-            style={{ flex: '1 1 180px', maxWidth: 240 }}
+            style={{ width: '100%' }}
             placeholder={t('anyExpiry', { defaultValue: 'Any expiry' })}
             value={query.expiry === 'any' ? undefined : query.expiry}
             onChange={value => setParam('expiry', value || '')}
@@ -198,9 +209,11 @@ const RenewalsPage = () => {
               { value: 'expired', label: t('expired', { defaultValue: 'Expired' }) },
             ]}
           />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
           <Select
             allowClear
-            style={{ flex: '1 1 140px', maxWidth: 180 }}
+            style={{ width: '100%' }}
             placeholder={t('status', { defaultValue: 'Status' })}
             value={query.status || undefined}
             onChange={value => setParam('status', value || '')}
@@ -209,13 +222,15 @@ const RenewalsPage = () => {
               label: t(`status.${status}`, { defaultValue: status }),
             }))}
           />
+          </div>
       </Flex>
 
       <Table<IWebsiteListItem>
         rowKey="id"
         loading={loading}
         dataSource={rows}
-        scroll={{ x: 1280 }}
+        tableLayout="fixed"
+        style={{ width: '100%' }}
         pagination={{
           current: query.index,
           pageSize: query.size,
@@ -236,22 +251,28 @@ const RenewalsPage = () => {
           setSearchParams(next);
         }}
         columns={[
-          { title: t('website', { defaultValue: 'Website' }), dataIndex: 'name', width: 280, sorter: true, render: (_value, record) => (
+          { title: t('website', { defaultValue: 'Website' }), dataIndex: 'name', width: '20%', sorter: true, render: (_value, record) => (
             <div>
-              <Link to={`/renewals/${record.id}`}>{record.name}</Link>
-              <div><Typography.Text type="secondary">{record.domain}</Typography.Text></div>
+              <Typography.Link href={websiteHref(record.domain)} target="_blank" rel="noopener noreferrer">
+                {record.name}
+              </Typography.Link>
+              <div>
+                <Typography.Link href={websiteHref(record.domain)} target="_blank" rel="noopener noreferrer" type="secondary">
+                  {record.domain}
+                </Typography.Link>
+              </div>
             </div>
           ) },
-          { title: t('domainManagedBy', { defaultValue: 'Domain managed by' }), dataIndex: 'domain_managed_by', width: 160, sorter: true, render: managedLabel },
-          { title: t('hostingManagedBy', { defaultValue: 'Hosting managed by' }), dataIndex: 'hosting_managed_by', width: 170, sorter: true, render: managedLabel },
-          { title: t('hostingProvider', { defaultValue: 'Hosting provider' }), dataIndex: 'hosting_provider', width: 160, sorter: true, render: value => value || '—' },
-          { title: t('dnsManager', { defaultValue: 'DNS manager' }), dataIndex: 'dns_manager', width: 150, sorter: true, render: value => value || '—' },
-          { title: t('domainExpiry', { defaultValue: 'Domain expiry' }), dataIndex: 'domain_expiry', width: 140, sorter: true, render: value => value || '—' },
-          { title: t('daysRemaining', { defaultValue: 'Days remaining' }), dataIndex: 'days_remaining', width: 140, sorter: true, render: (value: number | null) => (
+          { title: t('domainManagedBy', { defaultValue: 'Domain managed by' }), dataIndex: 'domain_managed_by', sorter: true, render: managedLabel },
+          { title: t('hostingManagedBy', { defaultValue: 'Hosting managed by' }), dataIndex: 'hosting_managed_by', sorter: true, render: managedLabel },
+          { title: t('hostingProvider', { defaultValue: 'Hosting provider' }), dataIndex: 'hosting_provider', sorter: true, render: value => value || '—' },
+          { title: t('dnsManager', { defaultValue: 'DNS manager' }), dataIndex: 'dns_manager', sorter: true, render: value => value || '—' },
+          { title: t('domainExpiry', { defaultValue: 'Domain expiry' }), dataIndex: 'domain_expiry', sorter: true, render: value => value || '—' },
+          { title: t('daysRemaining', { defaultValue: 'Days remaining' }), dataIndex: 'days_remaining', sorter: true, render: (value: number | null) => (
             value == null ? '—' : <Tag color={daysColor(value)}>{value}</Tag>
           ) },
-          { title: t('status', { defaultValue: 'Status' }), dataIndex: 'status', width: 120, sorter: true, render: value => t(`status.${value}`, { defaultValue: value }) },
-          { title: t('actions', { defaultValue: 'Actions' }), key: 'actions', width: 180, render: (_value, record) => (
+          { title: t('status', { defaultValue: 'Status' }), dataIndex: 'status', sorter: true, render: value => t(`status.${value}`, { defaultValue: value }) },
+          { title: t('actions', { defaultValue: 'Actions' }), key: 'actions', width: 168, render: (_value, record) => (
             <Space>
               <Button size="small" icon={<EditOutlined />} onClick={() => navigate(`/renewals/${record.id}`)}>
                 {t('edit', { defaultValue: 'Edit' })}
