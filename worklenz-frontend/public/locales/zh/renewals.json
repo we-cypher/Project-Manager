@@ -28,6 +28,7 @@
   "website": "Website",
   "domainManagedBy": "Domain managed by",
   "domainExpiry": "Domain expiry",
+  "expiry": "Expiry",
   "hostingManagedBy": "Hosting managed by",
   "hostingProvider": "Hosting provider",
   "hostingExpiry": "Hosting expiry",

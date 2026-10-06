@@ -24,6 +24,13 @@ import { websitesApiService } from '@/api/websites/websites.api.service';
 import { IWebsiteFilters, IWebsitePayload, RenewalItem } from '@/types/websites/website.types';
 import { useDocumentTitle } from '@/hooks/useDoumentTItle';
 
+function formatMonthDayYear(value: string | null | undefined): string {
+  if (!value) return '—';
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  if (!match) return value;
+  return `${match[2]}/${match[3]}/${match[1]}`;
+}
+
 function apiError(error: unknown, fallback: string): string {
   const messageText = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
   return messageText || fallback;
@@ -275,8 +282,8 @@ const RenewalDetailPage = () => {
             locale={{ emptyText: t('noHistory', { defaultValue: 'No renewals recorded' }) }}
             columns={[
               { title: t('item', { defaultValue: 'Item' }), dataIndex: 'item' },
-              { title: t('previousExpiry', { defaultValue: 'Previous expiry' }), dataIndex: 'previous_expiry', render: value => value || '—' },
-              { title: t('newExpiry', { defaultValue: 'New expiry' }), dataIndex: 'new_expiry' },
+              { title: t('previousExpiry', { defaultValue: 'Previous expiry' }), dataIndex: 'previous_expiry', render: value => formatMonthDayYear(value) },
+              { title: t('newExpiry', { defaultValue: 'New expiry' }), dataIndex: 'new_expiry', render: value => formatMonthDayYear(value) },
               { title: t('renewedBy', { defaultValue: 'Renewed by' }), dataIndex: 'renewed_by_name', render: value => value || '—' },
               { title: t('renewedOn', { defaultValue: 'Renewed on' }), dataIndex: 'renewed_at', render: value => value ? new Date(value).toLocaleString() : '—' },
               { title: t('note', { defaultValue: 'Note' }), dataIndex: 'note', render: value => value || '—' },

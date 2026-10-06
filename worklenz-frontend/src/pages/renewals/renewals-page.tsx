@@ -49,6 +49,13 @@ function websiteHref(domain: string): string {
   return `https://${trimmed}`;
 }
 
+function formatMonthDayYear(value: string | null | undefined): string {
+  if (!value) return '—';
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  if (!match) return value;
+  return `${match[2]}/${match[3]}/${match[1]}`;
+}
+
 function apiError(error: unknown, fallback: string): string {
   const messageText = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
   return messageText || fallback;
@@ -325,7 +332,7 @@ const RenewalsPage = () => {
           { title: t('hostingManagedBy', { defaultValue: 'Hosting managed by' }), dataIndex: 'hosting_managed_by', sorter: true, render: managedLabel },
           { title: t('hostingProvider', { defaultValue: 'Hosting provider' }), dataIndex: 'hosting_provider', sorter: true, render: value => value || '—' },
           { title: t('dnsManager', { defaultValue: 'DNS manager' }), dataIndex: 'dns_manager', sorter: true, render: value => value || '—' },
-          { title: t('domainExpiry', { defaultValue: 'Domain expiry' }), dataIndex: 'domain_expiry', sorter: true, render: value => value || '—' },
+          { title: t('expiry', { defaultValue: 'Expiry' }), dataIndex: 'domain_expiry', sorter: true, render: value => formatMonthDayYear(value) },
           { title: t('daysRemaining', { defaultValue: 'Days remaining' }), dataIndex: 'days_remaining', sorter: true, render: (value: number | null) => (
             value == null ? '—' : <Tag color={daysColor(value)}>{value}</Tag>
           ) },
