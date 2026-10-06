@@ -73,6 +73,11 @@ export const websitesApiService = {
     return response.data;
   },
 
+  async removeMany(body: { ids?: string[]; all?: boolean }): Promise<IServerResponse<{ deleted: number }>> {
+    const response = await apiClient.post<IServerResponse<{ deleted: number }>>(`${rootUrl}/bulk-delete`, body);
+    return response.data;
+  },
+
   async remove(id: string): Promise<IServerResponse<null>> {
     const response = await apiClient.delete<IServerResponse<null>>(`${rootUrl}/${id}`);
     return response.data;

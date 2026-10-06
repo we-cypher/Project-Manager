@@ -66,6 +66,7 @@ const RenewalsPage = () => {
   const [summary, setSummary] = useState<IWebsiteSummary>(emptySummary);
   const [loading, setLoading] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
 
   const query = useMemo(() => ({
@@ -123,11 +124,27 @@ const RenewalsPage = () => {
   const managedLabel = (value: string) =>
     value === 'us' ? t('managedUs', { defaultValue: 'Wecypher' }) : t('managedClient', { defaultValue: 'Client' });
 
+  const removeSelected = async (all: boolean) => {
+    try {
+      const res = await websitesApiService.removeMany(all ? { all: true } : { ids: selectedIds });
+      if (res.done) {
+        message.success(all
+          ? t('deletedAll', { defaultValue: 'All websites deleted' })
+          : t('deletedSelected', { count: res.body?.deleted || selectedIds.length, defaultValue: '{{count}} websites deleted' }));
+        setSelectedIds([]);
+        void load();
+      }
+    } catch (error) {
+      message.error(apiError(error, t('deleteFailed', { defaultValue: 'Could not delete website' })));
+    }
+  };
+
   const remove = async (id: string) => {
     try {
       const res = await websitesApiService.remove(id);
       if (res.done) {
         message.success(t('deleted', { defaultValue: 'Website deleted' }));
+        setSelectedIds(current => current.filter(item => item !== id));
         void load();
       }
     } catch (error) {
@@ -230,12 +247,48 @@ const RenewalsPage = () => {
           </div>
       </Flex>
 
+      <Flex justify="flex-end" gap={8}>
+        <Popconfirm
+          title={t('deleteSelectedConfirm', {
+            count: selectedIds.length,
+            defaultValue: 'Delete {{count}} selected websites?',
+          })}
+          description={t('deleteConfirmDescription', { defaultValue: 'This removes the website and its renewal history.' })}
+          okText={t('delete', { defaultValue: 'Delete' })}
+          okButtonProps={{ danger: true }}
+          onConfirm={() => void removeSelected(false)}
+        >
+          <Button danger icon={<DeleteOutlined />} disabled={selectedIds.length === 0}>
+            {t('deleteSelected', { defaultValue: 'Delete selected' })}
+          </Button>
+        </Popconfirm>
+        <Popconfirm
+          title={t('deleteAllConfirm', {
+            count: summary.total,
+            defaultValue: 'Delete all {{count}} websites?',
+          })}
+          description={t('deleteConfirmDescription', { defaultValue: 'This removes the website and its renewal history.' })}
+          okText={t('delete', { defaultValue: 'Delete' })}
+          okButtonProps={{ danger: true }}
+          onConfirm={() => void removeSelected(true)}
+        >
+          <Button danger disabled={summary.total === 0}>
+            {t('deleteAll', { defaultValue: 'Delete all' })}
+          </Button>
+        </Popconfirm>
+      </Flex>
+
       <Table<IWebsiteListItem>
         rowKey="id"
         loading={loading}
         dataSource={rows}
         tableLayout="fixed"
         style={{ width: '100%' }}
+        rowSelection={{
+          selectedRowKeys: selectedIds,
+          preserveSelectedRowKeys: true,
+          onChange: keys => setSelectedIds(keys.map(String)),
+        }}
         pagination={{
           current: query.index,
           pageSize: query.size,

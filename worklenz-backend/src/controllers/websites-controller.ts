@@ -412,6 +412,7 @@ export default class WebsitesController extends WorklenzControllerBase {
     const seen = new Set<string>();
     const failed: { row: number; domain: string; message: string }[] = [];
     let created = 0;
+    let updated = 0;
 
     for (let index = 0; index < rawRows.length; index++) {
       const source = rawRows[index];
@@ -479,24 +480,34 @@ export default class WebsitesController extends WorklenzControllerBase {
       }
       seen.add(parsed.domain);
 
+      const existing = await db.query(
+        `SELECT id FROM websites WHERE team_id = $1 AND domain = $2 AND archived_at IS NULL`,
+        [teamId, parsed.domain]
+      );
+      const present = new Set(Object.keys(mapped));
       try {
-        await db.query(
-          `INSERT INTO websites (
-             team_id, client_id, project_id, name, domain, status,
-             domain_managed_by, domain_provider, domain_account_email, domain_expiry,
-             hosting_managed_by, hosting_provider, hosting_plan, hosting_expiry,
-             dns_manager, notes, credentials_ref, created_by
-           ) VALUES (
-             $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18
-           )`,
-          [
-            teamId, parsed.clientId, parsed.projectId, parsed.name, parsed.domain, parsed.status,
-            parsed.domainManagedBy, parsed.domainProvider, parsed.domainAccountEmail, parsed.domainExpiry,
-            parsed.hostingManagedBy, parsed.hostingProvider, parsed.hostingPlan, parsed.hostingExpiry,
-            parsed.dnsManager, parsed.notes, parsed.credentialsRef, req.user?.id || null,
-          ]
-        );
-        created += 1;
+        if (existing.rowCount) {
+          await WebsitesController.applyImportUpdate(existing.rows[0].id as string, parsed, present);
+          updated += 1;
+        } else {
+          await db.query(
+            `INSERT INTO websites (
+               team_id, client_id, project_id, name, domain, status,
+               domain_managed_by, domain_provider, domain_account_email, domain_expiry,
+               hosting_managed_by, hosting_provider, hosting_plan, hosting_expiry,
+               dns_manager, notes, credentials_ref, created_by
+             ) VALUES (
+               $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18
+             )`,
+            [
+              teamId, parsed.clientId, parsed.projectId, parsed.name, parsed.domain, parsed.status,
+              parsed.domainManagedBy, parsed.domainProvider, parsed.domainAccountEmail, parsed.domainExpiry,
+              parsed.hostingManagedBy, parsed.hostingProvider, parsed.hostingPlan, parsed.hostingExpiry,
+              parsed.dnsManager, parsed.notes, parsed.credentialsRef, req.user?.id || null,
+            ]
+          );
+          created += 1;
+        }
       } catch (error) {
         if (WebsitesController.duplicateMessage(error)) {
           failed.push({ row: rowNumber, domain: parsed.domain, message: "A website with this domain already exists" });
@@ -506,7 +517,35 @@ export default class WebsitesController extends WorklenzControllerBase {
       }
     }
 
-    return res.status(200).send(new ServerResponse(true, { created, failed }));
+    return res.status(200).send(new ServerResponse(true, { created, updated, failed }));
+  }
+
+  private static async applyImportUpdate(
+    id: string,
+    parsed: WebsiteInput,
+    present: Set<string>
+  ): Promise<void> {
+    const assignments = ["name = $2", "updated_at = CURRENT_TIMESTAMP"];
+    const params: unknown[] = [id, parsed.name];
+    const set = (column: string, value: unknown) => {
+      params.push(value);
+      assignments.push(`${column} = $${params.length}`);
+    };
+    if (present.has("client")) set("client_id", parsed.clientId);
+    if (present.has("project")) set("project_id", parsed.projectId);
+    if (present.has("status")) set("status", parsed.status);
+    if (present.has("domain_managed_by")) set("domain_managed_by", parsed.domainManagedBy);
+    if (present.has("domain_provider")) set("domain_provider", parsed.domainProvider);
+    if (present.has("domain_account_email")) set("domain_account_email", parsed.domainAccountEmail);
+    if (present.has("domain_expiry")) set("domain_expiry", parsed.domainExpiry);
+    if (present.has("hosting_managed_by")) set("hosting_managed_by", parsed.hostingManagedBy);
+    if (present.has("hosting_provider")) set("hosting_provider", parsed.hostingProvider);
+    if (present.has("hosting_plan")) set("hosting_plan", parsed.hostingPlan);
+    if (present.has("hosting_expiry")) set("hosting_expiry", parsed.hostingExpiry);
+    if (present.has("dns_manager")) set("dns_manager", parsed.dnsManager);
+    if (present.has("notes")) set("notes", parsed.notes);
+    if (present.has("credentials_ref")) set("credentials_ref", parsed.credentialsRef);
+    await db.query(`UPDATE websites SET ${assignments.join(", ")} WHERE id = $1`, params);
   }
 
   private static mapImportRow(source: Record<string, unknown>): Record<string, string> {
@@ -598,6 +637,30 @@ export default class WebsitesController extends WorklenzControllerBase {
     );
     if (!deleted.rowCount) return res.status(404).send(new ServerResponse(false, null, "Website not found"));
     return res.status(200).send(new ServerResponse(true, null, "Website deleted"));
+  }
+
+  @HandleExceptions()
+  public static async removeMany(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
+    const teamId = WebsitesController.teamId(req);
+    if (!teamId) return res.status(400).send(new ServerResponse(false, null, "Team not found"));
+
+    if (req.body?.all === true) {
+      const deleted = await db.query(
+        `DELETE FROM websites WHERE team_id = $1 AND archived_at IS NULL RETURNING id`,
+        [teamId]
+      );
+      return res.status(200).send(new ServerResponse(true, { deleted: deleted.rowCount || 0 }));
+    }
+
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids.filter((id: unknown) => typeof id === "string") : [];
+    if (!ids.length || ids.length > 500) {
+      return res.status(400).send(new ServerResponse(false, null, "Choose websites to delete"));
+    }
+    const deleted = await db.query(
+      `DELETE FROM websites WHERE team_id = $1 AND id = ANY($2::uuid[]) RETURNING id`,
+      [teamId, ids]
+    );
+    return res.status(200).send(new ServerResponse(true, { deleted: deleted.rowCount || 0 }));
   }
 
   @HandleExceptions()

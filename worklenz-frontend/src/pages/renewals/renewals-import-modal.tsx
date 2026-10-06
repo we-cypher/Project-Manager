@@ -41,10 +41,13 @@ export const RenewalsImportModal = ({ open, onClose, onImported }: RenewalsImpor
       const res = await websitesApiService.importRows(rows);
       if (!res.done || !res.body) return;
       setFailed(res.body.failed || []);
-      if (res.body.created > 0) {
-        message.success(t('importCreated', {
-          count: res.body.created,
-          defaultValue: '{{count}} websites imported',
+      const created = res.body.created || 0;
+      const updated = res.body.updated || 0;
+      if (created > 0 || updated > 0) {
+        message.success(t('importFinished', {
+          created,
+          updated,
+          defaultValue: '{{created}} added, {{updated}} updated',
         }));
         onImported();
       }
@@ -68,7 +71,7 @@ export const RenewalsImportModal = ({ open, onClose, onImported }: RenewalsImpor
       <Space direction="vertical" size={12} style={{ width: '100%' }}>
         <Typography.Paragraph style={{ marginBottom: 0 }}>
           {t('importHelp', {
-            defaultValue: 'Use the template. Managed by is wecypher or client. Dates are YYYY-MM-DD. A blank client is allowed. Existing domains are skipped.',
+            defaultValue: 'Use the template. Managed by is wecypher or client. Dates are YYYY-MM-DD. A blank client is allowed. A domain that already exists is updated.',
           })}
         </Typography.Paragraph>
         <Button href="/renewals-websites-template.csv" download="renewals-websites-template.csv">

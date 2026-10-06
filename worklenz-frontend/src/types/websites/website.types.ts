@@ -104,6 +104,7 @@ export interface IWebsiteImportFailure {
 
 export interface IWebsiteImportResult {
   created: number;
+  updated: number;
   failed: IWebsiteImportFailure[];
 }
 
