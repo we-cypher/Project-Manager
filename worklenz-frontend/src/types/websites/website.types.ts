@@ -7,8 +7,8 @@ export interface IWebsiteListItem {
   name: string;
   domain: string;
   status: WebsiteStatus;
-  client_id: string;
-  client_name: string;
+  client_id: string | null;
+  client_name: string | null;
   project_id?: string | null;
   domain_managed_by: ManagedBy;
   domain_expiry: string | null;
@@ -54,7 +54,7 @@ export interface IWebsite extends IWebsiteListItem {
 export interface IWebsitePayload {
   name: string;
   domain: string;
-  client_id: string;
+  client_id?: string | null;
   project_id?: string | null;
   status: WebsiteStatus;
   domain_managed_by: ManagedBy;

@@ -19,5 +19,6 @@ router.post("/:id/archive", safeControllerFunction(WebsitesController.archive));
 router.post("/:id/restore", safeControllerFunction(WebsitesController.restore));
 router.get("/:id", safeControllerFunction(WebsitesController.getById));
 router.put("/:id", safeControllerFunction(WebsitesController.update));
+router.delete("/:id", safeControllerFunction(WebsitesController.remove));
 
 export default router;

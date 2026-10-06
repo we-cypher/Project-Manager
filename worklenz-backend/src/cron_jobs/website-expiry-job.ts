@@ -332,7 +332,7 @@ async function processTeam(teamId: string): Promise<void> {
   const websites = await db.query(
     `SELECT w.id, w.name, w.domain, w.status, c.name AS client_name, w.domain_expiry, w.hosting_expiry
      FROM websites w
-            JOIN clients c ON c.id = w.client_id
+            LEFT JOIN clients c ON c.id = w.client_id
      WHERE w.team_id = $1 AND w.archived_at IS NULL AND w.status <> 'archived'`,
     [teamId]
   );

@@ -67,6 +67,11 @@ export const websitesApiService = {
     return response.data;
   },
 
+  async remove(id: string): Promise<IServerResponse<null>> {
+    const response = await apiClient.delete<IServerResponse<null>>(`${rootUrl}/${id}`);
+    return response.data;
+  },
+
   async archive(id: string): Promise<IServerResponse<IWebsite>> {
     const response = await apiClient.post<IServerResponse<IWebsite>>(`${rootUrl}/${id}/archive`, {});
     return response.data;

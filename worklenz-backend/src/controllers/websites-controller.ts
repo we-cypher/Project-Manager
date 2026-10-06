@@ -36,7 +36,7 @@ const DEFAULT_INTERVALS = [60, 30, 14, 7, 1, 0];
 interface WebsiteInput {
   name: string;
   domain: string;
-  clientId: string;
+  clientId: string | null;
   projectId: string | null;
   status: WebsiteStatus;
   domainManagedBy: ManagedBy;
@@ -91,7 +91,7 @@ export default class WebsitesController extends WorklenzControllerBase {
   private static async parseBody(teamId: string, body: Record<string, unknown>): Promise<WebsiteInput | string> {
     const name = WebsitesController.text(body.name, 200);
     const domain = normalizeDomain(body.domain);
-    const clientId = typeof body.client_id === "string" ? body.client_id : "";
+    const clientId = typeof body.client_id === "string" && body.client_id ? body.client_id : null;
     const projectId = body.project_id ? String(body.project_id) : null;
     const status = body.status == null || body.status === "" ? "active" : parseStatus(body.status);
     const domainManagedBy = parseManagedBy(body.domain_managed_by);
@@ -102,14 +102,15 @@ export default class WebsitesController extends WorklenzControllerBase {
 
     if (!name) return "Website name is required";
     if (!domain) return "Enter a valid domain name";
-    if (!clientId) return "Client is required";
     if (!status) return "Status is invalid";
     if (!domainManagedBy || !hostingManagedBy) return "Managed by must be us or client";
     if (domainExpiry === undefined || hostingExpiry === undefined) return "Enter a valid expiry date";
     if (domainAccountEmail === undefined) return "Enter a valid account email";
 
-    const client = await db.query(`SELECT id FROM clients WHERE id = $1 AND team_id = $2`, [clientId, teamId]);
-    if (!client.rowCount) return "Client was not found on this team";
+    if (clientId) {
+      const client = await db.query(`SELECT id FROM clients WHERE id = $1 AND team_id = $2`, [clientId, teamId]);
+      if (!client.rowCount) return "Client was not found on this team";
+    }
 
     if (projectId) {
       const project = await db.query(
@@ -118,7 +119,7 @@ export default class WebsitesController extends WorklenzControllerBase {
       );
       if (!project.rowCount) return "Project was not found on this team";
       const projectClientId = project.rows[0].client_id as string | null;
-      if (projectClientId && projectClientId !== clientId) {
+      if (projectClientId && clientId && projectClientId !== clientId) {
         return "That project belongs to a different client";
       }
     }
@@ -151,7 +152,7 @@ export default class WebsitesController extends WorklenzControllerBase {
     const result = await db.query(
       `SELECT ${WEBSITE_COLUMNS}
        FROM websites w
-              JOIN clients c ON c.id = w.client_id
+              LEFT JOIN clients c ON c.id = w.client_id
               LEFT JOIN projects p ON p.id = w.project_id
        WHERE w.id = $1 AND w.team_id = $2`,
       [id, teamId]
@@ -229,7 +230,7 @@ export default class WebsitesController extends WorklenzControllerBase {
                   ELSE (LEAST(w.domain_expiry, w.hosting_expiry) - (SELECT day FROM today))::int
                 END AS days_remaining
          FROM websites w
-                JOIN clients c ON c.id = w.client_id
+                LEFT JOIN clients c ON c.id = w.client_id
          WHERE ${where.join(" AND ")}
        )
        SELECT *, COUNT(*) OVER() AS total_count
@@ -414,6 +415,18 @@ export default class WebsitesController extends WorklenzControllerBase {
       }
       throw error;
     }
+  }
+
+  @HandleExceptions()
+  public static async remove(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
+    const teamId = WebsitesController.teamId(req);
+    if (!teamId) return res.status(400).send(new ServerResponse(false, null, "Team not found"));
+    const deleted = await db.query(
+      `DELETE FROM websites WHERE id = $1 AND team_id = $2 RETURNING id`,
+      [req.params.id, teamId]
+    );
+    if (!deleted.rowCount) return res.status(404).send(new ServerResponse(false, null, "Website not found"));
+    return res.status(200).send(new ServerResponse(true, null, "Website deleted"));
   }
 
   @HandleExceptions()

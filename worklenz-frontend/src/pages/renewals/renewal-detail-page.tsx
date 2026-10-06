@@ -10,6 +10,8 @@ import {
   Input,
   Modal,
   Popconfirm,
+  Row,
+  Col,
   Select,
   Space,
   Table,
@@ -80,6 +82,7 @@ const RenewalDetailPage = () => {
     setSaving(true);
     const payload: IWebsitePayload = {
       ...values,
+      client_id: values.client_id || null,
       project_id: values.project_id || null,
       domain_expiry: values.domain_expiry || null,
       hosting_expiry: values.hosting_expiry || null,
@@ -136,7 +139,7 @@ const RenewalDetailPage = () => {
   };
 
   return (
-    <Flex vertical gap={16} style={{ padding: 24, maxWidth: 960 }}>
+    <Flex vertical gap={16} style={{ padding: 24, maxWidth: 1120 }}>
       <WorklenzPageHeader
         title={isNew ? t('addWebsite', { defaultValue: 'Add website' }) : t('editWebsite', { defaultValue: 'Website' })}
         extra={
@@ -166,76 +169,83 @@ const RenewalDetailPage = () => {
         initialValues={{ status: 'active', domain_managed_by: 'us', hosting_managed_by: 'us' }}
         onFinish={onFinish}
       >
-        <Card title={t('general', { defaultValue: 'General' })} style={{ marginBottom: 16 }}>
-          <Form.Item name="name" label={t('websiteName', { defaultValue: 'Website name' })} rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="domain" label={t('domain', { defaultValue: 'Domain' })} rules={[{ required: true }]}>
-            <Input placeholder="example.com" />
-          </Form.Item>
-          <Form.Item name="client_id" label={t('client', { defaultValue: 'Client' })} rules={[{ required: true }]}>
-            <Select showSearch optionFilterProp="label" options={filters.clients.map(client => ({ value: client.id, label: client.name }))} />
-          </Form.Item>
-          <Form.Item name="project_id" label={t('project', { defaultValue: 'Project' })}>
-            <Select allowClear showSearch optionFilterProp="label" options={projects.map(project => ({ value: project.id, label: project.name }))} />
-          </Form.Item>
-          <Form.Item name="status" label={t('status', { defaultValue: 'Status' })} rules={[{ required: true }]}>
-            <Select options={['active', 'suspended', 'expired', 'archived'].map(status => ({
-              value: status,
-              label: t(`status.${status}`, { defaultValue: status }),
-            }))} />
-          </Form.Item>
-        </Card>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} lg={12}>
+            <Card title={t('general', { defaultValue: 'General' })} style={{ height: '100%' }}>
+              <Form.Item name="name" label={t('websiteName', { defaultValue: 'Website name' })} rules={[{ required: true }]}>
+                <Input />
+              </Form.Item>
+              <Form.Item name="domain" label={t('domain', { defaultValue: 'Domain' })} rules={[{ required: true }]}>
+                <Input placeholder="example.com" />
+              </Form.Item>
+              <Form.Item name="client_id" label={t('client', { defaultValue: 'Client' })}>
+                <Select allowClear showSearch optionFilterProp="label" options={filters.clients.map(client => ({ value: client.id, label: client.name }))} />
+              </Form.Item>
+              <Form.Item name="project_id" label={t('project', { defaultValue: 'Project' })}>
+                <Select allowClear showSearch optionFilterProp="label" options={projects.map(project => ({ value: project.id, label: project.name }))} />
+              </Form.Item>
+              <Form.Item name="status" label={t('status', { defaultValue: 'Status' })} rules={[{ required: true }]} style={{ marginBottom: 0 }}>
+                <Select options={['active', 'suspended', 'expired', 'archived'].map(status => ({
+                  value: status,
+                  label: t(`status.${status}`, { defaultValue: status }),
+                }))} />
+              </Form.Item>
+            </Card>
+          </Col>
+          <Col xs={24} lg={12}>
+            <Card title={t('domainSection', { defaultValue: 'Domain' })} style={{ height: '100%' }}>
+              <Form.Item name="domain_managed_by" label={t('managedBy', { defaultValue: 'Managed by' })} rules={[{ required: true }]}>
+                <Select options={[
+                  { value: 'us', label: t('managedUs', { defaultValue: 'Us' }) },
+                  { value: 'client', label: t('managedClient', { defaultValue: 'Client' }) },
+                ]} />
+              </Form.Item>
+              <Form.Item name="domain_provider" label={t('registrar', { defaultValue: 'Registrar / provider' })}>
+                <Input />
+              </Form.Item>
+              <Form.Item name="domain_account_email" label={t('accountEmail', { defaultValue: 'Registered account email' })}>
+                <Input />
+              </Form.Item>
+              <Form.Item name="domain_expiry" label={t('expiryDate', { defaultValue: 'Expiry date' })} style={{ marginBottom: 0 }}>
+                <Input type="date" />
+              </Form.Item>
+            </Card>
+          </Col>
+          <Col xs={24} lg={12}>
+            <Card title={t('hostingSection', { defaultValue: 'Hosting' })} style={{ height: '100%' }}>
+              <Form.Item name="hosting_managed_by" label={t('managedBy', { defaultValue: 'Managed by' })} rules={[{ required: true }]}>
+                <Select options={[
+                  { value: 'us', label: t('managedUs', { defaultValue: 'Us' }) },
+                  { value: 'client', label: t('managedClient', { defaultValue: 'Client' }) },
+                ]} />
+              </Form.Item>
+              <Form.Item name="hosting_provider" label={t('hostingProvider', { defaultValue: 'Hosting provider' })}>
+                <Input />
+              </Form.Item>
+              <Form.Item name="hosting_plan" label={t('plan', { defaultValue: 'Plan / server' })}>
+                <Input />
+              </Form.Item>
+              <Form.Item name="hosting_expiry" label={t('expiryDate', { defaultValue: 'Expiry date' })} style={{ marginBottom: 0 }}>
+                <Input type="date" />
+              </Form.Item>
+            </Card>
+          </Col>
+          <Col xs={24} lg={12}>
+            <Card title={t('extras', { defaultValue: 'Extras' })} style={{ height: '100%' }}>
+              <Form.Item name="dns_manager" label={t('dnsManager', { defaultValue: 'DNS manager' })}>
+                <Input placeholder={t('dnsPlaceholder', { defaultValue: 'Cloudflare, registrar, hosting provider, or other' })} />
+              </Form.Item>
+              <Form.Item name="credentials_ref" label={t('credentialsRef', { defaultValue: 'Credentials location' })} extra={t('credentialsHelp', { defaultValue: 'Where the login lives. Do not store passwords here.' })}>
+                <Input />
+              </Form.Item>
+              <Form.Item name="notes" label={t('notes', { defaultValue: 'Notes' })} style={{ marginBottom: 0 }}>
+                <Input.TextArea rows={4} />
+              </Form.Item>
+            </Card>
+          </Col>
+        </Row>
 
-        <Card title={t('domainSection', { defaultValue: 'Domain' })} style={{ marginBottom: 16 }}>
-          <Form.Item name="domain_managed_by" label={t('managedBy', { defaultValue: 'Managed by' })} rules={[{ required: true }]}>
-            <Select options={[
-              { value: 'us', label: t('managedUs', { defaultValue: 'Us' }) },
-              { value: 'client', label: t('managedClient', { defaultValue: 'Client' }) },
-            ]} />
-          </Form.Item>
-          <Form.Item name="domain_provider" label={t('registrar', { defaultValue: 'Registrar / provider' })}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="domain_account_email" label={t('accountEmail', { defaultValue: 'Registered account email' })}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="domain_expiry" label={t('expiryDate', { defaultValue: 'Expiry date' })}>
-            <Input type="date" />
-          </Form.Item>
-        </Card>
-
-        <Card title={t('hostingSection', { defaultValue: 'Hosting' })} style={{ marginBottom: 16 }}>
-          <Form.Item name="hosting_managed_by" label={t('managedBy', { defaultValue: 'Managed by' })} rules={[{ required: true }]}>
-            <Select options={[
-              { value: 'us', label: t('managedUs', { defaultValue: 'Us' }) },
-              { value: 'client', label: t('managedClient', { defaultValue: 'Client' }) },
-            ]} />
-          </Form.Item>
-          <Form.Item name="hosting_provider" label={t('hostingProvider', { defaultValue: 'Hosting provider' })}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="hosting_plan" label={t('plan', { defaultValue: 'Plan / server' })}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="hosting_expiry" label={t('expiryDate', { defaultValue: 'Expiry date' })}>
-            <Input type="date" />
-          </Form.Item>
-        </Card>
-
-        <Card title={t('extras', { defaultValue: 'Extras' })} style={{ marginBottom: 16 }}>
-          <Form.Item name="dns_manager" label={t('dnsManager', { defaultValue: 'DNS manager' })}>
-            <Input placeholder={t('dnsPlaceholder', { defaultValue: 'Cloudflare, registrar, hosting provider, or other' })} />
-          </Form.Item>
-          <Form.Item name="credentials_ref" label={t('credentialsRef', { defaultValue: 'Credentials location' })} extra={t('credentialsHelp', { defaultValue: 'Where the login lives. Do not store passwords here.' })}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="notes" label={t('notes', { defaultValue: 'Notes' })}>
-            <Input.TextArea rows={4} />
-          </Form.Item>
-        </Card>
-
-        <Button type="primary" htmlType="submit" loading={saving}>
+        <Button type="primary" htmlType="submit" loading={saving} style={{ marginTop: 16 }}>
           {t('save', { defaultValue: 'Save' })}
         </Button>
       </Form>
