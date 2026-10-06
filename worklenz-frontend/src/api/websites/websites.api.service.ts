@@ -4,6 +4,7 @@ import { IServerResponse } from '@/types/common.types';
 import { toQueryString } from '@/utils/toQueryString';
 import {
   IWebsite,
+  IWebsiteImportResult,
   IWebsiteFilters,
   IWebsiteListItem,
   IWebsiteListQuery,
@@ -49,6 +50,11 @@ export const websitesApiService = {
 
   async getById(id: string): Promise<IServerResponse<IWebsite>> {
     const response = await apiClient.get<IServerResponse<IWebsite>>(`${rootUrl}/${id}`);
+    return response.data;
+  },
+
+  async importRows(rows: Record<string, string>[]): Promise<IServerResponse<IWebsiteImportResult>> {
+    const response = await apiClient.post<IServerResponse<IWebsiteImportResult>>(`${rootUrl}/import`, { rows });
     return response.data;
   },
 

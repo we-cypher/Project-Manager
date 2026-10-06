@@ -51,7 +51,10 @@ export function parseOptionalDate(input: unknown): string | null | undefined {
 }
 
 export function parseManagedBy(input: unknown): ManagedBy | undefined {
-  if (input === "us" || input === "client") return input;
+  if (typeof input !== "string") return undefined;
+  const value = input.trim().toLowerCase();
+  if (value === "us" || value === "wecypher") return "us";
+  if (value === "client") return "client";
   return undefined;
 }
 

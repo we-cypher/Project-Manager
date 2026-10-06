@@ -196,7 +196,7 @@ const RenewalDetailPage = () => {
             <Card title={t('domainSection', { defaultValue: 'Domain' })} style={{ height: '100%' }}>
               <Form.Item name="domain_managed_by" label={t('managedBy', { defaultValue: 'Managed by' })} rules={[{ required: true }]}>
                 <Select options={[
-                  { value: 'us', label: t('managedUs', { defaultValue: 'Us' }) },
+                  { value: 'us', label: t('managedUs', { defaultValue: 'Wecypher' }) },
                   { value: 'client', label: t('managedClient', { defaultValue: 'Client' }) },
                 ]} />
               </Form.Item>
@@ -215,7 +215,7 @@ const RenewalDetailPage = () => {
             <Card title={t('hostingSection', { defaultValue: 'Hosting' })} style={{ height: '100%' }}>
               <Form.Item name="hosting_managed_by" label={t('managedBy', { defaultValue: 'Managed by' })} rules={[{ required: true }]}>
                 <Select options={[
-                  { value: 'us', label: t('managedUs', { defaultValue: 'Us' }) },
+                  { value: 'us', label: t('managedUs', { defaultValue: 'Wecypher' }) },
                   { value: 'client', label: t('managedClient', { defaultValue: 'Client' }) },
                 ]} />
               </Form.Item>

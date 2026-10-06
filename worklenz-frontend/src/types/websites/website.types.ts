@@ -96,6 +96,17 @@ export interface IWebsiteSettings {
   timezone: string | null;
 }
 
+export interface IWebsiteImportFailure {
+  row: number;
+  domain: string;
+  message: string;
+}
+
+export interface IWebsiteImportResult {
+  created: number;
+  failed: IWebsiteImportFailure[];
+}
+
 export interface IWebsiteListQuery {
   index: number;
   size: number;

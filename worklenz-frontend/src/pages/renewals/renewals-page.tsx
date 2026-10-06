@@ -16,7 +16,8 @@ import {
   message,
   theme,
 } from '@/shared/antd-imports';
-import { DeleteOutlined, EditOutlined, PlusOutlined, SettingOutlined } from '@/shared/antd-imports';
+import { DeleteOutlined, EditOutlined, ImportOutlined, PlusOutlined, SettingOutlined } from '@/shared/antd-imports';
+import { RenewalsImportModal } from '@/pages/renewals/renewals-import-modal';
 import WorklenzPageHeader from '@/components/common/WorklenzPageHeader';
 import { websitesApiService } from '@/api/websites/websites.api.service';
 import { DEFAULT_PAGE_SIZE } from '@/shared/constants';
@@ -64,6 +65,7 @@ const RenewalsPage = () => {
   const [total, setTotal] = useState(0);
   const [summary, setSummary] = useState<IWebsiteSummary>(emptySummary);
   const [loading, setLoading] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
 
   const query = useMemo(() => ({
@@ -119,7 +121,7 @@ const RenewalsPage = () => {
   }, [searchInput]);
 
   const managedLabel = (value: string) =>
-    value === 'us' ? t('managedUs', { defaultValue: 'Us' }) : t('managedClient', { defaultValue: 'Client' });
+    value === 'us' ? t('managedUs', { defaultValue: 'Wecypher' }) : t('managedClient', { defaultValue: 'Client' });
 
   const remove = async (id: string) => {
     try {
@@ -148,6 +150,9 @@ const RenewalsPage = () => {
           <Space>
             <Button icon={<SettingOutlined />} onClick={() => navigate('/renewals/settings')}>
               {t('settings', { defaultValue: 'Settings' })}
+            </Button>
+            <Button icon={<ImportOutlined />} onClick={() => setImportOpen(true)}>
+              {t('importAction', { defaultValue: 'Import' })}
             </Button>
             <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/renewals/new')}>
               {t('addWebsite', { defaultValue: 'Add website' })}
@@ -187,9 +192,9 @@ const RenewalsPage = () => {
             value={query.management === 'all' ? undefined : query.management}
             onChange={value => setParam('management', value || '')}
             options={[
-              { value: 'both_us', label: t('bothUs', { defaultValue: 'Domain and hosting with us' }) },
-              { value: 'hosting_us', label: t('hostingUs', { defaultValue: 'Hosting only with us' }) },
-              { value: 'domain_us', label: t('domainUs', { defaultValue: 'Domain only with us' }) },
+              { value: 'both_us', label: t('bothUs', { defaultValue: 'Domain and hosting with Wecypher' }) },
+              { value: 'hosting_us', label: t('hostingUs', { defaultValue: 'Hosting only with Wecypher' }) },
+              { value: 'domain_us', label: t('domainUs', { defaultValue: 'Domain only with Wecypher' }) },
               { value: 'client', label: t('clientManaged', { defaultValue: 'Client managed' }) },
             ]}
           />
@@ -291,6 +296,11 @@ const RenewalsPage = () => {
             </Space>
           ) },
         ]}
+      />
+      <RenewalsImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={() => void load()}
       />
     </Flex>
   );

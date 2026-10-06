@@ -103,7 +103,7 @@ export default class WebsitesController extends WorklenzControllerBase {
     if (!name) return "Website name is required";
     if (!domain) return "Enter a valid domain name";
     if (!status) return "Status is invalid";
-    if (!domainManagedBy || !hostingManagedBy) return "Managed by must be us or client";
+    if (!domainManagedBy || !hostingManagedBy) return "Managed by must be Wecypher or client";
     if (domainExpiry === undefined || hostingExpiry === undefined) return "Enter a valid expiry date";
     if (domainAccountEmail === undefined) return "Enter a valid account email";
 
@@ -379,6 +379,177 @@ export default class WebsitesController extends WorklenzControllerBase {
       }
       throw error;
     }
+  }
+
+  @HandleExceptions()
+  public static async importRows(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
+    const teamId = WebsitesController.teamId(req);
+    if (!teamId) return res.status(400).send(new ServerResponse(false, null, "Team not found"));
+    const rawRows = Array.isArray(req.body?.rows) ? req.body.rows as unknown[] : null;
+    if (!rawRows) return res.status(400).send(new ServerResponse(false, null, "Upload a CSV with a header row"));
+    if (rawRows.length > 500) {
+      return res.status(400).send(new ServerResponse(false, null, "Import up to 500 websites at a time"));
+    }
+
+    const clients = await db.query(`SELECT id, lower(name) AS name FROM clients WHERE team_id = $1`, [teamId]);
+    const clientIds = new Map<string, string[]>();
+    for (const row of clients.rows as { id: string; name: string }[]) {
+      const matches = clientIds.get(row.name) || [];
+      matches.push(row.id);
+      clientIds.set(row.name, matches);
+    }
+    const projects = await db.query(
+      `SELECT id, lower(name) AS name, client_id FROM projects WHERE team_id = $1`,
+      [teamId]
+    );
+    const projectIds = new Map<string, { id: string; client_id: string | null }[]>();
+    for (const row of projects.rows as { id: string; name: string; client_id: string | null }[]) {
+      const matches = projectIds.get(row.name) || [];
+      matches.push({ id: row.id, client_id: row.client_id });
+      projectIds.set(row.name, matches);
+    }
+
+    const seen = new Set<string>();
+    const failed: { row: number; domain: string; message: string }[] = [];
+    let created = 0;
+
+    for (let index = 0; index < rawRows.length; index++) {
+      const source = rawRows[index];
+      const rowNumber = index + 2;
+      if (!source || typeof source !== "object") {
+        failed.push({ row: rowNumber, domain: "", message: "Row is empty" });
+        continue;
+      }
+      const mapped = WebsitesController.mapImportRow(source as Record<string, unknown>);
+      if (!mapped.name && !mapped.domain) continue;
+
+      let clientId = "";
+      if (mapped.client) {
+        const matches = clientIds.get(mapped.client.toLowerCase()) || [];
+        if (matches.length !== 1) {
+          failed.push({
+            row: rowNumber,
+            domain: mapped.domain,
+            message: matches.length === 0 ? "Client was not found on this team" : "More than one client has this name",
+          });
+          continue;
+        }
+        clientId = matches[0];
+      }
+
+      let projectId: string | null = null;
+      if (mapped.project) {
+        const matches = projectIds.get(mapped.project.toLowerCase()) || [];
+        if (matches.length !== 1) {
+          failed.push({
+            row: rowNumber,
+            domain: mapped.domain,
+            message: matches.length === 0 ? "Project was not found on this team" : "More than one project has this name",
+          });
+          continue;
+        }
+        projectId = matches[0].id;
+      }
+
+      const parsed = await WebsitesController.parseBody(teamId, {
+        name: mapped.name,
+        domain: mapped.domain,
+        client_id: clientId,
+        project_id: projectId,
+        status: mapped.status || "active",
+        domain_managed_by: mapped.domain_managed_by || "wecypher",
+        domain_provider: mapped.domain_provider,
+        domain_account_email: mapped.domain_account_email,
+        domain_expiry: WebsitesController.normalizeImportDate(mapped.domain_expiry),
+        hosting_managed_by: mapped.hosting_managed_by || "wecypher",
+        hosting_provider: mapped.hosting_provider,
+        hosting_plan: mapped.hosting_plan,
+        hosting_expiry: WebsitesController.normalizeImportDate(mapped.hosting_expiry),
+        dns_manager: mapped.dns_manager,
+        credentials_ref: mapped.credentials_ref,
+        notes: mapped.notes,
+      });
+      if (typeof parsed === "string") {
+        failed.push({ row: rowNumber, domain: mapped.domain, message: parsed });
+        continue;
+      }
+      if (seen.has(parsed.domain)) {
+        failed.push({ row: rowNumber, domain: parsed.domain, message: "This domain is repeated in the file" });
+        continue;
+      }
+      seen.add(parsed.domain);
+
+      try {
+        await db.query(
+          `INSERT INTO websites (
+             team_id, client_id, project_id, name, domain, status,
+             domain_managed_by, domain_provider, domain_account_email, domain_expiry,
+             hosting_managed_by, hosting_provider, hosting_plan, hosting_expiry,
+             dns_manager, notes, credentials_ref, created_by
+           ) VALUES (
+             $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18
+           )`,
+          [
+            teamId, parsed.clientId, parsed.projectId, parsed.name, parsed.domain, parsed.status,
+            parsed.domainManagedBy, parsed.domainProvider, parsed.domainAccountEmail, parsed.domainExpiry,
+            parsed.hostingManagedBy, parsed.hostingProvider, parsed.hostingPlan, parsed.hostingExpiry,
+            parsed.dnsManager, parsed.notes, parsed.credentialsRef, req.user?.id || null,
+          ]
+        );
+        created += 1;
+      } catch (error) {
+        if (WebsitesController.duplicateMessage(error)) {
+          failed.push({ row: rowNumber, domain: parsed.domain, message: "A website with this domain already exists" });
+          continue;
+        }
+        throw error;
+      }
+    }
+
+    return res.status(200).send(new ServerResponse(true, { created, failed }));
+  }
+
+  private static mapImportRow(source: Record<string, unknown>): Record<string, string> {
+    const aliases: Record<string, string> = {
+      website: "name",
+      website_name: "name",
+      name: "name",
+      domain: "domain",
+      client: "client",
+      client_name: "client",
+      project: "project",
+      project_name: "project",
+      status: "status",
+      domain_managed_by: "domain_managed_by",
+      hosting_managed_by: "hosting_managed_by",
+      domain_provider: "domain_provider",
+      registrar: "domain_provider",
+      domain_account_email: "domain_account_email",
+      account_email: "domain_account_email",
+      domain_expiry: "domain_expiry",
+      hosting_provider: "hosting_provider",
+      hosting_plan: "hosting_plan",
+      plan: "hosting_plan",
+      hosting_expiry: "hosting_expiry",
+      dns_manager: "dns_manager",
+      credentials_ref: "credentials_ref",
+      credentials_location: "credentials_ref",
+      notes: "notes",
+    };
+    const mapped: Record<string, string> = {};
+    for (const [key, value] of Object.entries(source)) {
+      const normalized = key.trim().toLowerCase().replace(/^\uFEFF/, "").replace(/[\s/-]+/g, "_");
+      const field = aliases[normalized];
+      if (!field) continue;
+      mapped[field] = value == null ? "" : String(value).trim();
+    }
+    return mapped;
+  }
+
+  private static normalizeImportDate(value: string): string {
+    const match = /^(\d{1,2})[/. -](\d{1,2})[/. -](\d{4})$/.exec(value.trim());
+    if (!match) return value.trim();
+    return `${match[3]}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}`;
   }
 
   @HandleExceptions()

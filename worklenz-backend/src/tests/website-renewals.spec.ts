@@ -6,10 +6,18 @@ import {
   nearerExpiry,
   normalizeDomain,
   parseIntervals,
+  parseManagedBy,
   parseOptionalDate,
 } from "../shared/website-renewals";
 
 describe("website renewals helpers", () => {
+  it("treats Wecypher as the us ownership value", () => {
+    expect(parseManagedBy("Wecypher")).toBe("us");
+    expect(parseManagedBy("us")).toBe("us");
+    expect(parseManagedBy("client")).toBe("client");
+    expect(parseManagedBy("other")).toBeUndefined();
+  });
+
   it("normalizes a URL down to a hostname", () => {
     expect(normalizeDomain(" HTTPS://WWW.Example.com/path?q=1 ")).toBe("example.com");
     expect(normalizeDomain("not a domain")).toBeNull();

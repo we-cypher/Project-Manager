@@ -14,6 +14,7 @@ router.get("/settings", safeControllerFunction(WebsitesController.getSettings));
 router.put("/settings", safeControllerFunction(WebsitesController.updateSettings));
 router.get("/", safeControllerFunction(WebsitesController.list));
 router.post("/", safeControllerFunction(WebsitesController.create));
+router.post("/import", safeControllerFunction(WebsitesController.importRows));
 router.post("/:id/renew", safeControllerFunction(WebsitesController.renew));
 router.post("/:id/archive", safeControllerFunction(WebsitesController.archive));
 router.post("/:id/restore", safeControllerFunction(WebsitesController.restore));

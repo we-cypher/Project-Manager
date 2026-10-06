@@ -1,0 +1,2 @@
+name,domain,client,project,status,domain_managed_by,domain_provider,domain_account_email,domain_expiry,hosting_managed_by,hosting_provider,hosting_plan,hosting_expiry,dns_manager,credentials_ref,notes
+Example site,example.com,,,active,wecypher,Namecheap,ops@example.com,2027-01-15,wecypher,Cloudways,2 GB,2026-11-01,Cloudflare,,Imported example
