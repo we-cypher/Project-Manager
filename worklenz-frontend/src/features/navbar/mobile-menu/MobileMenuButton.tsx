@@ -11,7 +11,7 @@ import {
   ReadOutlined,
   GlobalOutlined,
 } from '@/shared/antd-imports';
-import { ShopOutlined } from '@ant-design/icons';
+import { ShopOutlined, FileSearchOutlined } from '@ant-design/icons';
 import { Card, Dropdown, Flex, MenuProps, Space, theme, Typography } from '@/shared/antd-imports';
 import React, { memo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -36,6 +36,7 @@ const ROUTE_ICONS: Record<string, ReactNode> = {
   finance: React.createElement(DollarOutlined),
   reporting: React.createElement(ReadOutlined),
   renewals: React.createElement(GlobalOutlined),
+  'proof-reader': React.createElement(FileSearchOutlined),
   'Team Reports': React.createElement(BarChartOutlined),
 };
 const DEFAULT_ROUTE_ICON = React.createElement(AppstoreOutlined);

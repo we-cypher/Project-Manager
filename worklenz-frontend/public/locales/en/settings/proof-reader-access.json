@@ -1,0 +1,14 @@
+{
+  "pageTitle": "Proof Reader access",
+  "description": "Owners and admins always see Proof Reader. Turn it on for other people who should review creatives.",
+  "nameColumn": "Name",
+  "emailColumn": "Email",
+  "roleColumn": "Role",
+  "accessColumn": "Proof Reader access",
+  "accessSwitchLabel": "Proof Reader access for {{name}}",
+  "searchPlaceholder": "Search people",
+  "loadError": "Could not load Proof Reader access.",
+  "saveError": "Could not update Proof Reader access.",
+  "retry": "Retry",
+  "empty": "No team members found."
+}

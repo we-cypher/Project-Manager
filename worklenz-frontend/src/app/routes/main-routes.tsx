@@ -18,6 +18,7 @@ import PlannerWorkloadView from '@/features/schedule/PlannerWorkloadView';
 import { ControlOutlined, CalendarOutlined, InboxOutlined } from '@ant-design/icons';
 import GuestRedirect from '@/guards/GuestRedirect';
 import { useCanAccessSales } from '@/hooks/useCanAccessSales';
+import { useCanAccessProofReader } from '@/hooks/useCanAccessProofReader';
 
 // Lazy load page components for better code splitting with chunk error handling
 const HomeLayout = lazy(
@@ -124,6 +125,18 @@ const RenewalsSettingsPage = lazy(
   ChunkErrorHandler.wrapLazyImport(
     () => import('@/pages/renewals/renewals-settings-page'),
     'RenewalsSettingsPage'
+  )
+);
+const ProofReaderPage = lazy(
+  ChunkErrorHandler.wrapLazyImport(
+    () => import('@/pages/proof-reader/proof-reader-page'),
+    'ProofReaderPage'
+  )
+);
+const ProofReaderSettingsPage = lazy(
+  ChunkErrorHandler.wrapLazyImport(
+    () => import('@/pages/proof-reader/proof-reader-settings-page'),
+    'ProofReaderSettingsPage'
   )
 );
 const LicenseExpiredPage = lazy(
@@ -241,6 +254,20 @@ const AdminGuard = ({ children }: { children: React.ReactNode }) => {
 
 const SalesAccessGuard = ({ children }: { children: React.ReactNode }) => {
   const { canAccess, isLoading } = useCanAccessSales();
+
+  if (isLoading) {
+    return <SuspenseFallback />;
+  }
+
+  if (!canAccess) {
+    return <Navigate to="/home" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+const ProofReaderAccessGuard = ({ children }: { children: React.ReactNode }) => {
+  const { canAccess, isLoading } = useCanAccessProofReader();
 
   if (isLoading) {
     return <SuspenseFallback />;
@@ -608,6 +635,27 @@ const FINANCE_BASE_PATH = '/finance';const mainRoutes: RouteObject[] = [
           { path: 'settings', element: <RenewalsSettingsPage /> },
           { path: 'new', element: <RenewalDetailPage /> },
           { path: ':id', element: <RenewalDetailPage /> },
+        ],
+      },
+      {
+        path: 'proof-reader',
+        element: (
+          <ProofReaderAccessGuard>
+            <Suspense fallback={<SuspenseFallback />}>
+              <Outlet />
+            </Suspense>
+          </ProofReaderAccessGuard>
+        ),
+        children: [
+          { index: true, element: <ProofReaderPage /> },
+          {
+            path: 'settings',
+            element: (
+              <AdminGuard>
+                <ProofReaderSettingsPage />
+              </AdminGuard>
+            ),
+          },
         ],
       },
       {

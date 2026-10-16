@@ -62,6 +62,13 @@ export const navRoutes: NavRoutesType[] = [
     freePlanFeature: false,
   },
   {
+    name: 'proof-reader',
+    path: '/proof-reader',
+    adminOnly: false,
+    freePlanFeature: true,
+    guestExcluded: true,
+  },
+  {
     name: 'Team Reports',
     path: '/team-lead-reports',
     adminOnly: false,

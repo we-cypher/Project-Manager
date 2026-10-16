@@ -19,7 +19,7 @@ import {
   ApiOutlined,
   UsergroupAddOutlined,
 } from '@/shared/antd-imports';
-import { MobileOutlined, ShopOutlined, SwapOutlined } from '@ant-design/icons';
+import { MobileOutlined, ShopOutlined, SwapOutlined, FileSearchOutlined } from '@ant-design/icons';
 import React, { ReactNode, lazy } from 'react';
 import { ILocalSession } from '@/types/auth/local-session.types';
 import { hasBusinessFeatureAccess } from '@/ee/utils/subscription-utils';
@@ -44,6 +44,9 @@ const TeamMembersSettings = lazy(
 );
 const SalesAccessSettings = lazy(
   () => import('@/pages/settings/sales-access/sales-access-settings')
+);
+const ProofReaderAccessSettings = lazy(
+  () => import('@/pages/settings/proof-reader-access/proof-reader-access-settings')
 );
 const GuestMembersSettings = lazy(
   () => import('@/pages/settings/guest-members/guest-members-settings')
@@ -234,6 +237,17 @@ export const settingsItems: SettingMenuItem[] = [
     groupDefaultValue: 'Workspace Setup',
     icon: React.createElement(ShopOutlined),
     element: React.createElement(SalesAccessSettings),
+    adminOnly: true,
+  },
+  {
+    key: 'proof-reader-access',
+    name: 'proof-reader-access',
+    defaultValue: 'Proof Reader access',
+    endpoint: 'proof-reader-access',
+    groupKey: 'workspace-setup',
+    groupDefaultValue: 'Workspace Setup',
+    icon: React.createElement(FileSearchOutlined),
+    element: React.createElement(ProofReaderAccessSettings),
     adminOnly: true,
   },
   {
