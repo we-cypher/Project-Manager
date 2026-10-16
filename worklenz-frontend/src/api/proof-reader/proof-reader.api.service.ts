@@ -121,6 +121,18 @@ export const proofReaderApiService = {
     return response.data;
   },
 
+  async getReviewImage(reviewId: string): Promise<Blob> {
+    const response = await apiClient.get<Blob>(`${rootUrl}/${reviewId}/image`, {
+      responseType: 'blob',
+      headers: { 'X-Silent-Request': '1' },
+    });
+    const contentType = String(response.headers['content-type'] || '');
+    if (!contentType.startsWith('image/')) {
+      throw new Error('Image not found');
+    }
+    return response.data;
+  },
+
   async createReview(file: File): Promise<IServerResponse<IProofReaderReview>> {
     const formData = new FormData();
     formData.append('file', file);

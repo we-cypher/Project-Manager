@@ -7,7 +7,6 @@ import {
   Button,
   Flex,
   Form,
-  Image,
   Input,
   Modal,
   Popconfirm,
@@ -20,7 +19,7 @@ import {
   message,
   theme,
 } from '@/shared/antd-imports';
-import { DeleteOutlined, EditOutlined, PlusOutlined, SettingOutlined } from '@/shared/antd-imports';
+import { DeleteOutlined, EditOutlined, PictureOutlined, PlusOutlined, SettingOutlined } from '@/shared/antd-imports';
 import type { TableProps, UploadProps } from '@/shared/antd-imports';
 
 import WorklenzPageHeader from '@/components/common/WorklenzPageHeader';
@@ -42,9 +41,84 @@ function apiError(error: unknown, fallback: string): string {
   return messageText || fallback;
 }
 
-const ReviewsTab = () => {
+const CreativeThumb = ({ reviewId, fileName }: { reviewId: string; fileName: string }) => {
   const { t } = useTranslation('proof-reader');
   const { token } = theme.useToken();
+  const [src, setSrc] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    let cancelled = false;
+
+    void proofReaderApiService
+      .getReviewImage(reviewId)
+      .then(blob => {
+        objectUrl = URL.createObjectURL(blob);
+        if (!cancelled) setSrc(objectUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setSrc(null);
+      });
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [reviewId]);
+
+  const label = src
+    ? t('thumbnailAlt', { defaultValue: 'Uploaded creative {{name}}', name: fileName })
+    : t('imageUnavailable', { defaultValue: 'Image could not be loaded' });
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-label={label}
+        disabled={!src}
+        onClick={() => setIsOpen(true)}
+        style={{
+          width: 40,
+          height: 40,
+          padding: 0,
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          border: `1px solid ${token.colorBorderSecondary}`,
+          borderRadius: token.borderRadius,
+          background: token.colorFillQuaternary,
+          cursor: src ? 'pointer' : 'default',
+        }}
+      >
+        {src ? (
+          <img alt="" src={src} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        ) : (
+          <PictureOutlined style={{ color: token.colorTextSecondary }} />
+        )}
+      </button>
+      <Modal
+        open={isOpen}
+        footer={null}
+        width={720}
+        title={fileName}
+        onCancel={() => setIsOpen(false)}
+      >
+        {src ? (
+          <img
+            alt=""
+            src={src}
+            style={{ width: '100%', maxHeight: '70vh', objectFit: 'contain', display: 'block' }}
+          />
+        ) : null}
+      </Modal>
+    </>
+  );
+};
+
+const ReviewsTab = () => {
+  const { t } = useTranslation('proof-reader');
   const navigate = useNavigate();
   const isOwnerOrAdmin = useAuthService().isOwnerOrAdmin();
   const [reviews, setReviews] = useState<IProofReaderReview[]>([]);
@@ -140,18 +214,7 @@ const ReviewsTab = () => {
       key: 'image',
       width: 88,
       render: (_value, record) =>
-        record.image_url ? (
-          <Image
-            src={record.image_url}
-            alt={t('thumbnailAlt', {
-              defaultValue: 'Uploaded creative {{name}}',
-              name: record.file_name,
-            })}
-            width={40}
-            height={40}
-            style={{ objectFit: 'cover', borderRadius: token.borderRadius }}
-          />
-        ) : null,
+        record.image_url ? <CreativeThumb reviewId={record.id} fileName={record.file_name} /> : null,
     },
     {
       title: t('nameColumn', { defaultValue: 'File' }),
@@ -232,7 +295,6 @@ const ReviewsTab = () => {
           columns={columns}
           dataSource={reviews}
           loading={isLoading}
-          scroll={{ x: 760 }}
           pagination={{ pageSize: 20, hideOnSinglePage: true }}
           locale={{
             emptyText: t('emptyReviews', {
@@ -244,6 +306,7 @@ const ReviewsTab = () => {
             expandedRowRender: record => (
               <Table<IProofReaderResult>
                 rowKey="id"
+                size="small"
                 columns={noteColumns}
                 dataSource={record.results}
                 pagination={false}

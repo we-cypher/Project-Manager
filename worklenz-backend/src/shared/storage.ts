@@ -724,6 +724,45 @@ export async function objectExists(key: string): Promise<boolean> {
  * size against the client-reported size from presign — the browser PUTs
  * directly to storage, so this is the only trustworthy size check.
  */
+/**
+ * Read an object the browser cannot reach directly (internal MinIO/S3 host).
+ * Returns the stored bytes. Callers set their own response headers.
+ */
+export async function readObject(
+  key: string,
+): Promise<{ buffer: Buffer; contentType: string } | null> {
+  try {
+    if (STORAGE_PROVIDER === "azure") {
+      if (!azureContainerClient) return null;
+      const blobClient = azureContainerClient.getBlockBlobClient(key);
+      const download = await blobClient.download();
+      const stream = download.readableStreamBody;
+      if (!stream) return null;
+      const chunks: Buffer[] = [];
+      for await (const chunk of stream) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      }
+      return {
+        buffer: Buffer.concat(chunks),
+        contentType: download.contentType || mimeTypes.lookup(key) || "application/octet-stream",
+      };
+    }
+
+    const result = await s3Client.send(
+      new GetObjectCommand({ Bucket: BUCKET, Key: key }),
+    );
+    if (!result.Body) return null;
+    const bytes = await result.Body.transformToByteArray();
+    return {
+      buffer: Buffer.from(bytes),
+      contentType: result.ContentType || mimeTypes.lookup(key) || "application/octet-stream",
+    };
+  } catch (error) {
+    log_error(error);
+    return null;
+  }
+}
+
 export async function getObjectSize(key: string): Promise<number | null> {
   try {
     if (STORAGE_PROVIDER === "azure") {

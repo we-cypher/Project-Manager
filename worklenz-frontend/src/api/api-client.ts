@@ -373,6 +373,11 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    const isSilentRequest = error.config?.headers?.['X-Silent-Request'] === '1';
+    if (isSilentRequest) {
+      return Promise.reject(error);
+    }
+
     const errorMessage = (errorResponse?.data as any)?.message || message || 'An unexpected error occurred';
     const errorTitle = 'Error';
 

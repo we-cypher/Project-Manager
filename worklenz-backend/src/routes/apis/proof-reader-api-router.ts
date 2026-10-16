@@ -69,6 +69,11 @@ proofReaderApiRouter.delete(
   safeControllerFunction(ProofReaderController.deleteSubPrompt)
 );
 
+proofReaderApiRouter.get(
+  "/:id/image",
+  idParamValidator,
+  safeControllerFunction(ProofReaderController.getImage)
+);
 proofReaderApiRouter.get("/", safeControllerFunction(ProofReaderController.listReviews));
 proofReaderApiRouter.post(
   "/",

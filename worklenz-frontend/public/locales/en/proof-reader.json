@@ -41,6 +41,7 @@
   "promptRequired": "Enter a prompt",
   "activeSwitchLabel": "Use {{title}} when reviewing",
   "thumbnailAlt": "Uploaded creative {{name}}",
+  "imageUnavailable": "Image could not be loaded",
   "settingsTitle": "Proof Reader settings",
   "settingsHelp": "This prompt is sent with every creative, along with the active sub-prompts.",
   "mainPrompt": "Main prompt",

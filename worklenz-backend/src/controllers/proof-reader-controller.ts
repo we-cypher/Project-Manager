@@ -9,7 +9,7 @@ import WorklenzControllerBase from "./worklenz-controller-base";
 import { userHasProofReaderAccess } from "../middlewares/validators/require-proof-reader-access";
 import { reviewCreative, ProofReaderNote } from "../services/proof-reader-openai";
 import { hasTeamAdminPrivileges } from "../shared/team-permissions";
-import { getPublicUrl, uploadBuffer } from "../shared/storage";
+import { readObject, uploadBuffer } from "../shared/storage";
 import { log_error } from "../shared/utils";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -21,6 +21,17 @@ const ALLOWED_IMAGE_TYPES: Record<string, string> = {
   "image/webp": "webp",
   "image/gif": "gif",
 };
+
+function imageContentType(contentType: string | undefined, buffer: Buffer | undefined): string | null {
+  const declared = (contentType || "").split(";")[0].trim().toLowerCase();
+  if (ALLOWED_IMAGE_TYPES[declared]) return declared;
+  if (!buffer || buffer.length < 12) return null;
+  if (buffer[0] === 0xff && buffer[1] === 0xd8) return "image/jpeg";
+  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) return "image/png";
+  if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) return "image/gif";
+  if (buffer.toString("ascii", 0, 4) === "RIFF" && buffer.toString("ascii", 8, 12) === "WEBP") return "image/webp";
+  return null;
+}
 
 interface UploadedImage {
   buffer: Buffer;
@@ -296,6 +307,35 @@ export default class ProofReaderController extends WorklenzControllerBase {
   }
 
   @HandleExceptions()
+  public static async getImage(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
+    const teamId = req.user?.team_id;
+    if (!teamId) return res.status(400).send(new ServerResponse(false, null, "Team not found"));
+
+    const review = await db.query(
+      `SELECT storage_key, file_name
+       FROM proof_reader_reviews
+       WHERE id = $1 AND team_id = $2`,
+      [req.params.id, teamId]
+    );
+    const storageKey = review.rows[0]?.storage_key as string | undefined;
+    if (!storageKey) {
+      return res.status(404).send(new ServerResponse(false, null, "Image not found"));
+    }
+
+    const object = await readObject(storageKey);
+    const contentType = imageContentType(object?.contentType, object?.buffer);
+    if (!object || !contentType) {
+      return res.status(404).send(new ServerResponse(false, null, "Image not found"));
+    }
+
+    const fileName = String(review.rows[0].file_name || "creative").replace(/[\r\n"]/g, "");
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Content-Disposition", `inline; filename="${fileName}"`);
+    res.setHeader("Cache-Control", "private, max-age=3600");
+    return res.status(200).send(object.buffer);
+  }
+
+  @HandleExceptions()
   public static async createReview(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
     const teamId = req.user?.team_id;
     const userId = req.user?.id;
@@ -442,7 +482,7 @@ export default class ProofReaderController extends WorklenzControllerBase {
     return rows.map(row => ({
       id: row.id,
       file_name: row.file_name,
-      image_url: row.storage_key ? getPublicUrl(row.storage_key) : null,
+      image_url: row.storage_key ? `/api/v1/proof-reader/${row.id}/image` : null,
       status: row.status,
       error_message: row.error_message,
       created_at: toIso(row.created_at),
