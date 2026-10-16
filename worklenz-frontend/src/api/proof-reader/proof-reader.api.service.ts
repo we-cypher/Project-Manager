@@ -16,6 +16,7 @@ export interface IProofReaderAccessMember {
 
 export interface IProofReaderSettings {
   main_prompt: string;
+  status_review_enabled: boolean;
 }
 
 export interface IProofReaderSubPrompt {
@@ -78,10 +79,8 @@ export const proofReaderApiService = {
     return response.data;
   },
 
-  async updateSettings(mainPrompt: string): Promise<IServerResponse<IProofReaderSettings>> {
-    const response = await apiClient.put<IServerResponse<IProofReaderSettings>>(`${rootUrl}/settings`, {
-      main_prompt: mainPrompt,
-    });
+  async updateSettings(settings: IProofReaderSettings): Promise<IServerResponse<IProofReaderSettings>> {
+    const response = await apiClient.put<IServerResponse<IProofReaderSettings>>(`${rootUrl}/settings`, settings);
     return response.data;
   },
 

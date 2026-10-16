@@ -6,7 +6,7 @@ import {
   PencilIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
-import { Checkbox, Dropdown, Input, Badge } from '@/shared/antd-imports';
+import { Checkbox, Dropdown, Input, Badge, Switch } from '@/shared/antd-imports';
 import GroupProgressBar from './GroupProgressBar';
 import { useTranslation } from 'react-i18next';
 import { getContrastColor } from '@/utils/colorUtils';
@@ -25,7 +25,7 @@ import {
 import { selectCurrentGrouping } from '@/features/task-management/grouping.slice';
 import { statusApiService } from '@/api/taskAttributes/status/status.api.service';
 import { phasesApiService } from '@/api/taskAttributes/phases/phases.api.service';
-import { fetchStatuses } from '@/features/taskAttributes/taskStatusSlice';
+import { fetchStatuses, updateStatus } from '@/features/taskAttributes/taskStatusSlice';
 import { fetchPhasesByProjectId } from '@/features/projects/singleProject/phase/phases.slice';
 import { useAuthService } from '@/hooks/useAuth';
 import { ITaskStatusUpdateModel } from '@/types/tasks/task-status-update-model.types';
@@ -74,6 +74,7 @@ const TaskGroupHeader: React.FC<TaskGroupHeaderProps> = ({
   const { isOwnerOrAdmin } = useAuthService();
 
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const ignoreNextMenuClose = useRef(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [isChangingCategory, setIsChangingCategory] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -354,6 +355,24 @@ const TaskGroupHeader: React.FC<TaskGroupHeaderProps> = ({
     [group.id, projectId, dispatch, trackMixpanelEvent, isChangingCategory]
   );
 
+  const proofReaderEnabled = Boolean(statusList.find(item => item.id === group.id)?.proof_reader_enabled);
+
+  const handleProofReader = useCallback(
+    async (enabled: boolean) => {
+      const projectId = project?.id;
+      if (!projectId || !group.id) return;
+      try {
+        const current = statusList.find(item => item.id === group.id);
+        if (current) dispatch(updateStatus({ ...current, proof_reader_enabled: enabled }));
+        await statusApiService.updateProofReader(group.id, enabled, projectId);
+        dispatch(fetchStatuses(projectId));
+      } catch (error) {
+        logger.error('Error updating Proof Reader', error);
+      }
+    },
+    [dispatch, group.id, project?.id, statusList]
+  );
+
   const isUnmappedPhase = useMemo(() => {
     return currentGrouping === 'phase' && (group.id === 'Unmapped' || group.name === 'Unmapped');
   }, [currentGrouping, group.id, group.name]);
@@ -405,11 +424,41 @@ const TaskGroupHeader: React.FC<TaskGroupHeaderProps> = ({
       } as any);
     }
 
+    if (currentGrouping === 'status' && isOwnerOrAdmin) {
+      items.push({
+        key: 'proofReader',
+        label: (
+          <div
+            className="flex items-center justify-between gap-3"
+            onMouseDown={event => {
+              event.stopPropagation();
+              ignoreNextMenuClose.current = true;
+            }}
+            onClick={event => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+          >
+            <span>{t('proofReader', { defaultValue: 'Proof Reader' })}</span>
+            <Switch
+              size="small"
+              checked={proofReaderEnabled}
+              onChange={checked => {
+                void handleProofReader(checked);
+              }}
+            />
+          </div>
+        ),
+      } as any);
+    }
+
     return items;
   }, [
     currentGrouping,
     handleRenameGroup,
     handleCategoryChange,
+    handleProofReader,
+    proofReaderEnabled,
     isOwnerOrAdmin,
     isGuest,
     isUnmappedPhase,
@@ -592,7 +641,13 @@ const TaskGroupHeader: React.FC<TaskGroupHeaderProps> = ({
               menu={{ items: menuItems }}
               trigger={['click']}
               open={dropdownVisible}
-              onOpenChange={setDropdownVisible}
+              onOpenChange={open => {
+                if (!open && ignoreNextMenuClose.current) {
+                  ignoreNextMenuClose.current = false;
+                  return;
+                }
+                setDropdownVisible(open);
+              }}
               placement="bottomRight"
               overlayStyle={{ zIndex: 1000 }}
             >

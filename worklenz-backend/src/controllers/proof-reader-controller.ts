@@ -186,10 +186,13 @@ export default class ProofReaderController extends WorklenzControllerBase {
     if (!teamId) return res.status(400).send(new ServerResponse(false, null, "Team not found"));
 
     const result = await db.query(
-      `SELECT main_prompt FROM proof_reader_settings WHERE team_id = $1`,
+      `SELECT main_prompt, status_review_enabled FROM proof_reader_settings WHERE team_id = $1`,
       [teamId]
     );
-    return res.status(200).send(new ServerResponse(true, { main_prompt: result.rows[0]?.main_prompt || "" }));
+    return res.status(200).send(new ServerResponse(true, {
+      main_prompt: result.rows[0]?.main_prompt || "",
+      status_review_enabled: result.rows[0]?.status_review_enabled === true,
+    }));
   }
 
   @HandleExceptions()
@@ -204,17 +207,23 @@ export default class ProofReaderController extends WorklenzControllerBase {
     if (mainPrompt.length > MAX_PROMPT_LENGTH) {
       return res.status(400).send(new ServerResponse(false, null, "Main prompt is too long"));
     }
+    const statusReviewEnabled = req.body.status_review_enabled === true;
 
     const result = await db.query(
-      `INSERT INTO proof_reader_settings (team_id, main_prompt)
-       VALUES ($1, $2)
+      `INSERT INTO proof_reader_settings (team_id, main_prompt, status_review_enabled)
+       VALUES ($1, $2, $3)
        ON CONFLICT (team_id)
-       DO UPDATE SET main_prompt = EXCLUDED.main_prompt, updated_at = CURRENT_TIMESTAMP
-       RETURNING main_prompt`,
-      [teamId, mainPrompt]
+       DO UPDATE SET main_prompt = EXCLUDED.main_prompt,
+                     status_review_enabled = EXCLUDED.status_review_enabled,
+                     updated_at = CURRENT_TIMESTAMP
+       RETURNING main_prompt, status_review_enabled`,
+      [teamId, mainPrompt, statusReviewEnabled]
     );
 
-    return res.status(200).send(new ServerResponse(true, { main_prompt: result.rows[0].main_prompt }));
+    return res.status(200).send(new ServerResponse(true, {
+      main_prompt: result.rows[0].main_prompt,
+      status_review_enabled: result.rows[0].status_review_enabled === true,
+    }));
   }
 
   @HandleExceptions()

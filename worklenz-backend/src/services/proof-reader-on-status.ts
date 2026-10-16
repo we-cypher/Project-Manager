@@ -7,7 +7,6 @@ import { log_error, sanitizeCommentContent } from "../shared/utils";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const MAX_COMMENT_LENGTH = 5000;
-const REVIEW_STATUS_NAMES = new Set(["selfreview", "underreview"]);
 const IMAGE_MIME_BY_TYPE: Record<string, string> = {
   png: "image/png",
   jpg: "image/jpeg",
@@ -28,10 +27,6 @@ interface ProofReaderStatusInput {
   statusId: string;
   userId: string;
   notify?: (projectId: string, taskId: string) => void;
-}
-
-function isReviewStatus(name: string): boolean {
-  return REVIEW_STATUS_NAMES.has(name.toLowerCase().replace(/[^a-z]/g, ""));
 }
 
 function escapeHtml(value: string): string {
@@ -98,29 +93,30 @@ export function queueProofReaderForTaskStatus(input: ProofReaderStatusInput): vo
 
 async function runProofReaderForTaskStatus(input: ProofReaderStatusInput): Promise<void> {
   const task = await db.query(
-    `SELECT t.project_id, p.team_id, ts.name AS status_name
+    `SELECT t.project_id, p.team_id, COALESCE(ts.proof_reader_enabled, FALSE) AS proof_reader_enabled
      FROM tasks t
      JOIN projects p ON p.id = t.project_id
      JOIN task_statuses ts ON ts.id = $2
      WHERE t.id = $1`,
     [input.taskId, input.statusId]
   );
-  const row = task.rows[0] as { project_id: string; team_id: string; status_name: string } | undefined;
-  if (!row || !isReviewStatus(row.status_name)) return;
+  const row = task.rows[0] as { project_id: string; team_id: string; proof_reader_enabled: boolean } | undefined;
+  if (!row?.proof_reader_enabled) return;
 
   const tell = () => input.notify?.(row.project_id, input.taskId);
 
   const settings = await db.query(
-    `SELECT main_prompt FROM proof_reader_settings WHERE team_id = $1`,
+    `SELECT main_prompt, status_review_enabled FROM proof_reader_settings WHERE team_id = $1`,
     [row.team_id]
   );
+  if (settings.rows[0]?.status_review_enabled !== true) return;
   const mainPrompt = String(settings.rows[0]?.main_prompt || "").trim();
   if (!mainPrompt) {
     await postComment(
       input.taskId,
       row.team_id,
       input.userId,
-      "<p><strong>Proof Reader</strong> did not run. Add a main prompt in Proof Reader settings, then move the task to Self Review or Under Review again.</p>"
+      "<p><strong>Proof Reader</strong> did not run. Add a main prompt in Proof Reader settings, then move the task into this status again.</p>"
     );
     tell();
     return;
@@ -140,7 +136,7 @@ async function runProofReaderForTaskStatus(input: ProofReaderStatusInput): Promi
   if (!latest) {
     const message = images.length
       ? "<p><strong>Proof Reader</strong> did not run. The image attachment is larger than 8 MB.</p>"
-      : "<p><strong>Proof Reader</strong> did not run. Attach a PNG, JPEG, WebP, or GIF, then move the task to Self Review or Under Review again.</p>";
+      : "<p><strong>Proof Reader</strong> did not run. Attach a PNG, JPEG, WebP, or GIF, then move the task into this status again.</p>";
     await postComment(input.taskId, row.team_id, input.userId, message);
     tell();
     return;

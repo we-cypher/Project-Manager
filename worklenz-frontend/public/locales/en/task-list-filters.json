@@ -79,6 +79,7 @@
   "deleteStatus": "Delete Status",
   "deleteStatusConfirm": "Are you sure you want to delete this status? This action cannot be undone.",
   "rename": "Rename",
+  "proofReader": "Proof Reader",
   "delete": "Delete",
   "enterStatusName": "Enter status name",
   "close": "Close",

@@ -87,6 +87,7 @@ export default class TaskStatusesController extends WorklenzControllerBase {
          stsc.color_code_dark                                 AS color_code_dark,
          stsc.name                                            AS category_name,
          task_statuses.category_id,
+         task_statuses.proof_reader_enabled,
          stsc.description
   FROM task_statuses
          INNER JOIN sys_task_status_categories stsc ON task_statuses.category_id = stsc.id
@@ -166,6 +167,30 @@ export default class TaskStatusesController extends WorklenzControllerBase {
     const [data] = result.rows;
     TaskStatusesController.notifyProjectStatusUpdate(req.body.project_id);
     return res.status(200).send(new ServerResponse(true, data));
+  }
+
+  @HandleExceptions()
+  public static async updateProofReader(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
+    const teamId = req.user?.team_id;
+    const projectId = (req.body.project_id || req.query.current_project_id) as string | undefined;
+    if (!teamId || !projectId) {
+      return res.status(400).send(new ServerResponse(false, null, "Project not found"));
+    }
+
+    const enabled = req.body.enabled === true;
+    const result = await db.query(
+      `UPDATE task_statuses
+       SET proof_reader_enabled = $4
+       WHERE id = $1
+         AND project_id = $2
+         AND team_id = $3
+       RETURNING id, proof_reader_enabled`,
+      [req.params.id, projectId, teamId, enabled]
+    );
+    if (!result.rows[0]) {
+      return res.status(404).send(new ServerResponse(false, null, "Status not found"));
+    }
+    return res.status(200).send(new ServerResponse(true, result.rows[0]));
   }
 
   @HandleExceptions()

@@ -10,7 +10,7 @@ import useIsProjectManager from '@/hooks/useIsProjectManager';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { ITaskStatusUpdateModel } from '@/types/tasks/task-status-update-model.types';
 import { statusApiService } from '@/api/taskAttributes/status/status.api.service';
-import { fetchStatuses } from '@/features/taskAttributes/taskStatusSlice';
+import { fetchStatuses, updateStatus } from '@/features/taskAttributes/taskStatusSlice';
 import logger from '@/utils/errorLogger';
 import { evt_project_board_column_setting_click } from '@/shared/worklenz-analytics-events';
 import { phasesApiService } from '@/api/taskAttributes/phases/phases.api.service';
@@ -25,7 +25,7 @@ import {
   IGroupBy,
   toggleGroupCollapse,
 } from '@/features/enhanced-kanban/enhanced-kanban.slice';
-import { Modal, Dropdown, Badge, Tooltip } from '@/shared/antd-imports';
+import { Modal, Dropdown, Badge, Switch, Tooltip } from '@/shared/antd-imports';
 // @ts-ignore: Heroicons module types
 import {
   EllipsisHorizontalIcon,
@@ -155,6 +155,7 @@ const KanbanGroup: React.FC<KanbanGroupProps> = memo(
     const [name, setName] = useState(group.name);
     const inputRef = useRef<HTMLInputElement>(null);
     const [dropdownVisible, setDropdownVisible] = useState(false);
+    const ignoreNextMenuClose = useRef(false);
     const [isChangingCategory, setIsChangingCategory] = useState(false);
     const themeMode = useAppSelector(state => state.themeReducer.mode);
     const dispatch = useAppDispatch();
@@ -361,6 +362,20 @@ const KanbanGroup: React.FC<KanbanGroupProps> = memo(
       }
     };
 
+    const proofReaderEnabled = Boolean(status.find(item => item.id === group.id)?.proof_reader_enabled);
+
+    const handleProofReader = async (enabled: boolean) => {
+      if (!projectId || !group.id) return;
+      try {
+        const current = status.find(item => item.id === group.id);
+        if (current) dispatch(updateStatus({ ...current, proof_reader_enabled: enabled }));
+        await statusApiService.updateProofReader(group.id, enabled, projectId);
+        dispatch(fetchStatuses(projectId));
+      } catch (error) {
+        logger.error('Error updating Proof Reader', error);
+      }
+    };
+
     const handleDelete = () => {
       if (groupBy === IGroupBy.STATUS) {
         Modal.confirm({
@@ -459,6 +474,34 @@ const KanbanGroup: React.FC<KanbanGroupProps> = memo(
         } as any);
       }
 
+      if (groupBy === IGroupBy.STATUS && isOwnerOrAdmin) {
+        items.push({
+          key: 'proofReader',
+          label: (
+            <div
+              className="flex items-center justify-between gap-3"
+              onMouseDown={event => {
+                event.stopPropagation();
+                ignoreNextMenuClose.current = true;
+              }}
+              onClick={event => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+            >
+              <span>{t('proofReader', { defaultValue: 'Proof Reader' })}</span>
+              <Switch
+                size="small"
+                checked={proofReaderEnabled}
+                onChange={checked => {
+                  void handleProofReader(checked);
+                }}
+              />
+            </div>
+          ),
+        } as any);
+      }
+
       // Add delete option
       items.push({
         key: 'delete',
@@ -477,6 +520,8 @@ const KanbanGroup: React.FC<KanbanGroupProps> = memo(
       handleRename,
       handleCategoryChange,
       handleDelete,
+      handleProofReader,
+      proofReaderEnabled,
       isOwnerOrAdmin,
       isProjectManager,
       isUnmappedPhase,
@@ -648,7 +693,13 @@ const KanbanGroup: React.FC<KanbanGroupProps> = memo(
                       menu={{ items: menuItems }}
                       trigger={['click']}
                       open={dropdownVisible}
-                      onOpenChange={setDropdownVisible}
+                      onOpenChange={open => {
+                        if (!open && ignoreNextMenuClose.current) {
+                          ignoreNextMenuClose.current = false;
+                          return;
+                        }
+                        setDropdownVisible(open);
+                      }}
                       placement="bottomRight"
                       overlayStyle={{ zIndex: 1000 }}
                     >

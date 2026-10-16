@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, Flex, Form, Input, Typography, message } from '@/shared/antd-imports';
+import { Button, Card, Flex, Form, Input, Switch, Typography, message } from '@/shared/antd-imports';
 
 import WorklenzPageHeader from '@/components/common/WorklenzPageHeader';
 import { proofReaderApiService } from '@/api/proof-reader/proof-reader.api.service';
@@ -16,7 +16,7 @@ function apiError(error: unknown, fallback: string): string {
 const ProofReaderSettingsPage = () => {
   const { t } = useTranslation('proof-reader');
   const navigate = useNavigate();
-  const [form] = Form.useForm<{ main_prompt: string }>();
+  const [form] = Form.useForm<{ main_prompt: string; status_review_enabled: boolean }>();
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -31,7 +31,10 @@ const ProofReaderSettingsPage = () => {
         setHasError(true);
         return;
       }
-      form.setFieldsValue({ main_prompt: response.body.main_prompt });
+      form.setFieldsValue({
+        main_prompt: response.body.main_prompt,
+        status_review_enabled: response.body.status_review_enabled === true,
+      });
     } catch (error) {
       setHasError(true);
       message.error(
@@ -46,10 +49,13 @@ const ProofReaderSettingsPage = () => {
     void loadSettings();
   }, [form]);
 
-  const onFinish = async (values: { main_prompt: string }) => {
+  const onFinish = async (values: { main_prompt: string; status_review_enabled: boolean }) => {
     setIsSaving(true);
     try {
-      const response = await proofReaderApiService.updateSettings(values.main_prompt);
+      const response = await proofReaderApiService.updateSettings({
+        main_prompt: values.main_prompt,
+        status_review_enabled: values.status_review_enabled === true,
+      });
       if (response.done) message.success(t('saved', { defaultValue: 'Saved' }));
     } catch (error) {
       message.error(apiError(error, t('saveFailed', { defaultValue: 'Could not save the prompt.' })));
@@ -85,6 +91,17 @@ const ProofReaderSettingsPage = () => {
               })}
             </Typography.Paragraph>
             <Form form={form} layout="vertical" onFinish={onFinish}>
+              <Form.Item
+                name="status_review_enabled"
+                label={t('statusReview', { defaultValue: 'Proof a task when it moves into a status' })}
+                valuePropName="checked"
+                extra={t('statusReviewHelp', {
+                  defaultValue:
+                    'Turn this on, then use the column menu on the board to choose which statuses run Proof Reader.',
+                })}
+              >
+                <Switch />
+              </Form.Item>
               <Form.Item
                 name="main_prompt"
                 label={t('mainPrompt', { defaultValue: 'Main prompt' })}

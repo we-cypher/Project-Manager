@@ -44,6 +44,8 @@
   "imageUnavailable": "Image could not be loaded",
   "settingsTitle": "Proof Reader settings",
   "settingsHelp": "This prompt is sent with every creative, along with the active sub-prompts.",
+  "statusReview": "Proof a task when it moves into a status",
+  "statusReviewHelp": "Turn this on, then use the column menu on the board to choose which statuses run Proof Reader.",
   "mainPrompt": "Main prompt",
   "mainPromptRequired": "Enter the main prompt",
   "back": "Back",

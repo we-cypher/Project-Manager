@@ -1355,7 +1355,8 @@ CREATE TABLE IF NOT EXISTS task_statuses (
     project_id  UUID                               NOT NULL,
     team_id     UUID                               NOT NULL,
     category_id UUID                               NOT NULL,
-    sort_order  INTEGER DEFAULT 0                  NOT NULL
+    sort_order  INTEGER DEFAULT 0                  NOT NULL,
+    proof_reader_enabled BOOLEAN DEFAULT FALSE    NOT NULL
 );
 
 ALTER TABLE task_statuses
@@ -2869,6 +2870,7 @@ CREATE TABLE IF NOT EXISTS proof_reader_settings (
     id          UUID                     DEFAULT uuid_generate_v4() NOT NULL,
     team_id     UUID                                                NOT NULL,
     main_prompt TEXT                     DEFAULT ''                  NOT NULL,
+    status_review_enabled BOOLEAN          DEFAULT FALSE           NOT NULL,
     updated_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
     CONSTRAINT proof_reader_settings_pk PRIMARY KEY (id),
     CONSTRAINT proof_reader_settings_team_unique UNIQUE (team_id),

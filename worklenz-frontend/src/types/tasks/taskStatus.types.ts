@@ -9,6 +9,7 @@ export interface ITaskStatus {
   color_code_dark?: string;
   category_id?: string;
   category_name?: string;
+  proof_reader_enabled?: boolean;
   category_color_code?: string;
   team_id?: string;
   default_status?: boolean;

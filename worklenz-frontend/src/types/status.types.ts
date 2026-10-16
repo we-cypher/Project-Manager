@@ -14,6 +14,7 @@ export interface ITaskStatus {
   color_code_dark?: string;
   team_id?: string;
   default_status?: boolean;
+  proof_reader_enabled?: boolean;
   date_created?: string;
   date_updated?: string;
 }

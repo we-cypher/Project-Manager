@@ -74,6 +74,19 @@ export const statusApiService = {
     return response.data;
   },
 
+  updateProofReader: async (
+    statusId: string,
+    enabled: boolean,
+    projectId: string
+  ): Promise<IServerResponse<{ id: string; proof_reader_enabled: boolean }>> => {
+    const q = toQueryString({ current_project_id: projectId });
+    const response = await apiClient.put<IServerResponse<{ id: string; proof_reader_enabled: boolean }>>(
+      `${rootUrl}/proof-reader/${statusId}${q}`,
+      { enabled, project_id: projectId }
+    );
+    return response.data;
+  },
+
   updateStatusColor: async (
   statusId: string,
   colorCode: string,
