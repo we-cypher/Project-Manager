@@ -5,6 +5,7 @@ import HandleExceptions from "../decorators/handle-exceptions";
 import { IWorkLenzRequest } from "../interfaces/worklenz-request";
 import { IWorkLenzResponse } from "../interfaces/worklenz-response";
 import { ServerResponse } from "../models/server-response";
+import WorklenzControllerBase from "./worklenz-controller-base";
 import { userHasProofReaderAccess } from "../middlewares/validators/require-proof-reader-access";
 import { reviewCreative, ProofReaderNote } from "../services/proof-reader-openai";
 import { hasTeamAdminPrivileges } from "../shared/team-permissions";
@@ -97,7 +98,7 @@ function readText(value: unknown, maxLength: number): string | null {
   return trimmed;
 }
 
-export default class ProofReaderController {
+export default class ProofReaderController extends WorklenzControllerBase {
   @HandleExceptions()
   public static async getMyAccess(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
     const teamId = req.user?.team_id;
