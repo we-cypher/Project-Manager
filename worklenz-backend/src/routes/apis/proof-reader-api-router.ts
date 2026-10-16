@@ -8,7 +8,7 @@ import teamOwnerOrAdminValidator from "../../middlewares/validators/team-owner-o
 import { ServerResponse } from "../../models/server-response";
 import safeControllerFunction from "../../shared/safe-controller-function";
 
-export const MAX_PROOF_READER_IMAGE_BYTES = 8 * 1024 * 1024;
+export const MAX_PROOF_READER_IMAGE_BYTES = 50 * 1024 * 1024;
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -28,7 +28,7 @@ const handleUpload = (
     if (err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") {
       return res
         .status(400)
-        .send(new ServerResponse(false, null, "Upload a PNG, JPEG, WebP, or GIF up to 8 MB."));
+        .send(new ServerResponse(false, null, "Upload an image up to 50 MB."));
     }
 
     return res.status(400).send(new ServerResponse(false, null, "Unable to process the uploaded file"));

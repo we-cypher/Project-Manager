@@ -32,8 +32,12 @@ import {
   proofReaderApiService,
 } from '@/api/proof-reader/proof-reader.api.service';
 
-const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
-const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+const MAX_IMAGE_BYTES = 50 * 1024 * 1024;
+
+function isImageFile(file: File): boolean {
+  if (file.type.startsWith('image/')) return true;
+  return /\.(png|jpe?g|jfif|pjp|gif|webp|bmp|tiff?|heic|heif|avif|svg|ico|jp2|jxl)$/i.test(file.name);
+}
 
 function apiError(error: unknown, fallback: string): string {
   const messageText = (error as { response?: { data?: { message?: string } } })?.response?.data
@@ -153,9 +157,9 @@ const ReviewsTab = () => {
   }, [loadReviews]);
 
   const uploadCreative: UploadProps['beforeUpload'] = file => {
-    if (!ACCEPTED_TYPES.includes(file.type) || file.size > MAX_IMAGE_BYTES) {
+    if (!isImageFile(file) || file.size > MAX_IMAGE_BYTES) {
       message.error(
-        t('invalidFile', { defaultValue: 'Upload a PNG, JPEG, WebP, or GIF up to 8 MB.' })
+        t('invalidFile', { defaultValue: 'Upload an image up to 50 MB.' })
       );
       return Upload.LIST_IGNORE;
     }
@@ -271,7 +275,7 @@ const ReviewsTab = () => {
 
       <Flex justify="flex-end">
         <Upload
-          accept={ACCEPTED_TYPES.join(',')}
+          accept="image/*"
           showUploadList={false}
           beforeUpload={uploadCreative}
           disabled={isUploading || !hasPrompt}

@@ -41,7 +41,10 @@ export function buildProofReaderInstruction(mainPrompt: string, checks: ProofRea
     "You review one graphic design creative.",
     "Answer the main prompt first, then answer each check in the listed order.",
     "Return one result for the main prompt and one result for each check.",
-    "Each note is a short written finding about what you see in the image.",
+    "Write every note in simple English.",
+    "Use short sentences. Do not use fancy words.",
+    "Say what is wrong, or say it looks fine.",
+    "Keep each note to one or two sentences.",
     "",
     "Main prompt:",
     mainPrompt.trim(),
@@ -53,6 +56,8 @@ export function buildProofReaderInstruction(mainPrompt: string, checks: ProofRea
       lines.push(`${index + 1}. ${check.label}: ${check.prompt}`);
     });
   }
+
+  lines.push("", "Reminder: every note must stay in simple English and be one or two short sentences.");
 
   return lines.join("\n");
 }

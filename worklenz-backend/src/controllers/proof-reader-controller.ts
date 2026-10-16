@@ -15,16 +15,21 @@ import { log_error } from "../shared/utils";
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_PROMPT_LENGTH = 8000;
 const MAX_SUB_PROMPT_LENGTH = 4000;
-const ALLOWED_IMAGE_TYPES: Record<string, string> = {
-  "image/png": "png",
-  "image/jpeg": "jpg",
-  "image/webp": "webp",
-  "image/gif": "gif",
-};
+function imageExtension(mimeType: string): string {
+  const subtype = mimeType.slice("image/".length).split("+")[0].split(";")[0].toLowerCase();
+  if (subtype === "jpeg" || subtype === "jpg") return "jpg";
+  if (subtype === "svg") return "svg";
+  const cleaned = subtype.replace(/[^a-z0-9]/g, "");
+  return cleaned || "img";
+}
+
+function isImageMime(mimeType: string): boolean {
+  return mimeType.toLowerCase().startsWith("image/");
+}
 
 function imageContentType(contentType: string | undefined, buffer: Buffer | undefined): string | null {
   const declared = (contentType || "").split(";")[0].trim().toLowerCase();
-  if (ALLOWED_IMAGE_TYPES[declared]) return declared;
+  if (declared.startsWith("image/")) return declared;
   if (!buffer || buffer.length < 12) return null;
   if (buffer[0] === 0xff && buffer[1] === 0xd8) return "image/jpeg";
   if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) return "image/png";
@@ -96,7 +101,7 @@ function displayFileName(name: string): string {
 }
 
 function storageFileName(name: string, mimeType: string): string {
-  const extension = ALLOWED_IMAGE_TYPES[mimeType] || "img";
+  const extension = imageExtension(mimeType);
   const base = displayFileName(name).replace(/[^a-zA-Z0-9._-]/g, "_");
   const withExtension = base.toLowerCase().endsWith(`.${extension}`) ? base : `${base}.${extension}`;
   return withExtension.slice(0, 180);
@@ -354,8 +359,8 @@ export default class ProofReaderController extends WorklenzControllerBase {
     if (!file?.buffer?.length) {
       return res.status(400).send(new ServerResponse(false, null, "Upload an image"));
     }
-    if (!ALLOWED_IMAGE_TYPES[file.mimetype]) {
-      return res.status(400).send(new ServerResponse(false, null, "Upload a PNG, JPEG, WebP, or GIF"));
+    if (!isImageMime(file.mimetype)) {
+      return res.status(400).send(new ServerResponse(false, null, "Upload an image up to 50 MB."));
     }
 
     const settings = await db.query(

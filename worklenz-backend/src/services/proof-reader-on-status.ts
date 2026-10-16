@@ -5,19 +5,30 @@ import { reviewCreative, ProofReaderNote } from "./proof-reader-openai";
 import { getKey, readObject, uploadBuffer } from "../shared/storage";
 import { log_error, sanitizeCommentContent } from "../shared/utils";
 
-const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 50 * 1024 * 1024;
 const MAX_COMMENT_LENGTH = 5000;
 const IMAGE_MIME_BY_TYPE: Record<string, string> = {
   png: "image/png",
   jpg: "image/jpeg",
   jpeg: "image/jpeg",
-  webp: "image/webp",
+  jpe: "image/jpeg",
+  jfif: "image/jpeg",
+  pjp: "image/jpeg",
   gif: "image/gif",
-  "image/png": "image/png",
-  "image/jpeg": "image/jpeg",
-  "image/jpg": "image/jpeg",
-  "image/webp": "image/webp",
-  "image/gif": "image/gif",
+  webp: "image/webp",
+  bmp: "image/bmp",
+  dib: "image/bmp",
+  tif: "image/tiff",
+  tiff: "image/tiff",
+  heic: "image/heic",
+  heif: "image/heif",
+  avif: "image/avif",
+  svg: "image/svg+xml",
+  svgz: "image/svg+xml",
+  ico: "image/x-icon",
+  jp2: "image/jp2",
+  jxl: "image/jxl",
+  apng: "image/apng",
 };
 
 const runningTaskIds = new Set<string>();
@@ -27,6 +38,12 @@ interface ProofReaderStatusInput {
   statusId: string;
   userId: string;
   notify?: (projectId: string, taskId: string) => void;
+}
+
+function mimeForAttachment(type: string): string | null {
+  const normalized = type.toLowerCase().trim();
+  if (normalized.startsWith("image/")) return normalized === "image/jpg" ? "image/jpeg" : normalized;
+  return IMAGE_MIME_BY_TYPE[normalized] || null;
 }
 
 function escapeHtml(value: string): string {
@@ -131,18 +148,19 @@ async function runProofReaderForTaskStatus(input: ProofReaderStatusInput): Promi
     [input.taskId]
   );
   const images = (attachment.rows as Array<{ id: string; name: string; size: string | number; type: string }>)
-    .filter(file => IMAGE_MIME_BY_TYPE[String(file.type || "").toLowerCase()]);
+    .filter(file => mimeForAttachment(String(file.type || "")));
   const latest = images.find(file => Number(file.size) <= MAX_IMAGE_BYTES);
   if (!latest) {
     const message = images.length
-      ? "<p><strong>Proof Reader</strong> did not run. The image attachment is larger than 8 MB.</p>"
-      : "<p><strong>Proof Reader</strong> did not run. Attach a PNG, JPEG, WebP, or GIF, then move the task into this status again.</p>";
+      ? "<p><strong>Proof Reader</strong> did not run. The image attachment is larger than 50 MB.</p>"
+      : "<p><strong>Proof Reader</strong> did not run. Attach an image, then move the task into this status again.</p>";
     await postComment(input.taskId, row.team_id, input.userId, message);
     tell();
     return;
   }
 
-  const mimeType = IMAGE_MIME_BY_TYPE[latest.type.toLowerCase()];
+  const mimeType = mimeForAttachment(latest.type);
+  if (!mimeType) return;
   const source = await readObject(getKey(row.team_id, row.project_id, latest.id, latest.type));
   if (!source?.buffer?.length) {
     await postComment(

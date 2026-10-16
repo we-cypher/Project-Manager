@@ -19,7 +19,7 @@
   "loadError": "Could not load reviews.",
   "uploadError": "Could not review this creative.",
   "promptMissing": "Add a main prompt in Proof Reader settings before uploading.",
-  "invalidFile": "Upload a PNG, JPEG, WebP, or GIF up to 8 MB.",
+  "invalidFile": "Upload an image up to 50 MB.",
   "retry": "Retry",
   "subPromptTitle": "Title",
   "subPromptText": "Prompt",
