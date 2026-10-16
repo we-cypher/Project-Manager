@@ -36,6 +36,8 @@ import { ITeamMember } from '@/types/teamMembers/teamMember.types';
 import CustomMentionsInput, { MentionOption } from './custom-mentions-input';
 import '../info-tab-footer.css';
 import { useAppSumoTracking } from '@/ee/hooks/useAppSumoTracking';
+import { useSocket } from '@/socket/socketContext';
+import { SocketEvents } from '@/shared/socket-events';
 import { AppSumoUpsellEvents } from '@/types/mixpanel-events.types';
 
 // Helper function to format date for time separators
@@ -179,6 +181,7 @@ const TaskComments = ({ taskId, t, isGuest = false }: { taskId?: string; t: TFun
   // Members for mention dropdown (shared with edit input)
   const [members, setMembers] = useState<ITeamMember[]>([]);
   const { projectId } = useAppSelector(state => state.projectReducer);
+  const { socket } = useSocket();
 
   const mentionOptions: MentionOption[] = useMemo(
     () => members.map(m => ({ key: m.id!, value: m.name!, label: m.name! })),
@@ -305,11 +308,20 @@ const TaskComments = ({ taskId, t, isGuest = false }: { taskId?: string; t: TFun
     document.addEventListener('task-comment-create', handleCommentCreate);
     document.addEventListener('task-comment-update', handleCommentUpdate);
 
+    const handleProofComment = (data?: { task_id?: string }) => {
+      if (!data?.task_id || data.task_id === taskId) {
+        getComments(false);
+        scrollIntoView();
+      }
+    };
+    socket?.on(SocketEvents.TASK_COMMENTS_UPDATED.toString(), handleProofComment);
+
     return () => {
       document.removeEventListener('task-comment-create', handleCommentCreate);
       document.removeEventListener('task-comment-update', handleCommentUpdate);
+      socket?.off(SocketEvents.TASK_COMMENTS_UPDATED.toString(), handleProofComment);
     };
-  }, [taskId, getComments, scrollIntoView]);
+  }, [taskId, getComments, scrollIntoView, socket]);
 
   const canEdit = (userId?: string) => {
     if (!userId) return false;

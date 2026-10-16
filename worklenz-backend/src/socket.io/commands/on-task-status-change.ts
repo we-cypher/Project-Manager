@@ -13,6 +13,7 @@ import { log_error } from "../../shared/utils";
 import {verifyNonGuestTaskAccessSocket, logUnauthorizedSocketAccess} from "../authorization";
 import { checkPhaseCompletionGuard } from "../../shared/phase-completion-guard";
 import { autoAdvanceToNextPhase } from "../../shared/phase-auto-advance";
+import { queueProofReaderForTaskStatus } from "../../services/proof-reader-on-status";
 
 export async function on_task_status_change(_io: Server, socket: Socket, data?: string) {
   try {
@@ -177,6 +178,19 @@ export async function on_task_status_change(_io: Server, socket: Socket, data?: 
       new_value: body.status_id,
       old_value: taskData.status_id
     });
+
+    if (userId && body.status_id && body.status_id !== taskData.status_id) {
+      queueProofReaderForTaskStatus({
+        taskId: body.task_id,
+        statusId: body.status_id,
+        userId,
+        notify: (projectId, taskId) => {
+          const payload = { task_id: taskId };
+          socket.emit(SocketEvents.TASK_COMMENTS_UPDATED.toString(), payload);
+          socket.to(projectId).emit(SocketEvents.TASK_COMMENTS_UPDATED.toString(), payload);
+        },
+      });
+    }
 
     notifyProjectUpdates(socket, body.task_id);
 

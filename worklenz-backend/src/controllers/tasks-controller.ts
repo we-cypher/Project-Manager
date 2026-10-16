@@ -23,6 +23,7 @@ import {
 import WorklenzControllerBase from "./worklenz-controller-base";
 import HandleExceptions from "../decorators/handle-exceptions";
 import { NotificationsService } from "../services/notifications/notifications.service";
+import { queueProofReaderForTaskStatus } from "../services/proof-reader-on-status";
 import { getTaskCompleteInfo } from "../socket.io/commands/on-quick-task";
 import {
   getAssignees,
@@ -358,6 +359,8 @@ export default class TasksController extends TasksControllerBase {
     res: IWorkLenzResponse,
   ): Promise<IWorkLenzResponse> {
     const userId = req.user?.id as string;
+    const previousStatus = await db.query(`SELECT status_id FROM tasks WHERE id = $1`, [req.body.id]);
+    const previousStatusId = previousStatus.rows[0]?.status_id as string | undefined;
 
     await this.notifyStatusChange(userId, req.body.id, req.body.status_id);
 
@@ -373,6 +376,14 @@ export default class TasksController extends TasksControllerBase {
     if ("description" in req.body) {
       const teamId = req.user?.team_id as string;
       void syncTaskDescriptionLinks(req.body.project_id, req.body.id, teamId, req.body.description || "", userId);
+    }
+
+    if (req.body.status_id && req.body.status_id !== previousStatusId) {
+      queueProofReaderForTaskStatus({
+        taskId: req.body.id,
+        statusId: req.body.status_id,
+        userId,
+      });
     }
 
     return res.status(200).send(new ServerResponse(true, result.rows));
@@ -414,6 +425,9 @@ export default class TasksController extends TasksControllerBase {
       return res.status(200).send(new ServerResponse(false, { completed_deps: false }, "Task has incomplete dependencies and cannot be marked as done."));
     }
 
+    const previousStatus = await db.query(`SELECT status_id FROM tasks WHERE id = $1`, [task_id]);
+    const previousStatusId = previousStatus.rows[0]?.status_id as string | undefined;
+
     const q = `SELECT update_task_status($1, $2, $3, $4, $5) AS status;`;
     const result = await db.query(q, [
       task_id,
@@ -423,7 +437,17 @@ export default class TasksController extends TasksControllerBase {
       to_index,
     ]);
     const [data] = result.rows;
-    if (data?.status) return res.status(200).send(new ServerResponse(true, {}));
+    if (data?.status) {
+      const userId = req.user?.id;
+      if (userId && status_id !== previousStatusId) {
+        queueProofReaderForTaskStatus({
+          taskId: task_id,
+          statusId: status_id,
+          userId,
+        });
+      }
+      return res.status(200).send(new ServerResponse(true, {}));
+    }
 
     return res
       .status(200)
